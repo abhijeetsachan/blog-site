@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+            --glass-bg: rgba(30, 30, 46, 0.7);
+            --glass-border: rgba(99, 102, 241, 0.2);
+        }
+        body { 
+            font-family: 'Inter', sans-serif;
+            background: #0f0f23; 
+            color: #e2e8f0;
+            background-image: radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.1) 0%, transparent 20%), radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 20%);
+        }
+        .glass { 
+            background: var(--glass-bg); 
+            backdrop-filter: blur(10px); 
+            border: 1px solid var(--glass-border); 
+        }
+        .gradient-text { 
+            background: var(--primary-gradient); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+            background-clip: text; 
+        }
+        .gradient-bg { 
+            background: var(--primary-gradient); 
+        }
+        .form-input {
+            background-color: rgba(15, 15, 35, 0.8);
+            border: 1px solid var(--glass-border);
+            color: #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            width: 100%;
+        }
+        .form-input:focus {
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.3);
+            outline: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <div class="w-full max-w-md">
+        <form action="/admin/login" method="POST" class="glass rounded-2xl shadow-xl p-8 md:p-10 space-y-6">
+            <h1 class="text-3xl font-bold gradient-text text-center">Admin Login</h1>
+            
+            <div id="error-message" class="text-center text-red-400 text-sm"></div>
+
+            <div>
+                <label for="username" class="block text-sm font-medium mb-2">Username</label>
+                <input type="text" id="username" name="username" class="form-input" required>
+            </div>
+            
+            <div>
+                <label for="password" class="block text-sm font-medium mb-2">Password</label>
+                <input type="password" id="password" name="password" class="form-input" required>
+            </div>
+            
+            <button type="submit" class="w-full gradient-bg text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-transform hover:scale-105">
+                Login
+            </button>
+        </form>
+    </div>
+
+    <script>
+        // Show an error message if the URL has ?error=1
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('error')) {
+            document.getElementById('error-message').textContent = 'Invalid username or password.';
+        }
+    </script>
+
+</body>
+</html>

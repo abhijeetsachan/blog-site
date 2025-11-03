@@ -377,7 +377,32 @@
             const snackbar = document.getElementById('snackbar');
             const snackbarMessage = document.getElementById('snackbar-message');
             const toTopButton = document.getElementById('to-top-button');
+
             
+            // --- *** NEW: Date Helper Function *** ---
+            // Converts "YYYY-MM-DD" to "Month Day, Year" for display
+            function formatDateForDisplay(dateStr) {
+                if (!dateStr || !dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                     // Try to parse it as another format, or return original
+                    const d = new Date(dateStr);
+                    if (isNaN(d.getTime())) return dateStr; // return original if unparseable
+                    // Re-run with a valid Date object (adjust for timezone)
+                    const validDate = new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+                    return validDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+                }
+                
+                try {
+                    const [year, month, day] = dateStr.split('-');
+                    // Note: new Date('2025-11-01') can be off by a day due to timezone.
+                    // This is more reliable:
+                    const dateObj = new Date(Date.UTC(year, month - 1, day));
+                    return dateObj.toLocaleDateString('en-US', { timeZone: 'UTC', year: 'numeric', month: 'long', day: 'numeric' });
+                } catch (e) {
+                    return dateStr; // Fallback
+                }
+            }
+            
+
             // --- FETCH LOGIC ---
             async function loadBlogData() {
                 try {
@@ -391,6 +416,7 @@
                     const data = await response.json();
                     
                     // The new API endpoint *already* filters published posts
+                    // and sorts them by date descending!
                     blogPosts = data.posts || [];
                     allCategories = data.categories || {};
                     
@@ -543,7 +569,7 @@
                             </h2>
                             <div class="flex items-center text-sm text-gray-400 mb-3">
                                 <i data-lucide="calendar-days" class="w-4 h-4 mr-1.5"></i>
-                                <span>${post.date}</span>
+                                <span>${formatDateForDisplay(post.date)}</span>
                             </div>
                             <p class="text-gray-300 leading-relaxed mb-4">${post.excerpt}</p>
                         </div>
@@ -650,7 +676,9 @@
                 }
                 
                 // 2. Sort
-                tempPosts.sort((a, b) => (b.id - a.id));
+                // *** MODIFIED: Sort by date string (YYYY-MM-DD) descending ***
+                // The server *should* already provide it sorted, but this is a good safety check.
+                tempPosts.sort((a, b) => a.date < b.date ? 1 : -1);
                 
                 // 3. Update global filteredPosts variable
                 filteredPosts = tempPosts;
@@ -730,7 +758,9 @@
                 if (!post) return;
 
                 document.getElementById('post-title').innerHTML = `<i data-lucide="book-open" class="w-10 h-10 -mt-2 mr-3 inline-block text-gray-500"></i> ${post.title}`;
-                document.getElementById('post-date').innerHTML = `<i data-lucide="calendar-days" class="w-4 h-4 mr-2 inline-block text-gray-500"></i> ${post.date}`;
+                
+                // *** MODIFIED: Use date formatter ***
+                document.getElementById('post-date').innerHTML = `<i data-lucide="calendar-days" class="w-4 h-4 mr-2 inline-block text-gray-500"></i> ${formatDateForDisplay(post.date)}`;
                 
                 const postImage = document.getElementById('post-image');
                 postImage.src = post.image; 

@@ -92,6 +92,30 @@
         
         .morph { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; animation: morph 8s ease-in-out infinite; }
         @keyframes morph { 0% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; } 50% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; } 100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; } }
+        
+        /* --- NEW: Pagination Button Style --- */
+        .pagination-btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 0.75rem;
+            color: #e2e8f0;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        .pagination-btn:hover:not(:disabled) {
+            background-color: rgba(99, 102, 241, 0.2);
+            border-color: rgba(99, 102, 241, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2);
+        }
+        .pagination-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
     </style>
 </head>
 <body class="min-h-screen">
@@ -216,6 +240,10 @@
                         <p class="text-gray-400">Loading posts...</p>
                     </div>
                 </div>
+                
+                <div id="pagination-controls" class="flex justify-between items-center mt-12">
+                    </div>
+
             </main>
 
             <div id="about-section-mobile" class="block md:hidden glass p-6 rounded-2xl shadow-xl relative overflow-hidden mt-8">
@@ -318,8 +346,14 @@
             let activeTag = null; 
             let typewriterInterval = null; 
 
+            // --- *** NEW: PAGINATION STATE *** ---
+            let filteredPosts = []; // Holds ALL filtered posts
+            let currentPage = 1;
+            const postsPerPage = 4;
+
             // --- ELEMENT REFERENCES ---
             const blogFeed = document.getElementById('blog-feed');
+            const paginationControls = document.getElementById('pagination-controls'); // <-- NEW
             const categoryList = document.getElementById('category-list');
             const tagContainer = document.getElementById('tag-container');
             const tagList = document.getElementById('tag-list');
@@ -361,7 +395,7 @@
                     allCategories = data.categories || {};
                     
                     renderCategories();
-                    filterAndRender(); 
+                    filterAndRender(); // This will now call renderCurrentPage()
                     lucide.createIcons();
                 
                 } catch (error) {
@@ -378,27 +412,112 @@
 
             // --- FUNCTIONS ---
 
+            // *** NEW: Renders just the posts for the current page ***
+            function renderCurrentPage() {
+                // 1. Calculate pagination slice
+                const startIndex = (currentPage - 1) * postsPerPage;
+                const endIndex = currentPage * postsPerPage;
+                const paginatedPosts = filteredPosts.slice(startIndex, endIndex);
+
+                // 2. Render the sliced posts
+                renderPosts(paginatedPosts);
+                
+                // 3. Render the pagination controls
+                renderPaginationControls();
+            }
+
+            // *** NEW: Renders the pagination buttons ***
+            function renderPaginationControls() {
+                paginationControls.innerHTML = ''; // Clear old buttons
+                
+                const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
+
+                if (totalPages <= 1) {
+                    return; // No controls needed if 1 page or less
+                }
+
+                // Previous Button
+                const prevButton = document.createElement('button');
+                prevButton.id = 'prev-page-btn';
+                prevButton.className = 'pagination-btn';
+                prevButton.innerHTML = `<i data-lucide="arrow-left" class="w-4 h-4 mr-2"></i> Previous`;
+                if (currentPage === 1) {
+                    prevButton.disabled = true;
+                }
+                prevButton.addEventListener('click', prevPage);
+                
+                // Page Status
+                const pageStatus = document.createElement('span');
+                pageStatus.className = 'text-gray-400 text-sm font-medium';
+                pageStatus.textContent = `Page ${currentPage} of ${totalPages}`;
+
+                // Next Button
+                const nextButton = document.createElement('button');
+                nextButton.id = 'next-page-btn';
+                nextButton.className = 'pagination-btn';
+                nextButton.innerHTML = `Next <i data-lucide="arrow-right" class="w-4 h-4 ml-2"></i>`;
+                if (currentPage === totalPages) {
+                    nextButton.disabled = true;
+                }
+                nextButton.addEventListener('click', nextPage);
+
+                paginationControls.appendChild(prevButton);
+                paginationControls.appendChild(pageStatus);
+                paginationControls.appendChild(nextButton);
+                lucide.createIcons();
+            }
+
+            // *** NEW: Pagination click handlers ***
+            function nextPage() {
+                const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderCurrentPage();
+                    // Scroll to top of feed
+                    blogFeed.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+            
+            function prevPage() {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderCurrentPage();
+                    // Scroll to top of feed
+                    blogFeed.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+
+
             function renderPosts(postsToRender) {
                 blogFeed.innerHTML = ''; 
 
                 if (postsToRender.length === 0) {
-                let message = `<div class="text-center p-6 glass rounded-xl border border-gray-700">
-                                        <i data-lucide="archive-x" class="w-16 h-16 mx-auto text-gray-500 mb-4"></i>
-                                        <h3 class="text-2xl font-semibold text-white">No Posts Found</h3>
-                                        <p class="text-gray-400 mt-2">No posts found matching your criteria.</p>
+                    let message = `<div class="text-center p-6 glass rounded-xl border border-gray-700">
+                                            <i data-lucide="archive-x" class="w-16 h-16 mx-auto text-gray-500 mb-4"></i>
+                                            <h3 class="text-2xl font-semibold text-white">No Posts Found</h3>
+                                            <p class="text-gray-400 mt-2">No posts found matching your criteria.</p>
+                                        </div>`;
+                    
+                    // This logic remains valid
+                    if (activeCategory !== 'all' && filteredPosts.length === 0) {
+                        message = `<div class="text-center p-6 glass rounded-xl border border-gray-700">
+                                            <i data-lucide="archive-x" class="w-16 h-16 mx-auto text-gray-500 mb-4"></i>
+                                            <h3 class="text-2xl font-semibold text-white">This Archive is Quiet</h3>
+                                            <p class="text-gray-400 mt-2">There are no posts in the '${activeCategory}' category just yet. Check back soon!</p>
                                     </div>`;
-                
-                if (activeCategory !== 'all') {
-                    message = `<div class="text-center p-6 glass rounded-xl border border-gray-700">
-                                        <i data-lucide="archive-x" class="w-16 h-16 mx-auto text-gray-500 mb-4"></i>
-                                        <h3 class="text-2xl font-semibold text-white">This Archive is Quiet</h3>
-                                        <p class="text-gray-400 mt-2">There are no posts in the '${activeCategory}' category just yet. Check back soon!</p>
-                                </div>`;
-                        showSnackbar(`No posts yet in '${activeCategory}'.`);
-                }
-                blogFeed.innerHTML = message;
-                lucide.createIcons(); 
-                return; 
+                            showSnackbar(`No posts yet in '${activeCategory}'.`);
+                    } else if (filteredPosts.length > 0 && postsToRender.length === 0) {
+                        // This case should not happen with correct pagination, but good to have
+                        message = `<div class="text-center p-6 glass rounded-xl border border-gray-700">
+                                            <i data-lucide="alert-circle" class="w-16 h-16 mx-auto text-gray-500 mb-4"></i>
+                                            <h3 class="text-2xl font-semibold text-white">Pagination Error</h3>
+                                            <p class="text-gray-400 mt-2">Could not load posts for this page.</p>
+                                    </div>`;
+                    }
+
+                    blogFeed.innerHTML = message;
+                    lucide.createIcons(); 
+                    return; 
                 }
 
             const categoryColors = {
@@ -517,22 +636,30 @@
                 setTimeout(function(){ snackbar.className = snackbar.className.replace("show", ""); }, 4000);
             }
 
+            // *** MODIFIED: This function now populates filteredPosts, then calls renderCurrentPage ***
             function filterAndRender() {
-                let filteredPosts = blogPosts;
+                // 1. Filter
+                let tempPosts = blogPosts;
 
                 if (activeCategory !== 'all') {
-                filteredPosts = filteredPosts.filter(post => post.category === activeCategory);
+                    tempPosts = tempPosts.filter(post => post.category === activeCategory);
                 }
 
                 if (activeTag) {
-                filteredPosts = filteredPosts.filter(post => post.tags && post.tags.includes(activeTag));
+                    tempPosts = tempPosts.filter(post => post.tags && post.tags.includes(activeTag));
                 }
                 
-                // Sort by ID, assuming higher ID is newer
-                // You might want to sort by date if you trust the date field
-                filteredPosts.sort((a, b) => (b.id - a.id));
+                // 2. Sort
+                tempPosts.sort((a, b) => (b.id - a.id));
+                
+                // 3. Update global filteredPosts variable
+                filteredPosts = tempPosts;
 
-                renderPosts(filteredPosts);
+                // 4. Reset to page 1 and render
+                currentPage = 1; 
+                renderCurrentPage(); // <-- This now handles rendering posts and pagination
+                
+                // 5. Update UI elements
                 updateCategoryUI();
                 renderTags(); 
                 updateFeedTitle();
@@ -631,6 +758,7 @@
                 feedView.classList.add('md:flex'); 
                 feedView.classList.add('animate__fadeIn');
                 updateFeedTitle(); 
+                // We don't need to re-render, state is preserved
             }
             
             function closeMobileMenu() {
@@ -650,7 +778,7 @@
                 e.preventDefault();
                 activeCategory = link.dataset.category;
                 activeTag = null; 
-                filterAndRender();
+                filterAndRender(); // This will reset to page 1
                 showFeed();
             };
             categoryList.addEventListener('click', handleCategoryClick);
@@ -669,7 +797,7 @@
                 activeTag = null;
                 mobileCategoryMenu.classList.add('hidden');
                 mobileCategoryChevron.style.transform = 'rotate(0deg)';
-                filterAndRender();
+                filterAndRender(); // This will reset to page 1
                 showFeed();
             }
             });
@@ -695,7 +823,7 @@
                 } else {
                     activeTag = tag; 
                 }
-                filterAndRender();
+                filterAndRender(); // This will reset to page 1
             }
             };
             tagList.addEventListener('click', handleTagClick);
@@ -718,7 +846,7 @@
                 e.preventDefault();
                 activeCategory = 'all';
                 activeTag = null;
-                filterAndRender();
+                filterAndRender(); // This will reset to page 1
                 showFeed();
                 window.scrollTo(0, 0); 
             };
@@ -780,10 +908,3 @@
 </body>
 
 </html>
-
-
-
-
-
-
-

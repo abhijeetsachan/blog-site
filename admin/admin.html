@@ -8,7 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
     
-    <script src="https://cdn.tiny.cloud/1/gpo3vu0adjy1d9r8pl1381pse2fxtz6tpmw/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+    <script src="https://cdn.tiny.cloud/1/gpo3vu0adjy1d9r8pl1381pse2qxzxzx7ab9se2fxtz6tpmw/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
     
     <script>
         // 4. Initialize the editor
@@ -74,11 +74,6 @@
             outline: none;
         }
         
-        /* Fix for date picker icon color */
-        .form-input::-webkit-calendar-picker-indicator {
-            filter: invert(0.8);
-        }
-
         .tab-chip {
             padding: 0.5rem 1rem;
             border-radius: 0.5rem;
@@ -383,12 +378,7 @@
             
                             <input type="text" id="tags" name="tags" class="hidden">
                         </div>
-                    </div>
-                    
-                    <div>
-                        <label for="post-date" class="block text-sm font-medium mb-2">Publish Date</label>
-                        <input type="date" id="post-date" name="post-date" class="form-input" required>
-                    </div>
+                        </div>
                     
                     <div>
                         <label for="image" class="block text-sm font-medium mb-2">Image URL</label>
@@ -461,65 +451,6 @@
             const globalStatus = document.getElementById('global-status-message');
 
 
-            // --- *** NEW: Date Helper Functions *** ---
-
-            // Gets today's date as "YYYY-MM-DD"
-            function getTodayYYYYMMDD() {
-                const today = new Date();
-                const year = today.getFullYear();
-                const month = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
-                const day = String(today.getDate()).padStart(2, '0');
-                return `${year}-${month}-${day}`;
-            }
-
-            // Converts "Month Day, Year" or "YYYY-MM-DD" to "YYYY-MM-DD"
-            function formatDateToYYYYMMDD(dateString) {
-                if (!dateString) return getTodayYYYYMMDD();
-                
-                // Check if it's already in YYYY-MM-DD format
-                if (dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
-                    return dateString;
-                }
-                
-                // Try to parse "Month Day, Year" format
-                try {
-                    const dateObj = new Date(dateString);
-                    if (isNaN(dateObj.getTime())) { // Check for invalid date
-                        throw new Error('Invalid date string');
-                    }
-                    const year = dateObj.getFullYear();
-                    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-                    const day = String(dateObj.getDate()).padStart(2, '0');
-                    return `${year}-${month}-${day}`;
-                } catch (e) {
-                    console.warn(`Could not parse date: ${dateString}. Defaulting to today.`);
-                    return getTodayYYYYMMDD();
-                }
-            }
-            
-            // Converts "YYYY-MM-DD" to "Month Day, Year" for display
-            function formatDateForDisplay(dateStr) {
-                if (!dateStr || !dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
-                    // Try to parse it as another format, or return original
-                    const d = new Date(dateStr);
-                    if (isNaN(d.getTime())) return dateStr; // return original if unparseable
-                    // Re-run with a valid Date object (adjust for timezone)
-                    const validDate = new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
-                    return validDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-                }
-                
-                try {
-                    const [year, month, day] = dateStr.split('-');
-                    // Note: new Date('2025-11-01') can be off by a day due to timezone.
-                    // This is more reliable:
-                    const dateObj = new Date(Date.UTC(year, month - 1, day));
-                    return dateObj.toLocaleDateString('en-US', { timeZone: 'UTC', year: 'numeric', month: 'long', day: 'numeric' });
-                } catch (e) {
-                    return dateStr; // Fallback
-                }
-            }
-
-
             // --- 1. DATA LOADING & INITIALIZATION ---
             
             // NEW: Helper function to check for unauthorized API responses
@@ -566,8 +497,8 @@
                     return;
                 }
 
-                // *** MODIFIED: Sorting is now handled by the server (date desc) ***
-                // posts.sort((a, b) => (b.id - a.id)); // <-- REMOVED
+                // Sort by ID (assuming higher is newer, which it is with Supabase)
+                posts.sort((a, b) => (b.id - a.id)); 
 
                 posts.forEach(post => {
                     const row = document.createElement('tr');
@@ -576,8 +507,8 @@
                         `<span class="text-green-400 flex items-center"><i data-lucide="eye" class="w-4 h-4 mr-1.5"></i>Published</span>` : 
                         `<span class="text-gray-400 flex items-center"><i data-lucide="eye-off" class="w-4 h-4 mr-1.5"></i>Unpublished</span>`;
                     
-                    // *** MODIFIED: Use new date formatter ***
-                    const postDate = formatDateForDisplay(post.date) || new Date(post.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+                    // Use the 'date' field, fallback to created_at if 'date' is missing
+                    const postDate = post.date || new Date(post.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
 
                     row.innerHTML = `
@@ -712,10 +643,6 @@
                         document.getElementById('title').value = post.title;
                         document.getElementById('post-category-select').value = post.category; 
                         document.getElementById('tags').value = post.tags ? post.tags.join(', ') : ''; // Set hidden tag input
-                        
-                        // *** MODIFIED: Set date input ***
-                        document.getElementById('post-date').value = formatDateToYYYYMMDD(post.date);
-                        
                         document.getElementById('image').value = post.image;
                         document.getElementById('excerpt').value = post.excerpt;
                         tinymce.get('blog-editor').setContent(post.fullContent || '');
@@ -724,10 +651,6 @@
                 } else {
                     // CREATE MODE
                     modalTitle.textContent = 'Create New Post';
-                    
-                    // *** MODIFIED: Set date to today ***
-                    document.getElementById('post-date').value = getTodayYYYYMMDD();
-                    
                     document.getElementById('published').checked = true; 
                 }
                 
@@ -768,13 +691,13 @@
                 const tagsRaw = document.getElementById('tags').value; // Reads from hidden input
                 const category = document.getElementById('post-category-select').value;
                 
-                // --- *** MODIFIED: Get date from calendar input *** ---
-                const postDate = document.getElementById('post-date').value; // This is now "YYYY-MM-DD"
-                
-                // --- *** DELETED OLD postDate LOGIC *** ---
+                // Get existing date if editing, otherwise create a new one
+                const postDate = isEditMode ? allPosts.find(p=>p.id == postId).date : new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
                 const postData = {
                     // --- ID IS REMOVED ---
+                    // ID is now handled by Supabase (on create) 
+                    // or by the URL param (on update)
                     title: document.getElementById('title').value,
                     category: category,
                     tags: tagsRaw.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0),
@@ -782,7 +705,7 @@
                     excerpt: document.getElementById('excerpt').value,
                     fullContent: fullContent,
                     published: document.getElementById('published').checked,
-                    date: postDate // *** MODIFIED: Use the new postDate variable ***
+                    date: postDate
                 };
 
                 try {

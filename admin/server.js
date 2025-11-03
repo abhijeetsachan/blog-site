@@ -80,16 +80,15 @@ const express = require('express');
 const path = require('path');
 const cors = require('cors'); 
 const session = require('express-session');
-const { createClient } = require('@supabase/supabase-js'); // <-- ADD THIS
+const { createClient } = require('@supabase/supabase-js');
 
 // --- Load Environment Variables (for local development) ---
-// For this to work, create a file named `.env` in the `admin` folder
-// DO NOT commit this .env file to GitHub.
 if (process.env.NODE_ENV !== 'production') {
     require('dotenv').config({ path: path.join(__dirname, '.env') });
 }
 
 const app = express();
+// Render provides the PORT environment variable
 const PORT = process.env.PORT || 3000;
 
 // --- SUPABASE & ADMIN CREDENTIALS ---
@@ -107,8 +106,6 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY || !ADMIN_USER || !ADMIN_PASS || !SESSIO
 }
 
 // --- Initialize Supabase Client ---
-// We use the anon key. RLS (Row Level Security) should be off for `public`
-// or configured to allow public read. Our server auth protects writes.
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // --- Middleware ---
@@ -117,6 +114,8 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 // --- Session Middleware ---
+// The "MemoryStore" warning is normal for development.
+// For production, you'd use a session store like `connect-pg-simple`
 app.use(session({
     secret: SESSION_SECRET,
     resave: false,
@@ -127,30 +126,8 @@ app.use(session({
     }
 }));
 
-// --- Serve Public Files ---
-// Serve index.html and other root-level static assets
-app.use(express.static(path.join(__dirname, '..'), {
-    index: false,
-    setHeaders: (res, filePath) => {
-        // Block sensitive files
-        if (filePath.endsWith('admin.html') || filePath.endsWith('db.json')) {
-            res.status(403).send('Forbidden');
-        }
-    }
-}));
-// Serve index.html as the root
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'index.html'));
-});
-// Serve the login page publicly
-app.get('/admin/login.html', (req, res) => {
-    res.sendFile(path.join(__dirname, 'login.html'));
-});
-
 
 // --- Helper Function to format categories ---
-// The frontend expects: { "CategoryName": ["tag1", "tag2"], ... }
-// Supabase returns: [ { "name": "CategoryName", "tags": ["tag1", "tag2"] }, ... ]
 function formatCategories(categoryList) {
     if (!categoryList) return {};
     return categoryList.reduce((acc, cat) => {
@@ -176,7 +153,16 @@ function checkApiAuth(req, res, next) {
     }
 }
 
-// --- NEW AUTH ROUTES ---
+// ===================================================================
+//
+//               *** ROUTING ORDER FIX ***
+//
+// All specific API routes and page routes are now defined *BEFORE*
+// the `express.static` file server.
+//
+// ===================================================================
+
+// --- AUTH ROUTES ---
 app.post('/admin/login', (req, res) => {
     const { username, password } = req.body;
     if (username === ADMIN_USER && password === ADMIN_PASS) {
@@ -197,19 +183,20 @@ app.get('/admin/logout', (req, res) => {
     });
 });
 
-// --- NEW PROTECTED ADMIN PAGE ROUTE ---
+// --- PROTECTED ADMIN PAGE ROUTE ---
 app.get('/admin/admin.html', checkAuth, (req, res) => {
     res.sendFile(path.join(__dirname, 'admin.html'));
 });
 
+// --- PUBLIC PAGE ROUTE (LOGIN) ---
+app.get('/admin/login.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'login.html'));
+});
 
-// --- API Endpoints ---
-
-// --- NEW PUBLIC DATA ENDPOINT ---
+// --- PUBLIC API ENDPOINT ---
 app.get('/api/public-data', async (req, res) => {
     console.log(`[GET /api/public-data] Reading from Supabase for public...`);
     
-    // 1. Fetch published posts
     const { data: posts, error: postsError } = await supabase
         .from('posts')
         .select('*')
@@ -221,17 +208,15 @@ app.get('/api/public-data', async (req, res) => {
         return res.status(500).json({ message: 'Error reading posts.' });
     }
 
-    // 2. Fetch categories
     const { data: categoriesList, error: catsError } = await supabase
         .from('categories')
         .select('name, tags');
 
     if (catsError) {
         console.error('Supabase error (categories):', catsError.message);
-        return res.status(500).json({ message: 'Error reading categories.' });
+        return res.status(500).json({ message:.Error reading categories.' });
     }
 
-    // 3. Format and send data
     const publicData = {
         categories: formatCategories(categoriesList),
         posts: posts || []
@@ -282,7 +267,6 @@ app.post('/api/posts', checkApiAuth, async (req, res) => {
         return res.status(400).json({ message: 'Bad Request: Missing required fields.' });
     }
     
-    // Supabase auto-generates 'id'
     const { error } = await supabase.from('posts').insert(newPost);
 
     if (error) {
@@ -300,9 +284,8 @@ app.put('/api/posts/:id', checkApiAuth, async (req, res) => {
     const updatedPost = req.body;
     console.log(`[PUT /api/posts/${postId}] Updating post...`);
 
-    // Don't send the id *in* the update body
     delete updatedPost.id;
-    delete updatedPost.created_at; // Don't let client change this
+    delete updatedPost.created_at; 
 
     const { error } = await supabase
         .from('posts')
@@ -339,19 +322,17 @@ app.put('/api/posts/toggle-publish/:id', checkApiAuth, async (req, res) => {
     const postId = parseInt(req.params.id);
     console.log(`[PUT /api/posts/toggle-publish/${postId}] Toggling...`);
 
-    // 1. Get current status
     const { data: post, error: fetchError } = await supabase
         .from('posts')
         .select('published')
         .eq('id', postId)
-        .single(); // Get one record
+        .single(); 
 
     if (fetchError || !post) {
         console.error('Supabase error:', fetchError ? fetchError.message : 'Post not found');
         return res.status(404).json({ message: 'Post not found.' });
     }
 
-    // 2. Toggle and update
     const { error: updateError } = await supabase
         .from('posts')
         .update({ published: !post.published })
@@ -382,7 +363,7 @@ app.post('/api/categories', checkApiAuth, async (req, res) => {
         .insert({ name: newCategoryName, tags: [] });
 
     if (error) {
-        if (error.code === '23505') { // Unique constraint violation
+        if (error.code === '23505') { 
             return res.status(400).json({ message: 'Category already exists.' });
         }
         console.error('Supabase error:', error.message);
@@ -398,7 +379,6 @@ app.delete('/api/categories/:name', checkApiAuth, async (req, res) => {
     const categoryToDelete = decodeURIComponent(req.params.name);
     console.log(`[DELETE /api/categories] Request to delete: ${categoryToDelete}`);
 
-    // 1. Delete the category
     const { error: catError } = await supabase
         .from('categories')
         .delete()
@@ -409,15 +389,13 @@ app.delete('/api/categories/:name', checkApiAuth, async (req, res) => {
         return res.status(500).json({ message: 'Error deleting category.' });
     }
 
-    // 2. Update posts that used this category
     const { error: postError } = await supabase
         .from('posts')
-        .update({ category: "" }) // Set to empty string
+        .update({ category: "" }) 
         .eq('category', categoryToDelete);
     
     if (postError) {
         console.error('Supabase error (updating posts):', postError.message);
-        // Category was deleted, but posts failed to update. Not ideal, but...
     }
     
     console.log(`Deleted category: ${categoryToDelete} and updated posts.`);
@@ -434,21 +412,19 @@ app.put('/api/categories/:name', checkApiAuth, async (req, res) => {
         return res.status(400).json({ message: 'New category name is required.' });
     }
     
-    // 1. Rename the category
     const { error: catError } = await supabase
         .from('categories')
         .update({ name: newName })
         .eq('name', oldName);
 
     if (catError) {
-        if (catError.code === '23505') { // Unique constraint
+        if (catError.code === '23505') { 
             return res.status(400).json({ message: 'Category name already exists.' });
         }
         console.error('Supabase error (renaming category):', catError.message);
         return res.status(500).json({ message: 'Error renaming category.' });
     }
 
-    // 2. Update all posts using the old category name
     const { error: postError } = await supabase
         .from('posts')
         .update({ category: newName })
@@ -473,7 +449,6 @@ app.post('/api/tags', checkApiAuth, async (req, res) => {
         return res.status(400).json({ message: 'Category name and tag name are required.' });
     }
 
-    // 1. Get current tags
     const { data: category, error: fetchError } = await supabase
         .from('categories')
         .select('tags')
@@ -488,7 +463,6 @@ app.post('/api/tags', checkApiAuth, async (req, res) => {
         return res.status(400).json({ message: 'Tag already exists in this category.' });
     }
 
-    // 2. Add new tag
     const newTags = [...(category.tags || []), tagName];
     const { error: updateError } = await supabase
         .from('categories')
@@ -510,7 +484,6 @@ app.delete('/api/tags/:categoryName/:tagName', checkApiAuth, async (req, res) =>
     const tagName = decodeURIComponent(req.params.tagName);
     console.log(`[DELETE /api/tags] Request to delete tag '${tagName}' from '${categoryName}'`);
 
-    // 1. Remove tag from category
     const { data: category, error: fetchError } = await supabase
         .from('categories')
         .select('tags')
@@ -536,18 +509,6 @@ app.delete('/api/tags/:categoryName/:tagName', checkApiAuth, async (req, res) =>
         return res.status(500).json({ message: 'Error deleting tag from category.' });
     }
 
-    // 2. Remove the tag from all posts in that category
-    // This uses the 'array_remove' function we created in the SQL setup
-    const { error: rpcError } = await supabase.rpc('array_remove', {
-        arr: 'tags', // This is not the variable, it's the column name
-        item: tagName
-    })
-    // This is a bit tricky. The simple RPC call above won't work like that.
-    // We need to update posts WHERE category = categoryName
-    // A better RPC function would be needed.
-    // Let's do this the multi-query way.
-
-    // 2. Get all posts with that tag in that category
     const { data: posts, error: postFetchError } = await supabase
         .from('posts')
         .select('id, tags')
@@ -559,7 +520,6 @@ app.delete('/api/tags/:categoryName/:tagName', checkApiAuth, async (req, res) =>
         return res.status(500).json({ message: 'Tag deleted, but failed to update posts.' });
     }
 
-    // 3. Update them one by one (or in a batch)
     const updates = posts.map(post => {
         return supabase
             .from('posts')
@@ -567,7 +527,7 @@ app.delete('/api/tags/:categoryName/:tagName', checkApiAuth, async (req, res) =>
             .eq('id', post.id);
     });
     
-    await Promise.all(updates); // This can have partial failures, but it's ok for this app
+    await Promise.all(updates); 
 
     console.log('Tag deleted successfully and removed from posts.');
     res.status(200).json({ message: 'Tag deleted successfully!' });
@@ -584,7 +544,6 @@ app.put('/api/tags/:categoryName/:tagName', checkApiAuth, async (req, res) => {
         return res.status(400).json({ message: 'New tag name is required.' });
     }
 
-    // 1. Rename tag in category
     const { data: category, error: fetchError } = await supabase
         .from('categories')
         .select('tags')
@@ -614,7 +573,6 @@ app.put('/api/tags/:categoryName/:tagName', checkApiAuth, async (req, res) => {
         return res.status(500).json({ message: 'Error renaming tag in category.' });
     }
     
-    // 2. Get all posts with that tag in that category
     const { data: posts, error: postFetchError } = await supabase
         .from('posts')
         .select('id, tags')
@@ -626,7 +584,6 @@ app.put('/api/tags/:categoryName/:tagName', checkApiAuth, async (req, res) => {
         return res.status(500).json({ message: 'Tag renamed, but failed to update posts.' });
     }
     
-    // 3. Update them one by one
     const updates = posts.map(post => {
         return supabase
             .from('posts')
@@ -638,6 +595,25 @@ app.put('/api/tags/:categoryName/:tagName', checkApiAuth, async (req, res) => {
 
     console.log(`Renamed tag to '${newTagName}' and updated posts.`);
     res.status(200).json({ message: 'Tag renamed successfully!' });
+});
+
+
+// --- STATIC FILE SERVER (NOW LAST) ---
+// This serves all other static files (CSS, JS, images) from the root.
+app.use(express.static(path.join(__dirname, '..'), {
+    index: false, // We handle the index route ourselves
+    setHeaders: (res, filePath) => {
+        // Block sensitive files just in case
+        if (filePath.endsWith('admin.html') || filePath.endsWith('db.json')) {
+            res.status(403).send('Forbidden');
+        }
+    }
+}));
+
+// --- ROOT PAGE ROUTE (CATCH-ALL) ---
+// This must be one of the last routes.
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'index.html'));
 });
 
 

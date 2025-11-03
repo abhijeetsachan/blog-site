@@ -38,6 +38,9 @@
  * -- !! BONUS PERFORMANCE FIX: Add an index !!
  * -- (Run this in your SQL editor if you haven't)
  * CREATE INDEX idx_posts_published ON public.posts (published);
+ *
+ * -- *** NEW: Add an index for the date field for faster sorting ***
+ * CREATE INDEX idx_posts_date ON public.posts (date DESC);
  * * ------------------------- END OF SQL CODE --------------------------------
  *
  * ==========================================================================
@@ -185,7 +188,8 @@ app.get('/api/public-data', async (req, res) => {
         .from('posts')
         .select('*')
         .eq('published', true)
-        .order('id', { ascending: false });
+        // *** MODIFIED: Sort by date (newest first) instead of id ***
+        .order('date', { ascending: false });
 
     if (postsError) {
         console.error('Supabase error (posts):', postsError.message);
@@ -222,7 +226,8 @@ app.get('/api/data', checkApiAuth, async (req, res) => {
     const { data: posts, error: postsError } = await supabase
         .from('posts')
         .select('*')
-        .order('id', { ascending: false });
+        // *** MODIFIED: Sort by date (newest first) instead of id ***
+        .order('date', { ascending: false });
 
     if (postsError) {
         console.error('Supabase error (posts):', postsError.message);

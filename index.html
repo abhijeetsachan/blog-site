@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ridhi's Blog - Philosophy, Poetry, and Stories</title>
+    
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e2e8f0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z'/><path d='m16 8-4 4'/><path d='m21.44 11.3-8.49 8.48'/></svg>">
+    
+    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+            --secondary-gradient: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+            --glass-bg: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.2);
+        }
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Inter', sans-serif; background: #0f0f23; color: #e2e8f0; background-image: radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.1) 0%, transparent 20%), radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 20%), radial-gradient(circle at 50% 50%, rgba(236, 72, 153, 0.05) 0%, transparent 30%); }
+        .glass { background: var(--glass-bg); backdrop-filter: blur(10px); border: 1px solid var(--glass-border); }
+        .gradient-text { background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .gradient-bg { background: var(--primary-gradient); }
+        .post-card { transition: all 0.3s ease; background: rgba(30, 30, 46, 0.7); border: 1px solid rgba(99, 102, 241, 0.2); overflow: hidden; }
+        .post-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3); border-color: rgba(99, 102, 241, 0.5); }
+        .category-active { background: var(--primary-gradient); color: white; font-weight: 600; }
+        .category-link-custom-active { background: rgba(99, 102, 241, 0.1); color: #c7d2fe; font-weight: 600; }
+        .tag-active { background: var(--secondary-gradient) !important; color: white !important; font-weight: 700; transform: scale(1.05); box-shadow: 0 0 0 2px #0f0f23, 0 0 0 4px #f59e0b; }
+        .nav-link { position: relative; }
+        .nav-link::after { content: ''; position: absolute; width: 0; height: 2px; bottom: -4px; left: 0; background: var(--primary-gradient); transition: width 0.3s ease; }
+        .nav-link:hover::after { width: 100%; }
+        .floating-element { animation: float 6s ease-in-out infinite; }
+        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
+        .scrollbar-thin { scrollbar-width: thin; scrollbar-color: rgba(99, 102, 241, 0.5) rgba(30, 30, 46, 0.5); }
+        .scrollbar-thin::-webkit-scrollbar { width: 6px; }
+        .scrollbar-thin::-webkit-scrollbar-track { background: rgba(30, 30, 46, 0.5); border-radius: 10px; }
+        .scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.5); border-radius: 10px; }
+        .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, 0.8); }
+        .text-shadow { text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); }
+        .snackbar { visibility: hidden; min-width: 250px; transform: translateX(-50%); background: rgba(30, 30, 46, 0.9); color: #e2e8f0; text-align: center; border-radius: 12px; padding: 16px; position: fixed; z-index: 100; left: 50%; bottom: 30px; font-size: 17px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3); display: flex; align-items: center; border: 1px solid rgba(99, 102, 241, 0.3); backdrop-filter: blur(10px); }
+        .snackbar.show { visibility: visible; animation: snackFadeIn 0.5s, snackFadeOut 0.5s 3.5s; }
+        @keyframes snackFadeIn { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+        @keyframes snackFadeOut { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        #to-top-button.show { opacity: 1; visibility: visible; transform: translateY(0); }
+        .post-image { filter: brightness(0.9) contrast(1.1); transition: filter 0.5s ease; }
+        .post-card:hover .post-image { filter: brightness(1) contrast(1.2); }
+        
+        .typewriter {
+            border-right: 2px solid #8b5cf6;
+            white-space: nowrap;
+            width: fit-content;
+            max-width: 100%;
+            min-height: 2rem; 
+            animation: blink-caret 0.75s step-end infinite;
+        }
+        
+        @media (min-width: 1024px) { 
+            .typewriter { 
+                min-height: 3rem; 
+            } 
+        }
+
+        @keyframes blink-caret {
+            from, to { border-color: transparent }
+            50% { border-color: #8b5cf6 }
+        }
+        
+        .morph { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; animation: morph 8s ease-in-out infinite; }
+        @keyframes morph { 0% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; } 50% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; } 100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; } }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div class="absolute top-1/4 left-1/4 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl floating-element"></div>
+        <div class="absolute top-3/4 right-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl floating-element" style="animation-delay: 2s;"></div>
+        <div class="absolute bottom-1/4 left-1/2 w-80 h-80 bg-pink-500/10 rounded-full blur-3xl floating-element" style="animation-delay: 4s;"></div>
+    </div>
+
+    <header class="glass sticky top-0 z-50 transition-all duration-300 border-b border-gray-800">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex-shrink-0">
+                    <a href="#" class="text-3xl font-bold gradient-text flex items-center" id="home-link">
+                        <div class="w-10 h-10 rounded-full gradient-bg flex items-center justify-center mr-2">
+                            <i data-lucide="feather" class="w-5 h-5 text-white"></i>
+                        </div>
+                        Ridhi's Blog
+                    </a>
+                </div>
+                
+                <div class="hidden lg:flex lg:items-center lg:space-x-8">
+                    <a href="#about-section" class="nav-link flex items-center text-gray-300 hover:text-white font-medium transition-all duration-300 group">
+                        <i data-lucide="user-circle" class="w-5 h-5 mr-1.5 transition-transform duration-300 group-hover:rotate-6"></i> 
+                        About
+                    </a>
+                    <a href="mailto:ridhii1999@gmail.com" class="nav-link flex items-center text-gray-300 hover:text-white font-medium transition-all duration-300 group">
+                        <i data-lucide="mail" class="w-5 h-5 mr-1.5 transition-transform duration-300 group-hover:text-blue-400"></i>
+                        Contact
+                    </a>
+                </div>
+
+                <div class="lg:hidden flex items-center">
+                    <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-purple-500" aria-expanded="false">
+                        <span class="sr-only">Open main menu</span>
+                        <svg id="menu-icon-closed" class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                        <svg id="menu-icon-open" class="hidden h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <div class="lg:hidden hidden glass mt-2 rounded-lg mx-4" id="mobile-menu">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#about-section-mobile" class="mobile-nav-link flex items-center text-gray-300 hover:bg-gray-800 hover:text-white block px-3 py-2 rounded-md text-base font-medium">
+                    <i data-lucide="user-circle" class="w-5 h-5 mr-2"></i> About
+                </a>
+                <a href="mailto:ridhii1999@gmail.com" class="mobile-nav-link flex items-center text-gray-300 hover:bg-gray-800 hover:text-white block px-3 py-2 rounded-md text-base font-medium">
+                    <i data-lucide="mail" class="w-5 h-5 mr-2"></i> Contact
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 relative z-10">
+
+        <div id="post-view" class="hidden animate__animated animate__fadeIn">
+            <div class="glass rounded-2xl overflow-hidden">
+                <div class="p-6 md:p-10">
+                    <a href="#" id="back-button" class="inline-flex items-center text-blue-400 hover:text-blue-300 transition-colors group mb-6 glass px-4 py-2 rounded-full w-fit">
+                        <svg class="w-5 h-5 mr-2 transition-transform duration-200 group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                        Back to Blog
+                    </a>
+                    
+                    <h1 id="post-title" class="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 text-shadow">
+                    </h1>
+                    <p id="post-date" class="flex items-center text-base md:text-lg text-gray-400 mb-6">
+                    </p>
+                    
+                    <!-- 
+                      MODIFICATION 1 (Reverted): 
+                      - Changed base height to h-48 (192px) for mobile.
+                      - Kept sm:h-64 and md:h-80 for larger screens.
+                      - Changed object-contain back to object-cover.
+                      - Removed bg-black.
+                    -->
+                    <img id="post-image" class="w-full h-48 sm:h-64 md:h-80 max-h-[500px] object-cover rounded-xl shadow-lg mb-8 post-image" src="" alt="Post Image">
+                    
+                    <div id="post-content" class="max-w-none prose prose-lg prose-invert prose-headings:text-white prose-p:text-gray-300 prose-strong:text-white prose-a:text-blue-400">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="feed-view" class="md:flex md:space-x-4 lg:space-x-8 animate__animated animate__fadeIn">
+
+            <div class="block lg:hidden mb-8">
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-300 mb-1">
+                        Filter by Category
+                    </label>
+                    <div class="relative z-20">
+                        <button id="mobile-category-toggle" type="button" class="relative w-full glass border border-gray-700 rounded-xl shadow-sm pl-3 pr-10 py-2.5 text-left cursor-pointer focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500">
+                            <span id="mobile-category-label" class="block truncate">All Categories</span>
+                            <span class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                                <i id="mobile-category-chevron" data-lucide="chevron-down" class="w-5 h-5 text-gray-400 transition-transform duration-200"></i>
+                            </span>
+                        </button>
+                        
+                        <div id="mobile-category-menu" class="hidden absolute z-30 mt-1 w-full glass rounded-xl shadow-lg max-h-60 overflow-y-auto scrollbar-thin border border-gray-700 bg-slate-900/95">
+                            <ul id="mobile-category-list-custom" class="py-1">
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <span id="mobile-tag-list-label" class="block text-sm font-medium text-gray-300 mb-2">
+                        Filter by Tag
+                    </span>
+                    <div id="mobile-tag-list" class="flex items-center overflow-x-auto overflow-y-visible py-2 px-2 gap-2 hide-scrollbar scrollbar-thin">
+                    </div>
+                </div>
+            </div>
+
+
+            <main class="w-full md:w-3/4 lg:w-2/3">
+                <div class="mb-10 text-left">
+                    <h1 id="feed-title" class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 text-shadow typewriter"></h1>
+                    <p class="text-gray-400 text-base sm:text-lg">Exploring philosophy, poetry, and stories that shape our understanding of the world</p>
+                </div>
+                <div id="blog-feed" class="space-y-8">
+                    <div id="loading-placeholder" class="text-center p-6 glass rounded-xl">
+                        <p class="text-gray-400">Loading posts...</p>
+                    </div>
+                </div>
+            </main>
+
+            <div id="about-section-mobile" class="block md:hidden glass p-6 rounded-2xl shadow-xl relative overflow-hidden mt-8">
+                <div class="absolute -top-10 -right-10 w-20 h-20 bg-purple-500/20 rounded-full blur-xl"></div>
+                    <h3 class="text-2xl font-bold text-white mb-4 flex items-center relative z-10">
+                    <div class="w-8 h-8 rounded-full gradient-bg flex items-center justify-center mr-3">
+                        <i data-lucide="user-circle" class="w-4 h-4 text-white"></i>
+                    </div>
+                    About Ridhi's Blog
+                </h3>
+                <p class="text-gray-300 leading-relaxed relative z-10">
+                    Welcome to "Ridhi's Blog" - a digital sanctuary exploring the depths of philosophy, sociology, poetry, and storytelling. Here, we unravel the complexities of human existence through thoughtful essays, evocative poetry, and compelling narratives.
+                </p>
+            </div>
+
+            <aside class="hidden md:block md:w-1/4 lg:w-1/3 md:mt-0">
+                
+                <div class="glass p-6 rounded-2xl shadow-xl mb-8">
+                    <h3 class="text-2xl font-bold text-white mb-4 flex items-center">
+                        <div class="w-8 h-8 rounded-full gradient-bg flex items-center justify-center mr-3">
+                            <i data-lucide="layout-list" class="w-4 h-4 text-white"></i>
+                        </div>
+                        Categories
+                    </h3>
+                    <ul id="category-list" class="space-y-2">
+                        <li>
+                            <a href="#" class="block px-4 py-2 rounded-xl text-gray-300 hover:bg-gray-800 hover:translate-x-1 transition-all duration-200 category-link category-active" data-category="all">All Posts</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div id="tag-container" class="glass p-6 rounded-2xl shadow-xl mb-8">
+                    <h3 class="text-2xl font-bold text-white mb-4 flex items-center">
+                        <div class="w-8 h-8 rounded-full gradient-bg flex items-center justify-center mr-3" style="background: var(--secondary-gradient);">
+                            <i data-lucide="tags" class="w-4 h-4 text-white"></i>
+                        </div>
+                        Tags
+                    </h3>
+                    <div id="tag-list" class="flex flex-wrap gap-2">
+                    </div>
+                </div>
+
+                <div id="about-section" class="glass p-6 rounded-2xl shadow-xl relative overflow-hidden">
+                    <div class="absolute -top-10 -right-10 w-20 h-20 bg-purple-500/20 rounded-full blur-xl"></div>
+                    <h3 class="text-2xl font-bold text-white mb-4 flex items-center relative z-10">
+                        <div class="w-8 h-8 rounded-full gradient-bg flex items-center justify-center mr-3">
+                            <i data-lucide="user-circle" class="w-4 h-4 text-white"></i>
+                        </div>
+                        About Ridhi's Blog
+                    </h3>
+                    <p class="text-gray-300 leading-relaxed relative z-10">
+                        Welcome to "Ridhi's Blog" - a digital sanctuary exploring the depths of philosophy, sociology, poetry, and storytelling. Here, we unravel the complexities of human existence through thoughtful essays, evocative poetry, and compelling narratives.
+                    </p>
+                </div>
+            </aside>
+
+        </div>
+    </div>
+
+    <footer class="bg-gray-900/80 backdrop-blur-lg text-gray-300 mt-16 border-t border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="flex flex-col md:flex-row justify-between items-center text-center md:text-left">
+                <div class="mb-4 md:mb-0">
+                    <h3 class="text-2xl font-bold text-white gradient-text">Ridhi's Blog</h3>
+                    <p class="text-gray-400">Philosophy, Poetry, and Stories.</p>
+                </div>
+                <div class="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-6">
+                    <a href="#about-section" class="hover:text-white transition-colors nav-link">About</a>
+                    <a href="mailto:ridhii1999@gmail.com" class="flex items-center hover:text-white transition-colors nav-link">
+                        Contact
+                    </a>
+                    <a href="#" id="footer-home-link" class="hover:text-white transition-colors nav-link">Home</a>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2025 Ridhi's Blog. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <div id="snackbar" class="snackbar">
+        <i data-lucide="archive" class="w-5 h-5 mr-3 text-yellow-400"></i>
+        <span id="snackbar-message"></span>
+    </div>
+
+    <button id="to-top-button" class="fixed bottom-6 right-6 z-50 p-3 gradient-bg text-white rounded-full shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-gray-900 transition-all duration-300 opacity-0 invisible translate-y-4">
+        <i data-lucide="arrow-up" class="w-5 h-5"></i>
+        <span class="sr-only">Go to top</span>
+    </button>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+
+            // --- DATA (Will be populated from fetch) ---
+            let blogPosts = [];
+            let allCategories = {};
+            
+            // --- STATE ---
+            let activeCategory = 'all';
+            let activeTag = null; 
+            let typewriterInterval = null; 
+
+            // --- ELEMENT REFERENCES ---
+            const blogFeed = document.getElementById('blog-feed');
+            const categoryList = document.getElementById('category-list');
+            const tagContainer = document.getElementById('tag-container');
+            const tagList = document.getElementById('tag-list');
+            const feedTitle = document.getElementById('feed-title');
+            const mobileCategoryToggle = document.getElementById('mobile-category-toggle');
+            const mobileCategoryLabel = document.getElementById('mobile-category-label');
+            const mobileCategoryChevron = document.getElementById('mobile-category-chevron');
+            const mobileCategoryMenu = document.getElementById('mobile-category-menu');
+            const mobileCategoryListCustom = document.getElementById('mobile-category-list-custom');
+            const mobileTagList = document.getElementById('mobile-tag-list');
+            const mobileTagListLabel = document.getElementById('mobile-tag-list-label');
+            const feedView = document.getElementById('feed-view');
+            const postView = document.getElementById('post-view');
+            const backButton = document.getElementById('back-button');
+            const homeLink = document.getElementById('home-link');
+            const footerHomeLink = document.getElementById('footer-home-link');
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const menuIconClosed = document.getElementById('menu-icon-closed');
+            const menuIconOpen = document.getElementById('menu-icon-open');
+            const snackbar = document.getElementById('snackbar');
+            const snackbarMessage = document.getElementById('snackbar-message');
+            const toTopButton = document.getElementById('to-top-button');
+            
+            // --- FETCH LOGIC ---
+            async function loadBlogData() {
+                try {
+                    const response = await fetch('./db.json?cachebust=' + new Date().getTime());
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const data = await response.json();
+                    
+                    blogPosts = (data.posts || []).filter(post => post.published); // Only show published posts
+                    allCategories = data.categories || {};
+                    
+                    renderCategories();
+                    filterAndRender(); 
+                    lucide.createIcons();
+                
+                } catch (error) {
+                    console.error("Could not load blog data:", error);
+                    blogFeed.innerHTML = `
+                            <div class="text-center p-6 glass rounded-xl border border-red-700">
+                            <i data-lucide="alert-triangle" class="w-16 h-16 mx-auto text-red-500 mb-4"></i>
+                            <h3 class="text-2xl font-semibold text-white">Error Loading Posts</h3>
+                            <p class="text-gray-400 mt-2">Could not fetch data from db.json. Please try again later.</p>
+                            </div>`;
+                    lucide.createIcons(); 
+                }
+            }
+
+            // --- FUNCTIONS ---
+
+            function renderPosts(postsToRender) {
+                blogFeed.innerHTML = ''; 
+
+                if (postsToRender.length === 0) {
+                let message = `<div class="text-center p-6 glass rounded-xl border border-gray-700">
+                                        <i data-lucide="archive-x" class="w-16 h-16 mx-auto text-gray-500 mb-4"></i>
+                                        <h3 class="text-2xl font-semibold text-white">No Posts Found</h3>
+                                        <p class="text-gray-400 mt-2">No posts found matching your criteria.</p>
+                                    </div>`;
+                
+                if (activeCategory !== 'all') {
+                    message = `<div class="text-center p-6 glass rounded-xl border border-gray-700">
+                                        <i data-lucide="archive-x" class="w-16 h-16 mx-auto text-gray-500 mb-4"></i>
+                                        <h3 class="text-2xl font-semibold text-white">This Archive is Quiet</h3>
+                                        <p class="text-gray-400 mt-2">There are no posts in the '${activeCategory}' category just yet. Check back soon!</p>
+                                </div>`;
+                        showSnackbar(`No posts yet in '${activeCategory}'.`);
+                }
+                blogFeed.innerHTML = message;
+                lucide.createIcons(); 
+                return; 
+                }
+
+            const categoryColors = {
+                "Aphorism": "bg-purple-500/20 text-purple-300 border-purple-500/30",
+                "Essay": "bg-blue-500/20 text-blue-300 border-blue-500/30",
+                "Story writing": "bg-green-500/20 text-green-300 border-green-500/30",
+                "Poetry": "bg-pink-500/20 text-pink-300 border-pink-500/30"
+            };
+
+            postsToRender.forEach(post => {
+                const postElement = document.createElement('article');
+                postElement.className = 'post-card rounded-2xl overflow-hidden';
+                
+                const color = categoryColors[post.category] || "bg-gray-500/20 text-gray-300 border-gray-500/30";
+
+                postElement.innerHTML = `
+                    <!-- 
+                      MODIFICATION 2 (Reverted): 
+                      - Changed object-contain back to object-cover.
+                      - Removed bg-black.
+                    -->
+                    <img class="w-full h-64 object-cover post-image" src="${post.image}" alt="${post.title}" onerror="this.src='https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80'">
+                    <div class="p-6 flex flex-col flex-grow">
+                        <div>
+                            <span class="${color} text-xs font-medium px-2.5 py-0.5 rounded-full border">${post.category}</span>
+                            <h2 class="mt-3 mb-2 text-2xl font-semibold text-white hover:text-blue-400 transition-colors">
+                                <a href="#" class="view-post-link" data-post-id="${post.id}">${post.title}</a>
+                            </h2>
+                            <div class="flex items-center text-sm text-gray-400 mb-3">
+                                <i data-lucide="calendar-days" class="w-4 h-4 mr-1.5"></i>
+                                <span>${post.date}</span>
+                            </div>
+                            <p class="text-gray-300 leading-relaxed mb-4">${post.excerpt}</p>
+                        </div>
+                        <div class="mt-auto">
+                            <a href="#" class="view-post-link inline-flex items-center text-blue-400 hover:text-blue-300 font-medium group" data-post-id="${post.id}">
+                            Read More
+                            <i data-lucide="arrow-right" class="w-4 h-4 ml-1 transition-transform duration-200 group-hover:translate-x-1"></i>
+                            </a>
+                            <div class="mt-4 flex flex-wrap gap-2">
+                            ${(post.tags || []).map(tag => `
+                                <span class="flex items-center bg-gray-700/50 text-gray-300 text-xs font-medium px-2.5 py-0.5 rounded-full border border-gray-600">
+                                <i data-lucide="tag" class="w-3 h-3 mr-1"></i>
+                                ${tag}
+                                </span>
+                            `).join('')}
+                            </div>
+                        </div>
+                        </div>
+                    `;
+                blogFeed.appendChild(postElement);
+            });
+            }
+
+            function renderCategories() {
+                categoryList.innerHTML = '<li><a href="#" class="block px-4 py-2 rounded-xl text-gray-300 hover:bg-gray-800 hover:translate-x-1 transition-all duration-200 category-link category-active" data-category="all">All Posts</a></li>';
+                mobileCategoryListCustom.innerHTML = '';
+                
+                let allLiCustom = document.createElement('li');
+                allLiCustom.innerHTML = `<a href="#" class="block px-4 py-2 text-gray-300 hover:bg-gray-800 category-link-custom" data-category="all">All Categories</a>`;
+                mobileCategoryListCustom.appendChild(allLiCustom);
+
+                const categoryNames = Object.keys(allCategories).sort();
+
+                categoryNames.forEach(category => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<a href="#" class="block px-4 py-2 rounded-xl text-gray-300 hover:bg-gray-800 hover:translate-x-1 transition-all duration-200 category-link" data-category="${category}">${category}</a>`;
+                    categoryList.appendChild(li);
+                    
+                    const liCustom = document.createElement('li');
+                    liCustom.innerHTML = `<a href="#" class="block px-4 py-2 text-gray-300 hover:bg-gray-800 category-link-custom" data-category="${category}">${category}</a>`;
+                    mobileCategoryListCustom.appendChild(liCustom);
+                });
+            }
+
+            function renderTags() {
+                let tagsToShow = [];
+                if (activeCategory === 'all') {
+                    const allTags = new Set();
+                    Object.values(allCategories).forEach(tagArray => {
+                        tagArray.forEach(tag => allTags.add(tag));
+                    });
+                    tagsToShow = Array.from(allTags).sort();
+                } else {
+                    tagsToShow = (allCategories[activeCategory] || []).sort();
+                }
+                
+                const hasTags = tagsToShow.length > 0;
+                tagContainer.style.display = hasTags ? 'block' : 'none';
+                mobileTagList.style.display = hasTags ? 'flex' : 'none';
+                mobileTagListLabel.style.display = hasTags ? 'block' : 'none';
+
+                tagList.innerHTML = ''; 
+                mobileTagList.innerHTML = ''; 
+
+                const createTagChip = (tag, isMobile) => {
+                    const tagChip = document.createElement('button');
+                    let isActive = (tag === 'all' && !activeTag) || (activeTag === tag);
+                    const mobileClass = isMobile ? 'flex-shrink-0 ' : '';
+
+                    tagChip.className = `${mobileClass}tag-chip px-3 py-1 rounded-full text-sm font-medium transition-all duration-200 hover:-translate-y-0.5 ${isActive ? 'tag-active' : 'bg-gray-700/50 text-gray-300 hover:bg-gray-600 border border-gray-600'}`;
+                    tagChip.textContent = (tag === 'all') ? 'All Tags' : tag;
+                    tagChip.dataset.tag = tag;
+                    return tagChip;
+                };
+
+                if (tagsToShow.length > 0 || activeCategory === 'all') {
+                    tagList.appendChild(createTagChip('all', false));
+                    mobileTagList.appendChild(createTagChip('all', true));
+                }
+
+                tagsToShow.forEach(tag => {
+                    tagList.appendChild(createTagChip(tag, false));
+                    mobileTagList.appendChild(createTagChip(tag, true));
+                });
+            }
+            
+            function showSnackbar(message) {
+                snackbarMessage.textContent = message;
+                snackbar.className = "snackbar show";
+                setTimeout(function(){ snackbar.className = snackbar.className.replace("show", ""); }, 4000);
+            }
+
+            function filterAndRender() {
+                let filteredPosts = blogPosts;
+
+                if (activeCategory !== 'all') {
+                filteredPosts = filteredPosts.filter(post => post.category === activeCategory);
+                }
+
+                if (activeTag) {
+                filteredPosts = filteredPosts.filter(post => post.tags && post.tags.includes(activeTag));
+                }
+                
+                filteredPosts.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                renderPosts(filteredPosts);
+                updateCategoryUI();
+                renderTags(); 
+                updateFeedTitle();
+                lucide.createIcons();
+            }
+
+            function updateCategoryUI() {
+                document.querySelectorAll('#category-list .category-link').forEach(link => {
+                if (link.dataset.category === activeCategory) {
+                    link.classList.add('category-active');
+                } else {
+                    link.classList.remove('category-active');
+                }
+                });
+                
+                const selectedText = (activeCategory === 'all') ? 'All Categories' : activeCategory;
+                mobileCategoryLabel.textContent = selectedText;
+
+                mobileCategoryListCustom.querySelectorAll('.category-link-custom').forEach(link => {
+                if (link.dataset.category === activeCategory) {
+                    link.classList.add('category-link-custom-active');
+                    link.classList.remove('text-gray-300');
+                } else {
+                    link.classList.remove('category-link-custom-active');
+                    link.classList.add('text-gray-300');
+                }
+            });
+            }
+
+            function updateFeedTitle() {
+                let title = "Recent Posts"; 
+
+                if (activeCategory !== 'all') {
+                title = `Posts in: ${activeCategory}`;
+                }
+
+                if (activeTag) {
+                if (activeCategory !== 'all') {
+                    title = `${title} | ${activeTag}`;
+                } else {
+                    title = `Posts tagged: ${activeTag}`;
+                }
+                }
+                
+                if (typewriterInterval) {
+                clearInterval(typewriterInterval);
+                }
+
+                feedTitle.textContent = '';
+                feedTitle.classList.add('typewriter'); 
+                
+                let i = 0;
+                const typingSpeed = 50;
+
+                typewriterInterval = setInterval(() => {
+                if (i < title.length) {
+                    feedTitle.textContent += title.charAt(i);
+                    i++;
+                } else {
+                    clearInterval(typewriterInterval);
+                    typewriterInterval = null;
+                }
+            }, typingSpeed);
+            }
+
+            function showPost(postId) {
+                const post = blogPosts.find(p => p.id == postId);
+                if (!post) return;
+
+                document.getElementById('post-title').innerHTML = `<i data-lucide="book-open" class="w-10 h-10 -mt-2 mr-3 inline-block text-gray-500"></i> ${post.title}`;
+                document.getElementById('post-date').innerHTML = `<i data-lucide="calendar-days" class="w-4 h-4 mr-2 inline-block text-gray-500"></i> ${post.date}`;
+                
+                const postImage = document.getElementById('post-image');
+                postImage.src = post.image; 
+                postImage.alt = post.title; 
+                
+                const postContent = document.getElementById('post-content');
+                postContent.className = 'max-w-none prose prose-lg prose-invert prose-headings:text-white prose-p:text-gray-300 prose-strong:text-white prose-a:text-blue-400';
+                postContent.innerHTML = post.fullContent;
+                postContent.classList.add('prose-headings:font-bold');
+
+                feedView.classList.add('hidden');
+                feedView.classList.remove('md:flex'); 
+                feedView.classList.remove('animate__fadeIn'); 
+                postView.classList.remove('hidden');
+                postView.classList.add('animate__fadeIn'); 
+
+                window.scrollTo(0, 0);
+                lucide.createIcons();
+            }
+
+            function showFeed() {
+                postView.classList.add('hidden');
+                postView.classList.remove('animate__fadeIn');
+                feedView.classList.remove('hidden');
+                feedView.classList.add('md:flex'); 
+                feedView.classList.add('animate__fadeIn');
+                updateFeedTitle(); 
+            }
+            
+            function closeMobileMenu() {
+                if (!mobileMenu.classList.contains('hidden')) {
+                mobileMenu.classList.add('hidden');
+                menuIconOpen.classList.add('hidden');
+                menuIconClosed.classList.remove('hidden');
+                mobileMenuButton.setAttribute('aria-expanded', 'false');
+                }
+            }
+            
+            // --- EVENT LISTENERS ---
+
+            const handleCategoryClick = (e) => {
+                const link = e.target.closest('.category-link');
+                if (!link) return; 
+                e.preventDefault();
+                activeCategory = link.dataset.category;
+                activeTag = null; 
+                filterAndRender();
+                showFeed();
+            };
+            categoryList.addEventListener('click', handleCategoryClick);
+            
+            
+            mobileCategoryToggle.addEventListener('click', () => {
+                const isHidden = mobileCategoryMenu.classList.toggle('hidden');
+                mobileCategoryChevron.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
+            });
+
+            mobileCategoryMenu.addEventListener('click', (e) => {
+                const link = e.target.closest('.category-link-custom');
+                if (link) {
+                e.preventDefault();
+                activeCategory = link.dataset.category;
+                activeTag = null;
+                mobileCategoryMenu.classList.add('hidden');
+                mobileCategoryChevron.style.transform = 'rotate(0deg)';
+                filterAndRender();
+                showFeed();
+            }
+            });
+
+            window.addEventListener('click', (e) => {
+                if (!mobileCategoryToggle.contains(e.target) && !mobileCategoryMenu.contains(e.target)) {
+                if (!mobileCategoryMenu.classList.contains('hidden')) {
+                    mobileCategoryMenu.classList.add('hidden');
+                    mobileCategoryChevron.style.transform = 'rotate(0deg)';
+                }
+                }
+            });
+
+            const handleTagClick = (e) => {
+                const tagChip = e.target.closest('.tag-chip');
+                if (tagChip) {
+                e.preventDefault();
+                const tag = tagChip.dataset.tag;
+                if (tag === 'all') {
+            activeTag = null; 
+                } else if (activeTag === tag) {
+                    activeTag = null; 
+                } else {
+                    activeTag = tag; 
+                }
+                filterAndRender();
+            }
+            };
+            tagList.addEventListener('click', handleTagClick);
+            mobileTagList.addEventListener('click', handleTagClick);
+
+            blogFeed.addEventListener('click', (e) => {
+                const link = e.target.closest('.view-post-link');
+                if (link && link.dataset.postId) {
+                e.preventDefault();
+                showPost(link.dataset.postId);
+            }
+            });
+
+            backButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                showFeed();
+            });
+
+            const goHome = (e) => {
+                e.preventDefault();
+                activeCategory = 'all';
+                activeTag = null;
+                filterAndRender();
+                showFeed();
+                window.scrollTo(0, 0); 
+            };
+            homeLink.addEventListener('click', goHome);
+            footerHomeLink.addEventListener('click', goHome);
+
+            mobileMenuButton.addEventListener('click', () => {
+                const expanded = mobileMenuButton.getAttribute('aria-expanded') === 'true' || false;
+                mobileMenuButton.setAttribute('aria-expanded', !expanded);
+                mobileMenu.classList.toggle('hidden');
+                menuIconClosed.classList.toggle('hidden');
+                menuIconOpen.classList.toggle('hidden');
+            });
+
+            mobileMenu.addEventListener('click', (e) => {
+                const target = e.target.closest('a.mobile-nav-link');
+                if (!target) return; 
+
+                const href = target.getAttribute('href');
+                
+                if (href && href.startsWith('#')) {
+                e.preventDefault(); 
+                
+                const targetId = href.substring(1);
+                const targetElement = document.getElementById(targetId);
+
+                if (targetElement) {
+                    targetElement.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                    });
+                }
+                }
+                
+                closeMobileMenu();
+            });
+            
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 400) {
+                toTopButton.classList.add('show');
+                } else {
+                toTopButton.classList.remove('show');
+                }
+            });
+
+            toTopButton.addEventListener('click', () => {
+                window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+                });
+            });
+
+            // --- INITIAL LOAD ---
+            loadBlogData(); 
+
+        });
+    </script>
+
+</body>
+</html>
+

@@ -335,7 +335,7 @@
             const postView = document.getElementById('post-view');
             const backButton = document.getElementById('back-button');
             const homeLink = document.getElementById('home-link');
-            const footerHomeLink = document.getElementById('footer-home-link');
+            
             const mobileMenuButton = document.getElementById('mobile-menu-button');
             const mobileMenu = document.getElementById('mobile-menu');
             const menuIconClosed = document.getElementById('menu-icon-closed');
@@ -723,7 +723,7 @@
                 window.scrollTo(0, 0); 
             };
             homeLink.addEventListener('click', goHome);
-            footerHomeLink.addEventListener('click', goHome);
+            
 
             mobileMenuButton.addEventListener('click', () => {
                 const expanded = mobileMenuButton.getAttribute('aria-expanded') === 'true' || false;
@@ -780,6 +780,7 @@
 </body>
 
 </html>
+
 
 
 

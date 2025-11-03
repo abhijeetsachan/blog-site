@@ -214,7 +214,8 @@ app.get('/api/public-data', async (req, res) => {
 
     if (catsError) {
         console.error('Supabase error (categories):', catsError.message);
-        return res.status(500).json({ message:.Error reading categories.' });
+        // --- THIS IS THE FIXED LINE ---
+        return res.status(500).json({ message: 'Error reading categories.' });
     }
 
     const publicData = {
@@ -491,7 +492,7 @@ app.delete('/api/tags/:categoryName/:tagName', checkApiAuth, async (req, res) =>
         .single();
     
     if (fetchError || !category) {
-        return res.status(404).json({ message: 'Category not found.' });
+        return res.status(44).json({ message: 'Category not found.' });
     }
 
     if (!category.tags || !category.tags.includes(tagName)) {

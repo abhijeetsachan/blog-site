@@ -1,0 +1,1317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Ridhi's Blog</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    
+    <script src="https://cdn.tiny.cloud/1/gpo3vu0adjy1d9r8pl1381pse2qxzxzx7ab9se2fxtz6tpmw/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+    
+    <script>
+        // 4. Initialize the editor
+        tinymce.init({
+            selector: '#blog-editor',
+            plugins: 'lists link image media preview code wordcount',
+            toolbar: 'undo redo | blocks | bold italic | link image media | bullist numlist | code preview',
+            height: 400,
+            skin: 'oxide-dark',
+            content_css: 'dark',
+            menubar: false,
+        });
+    </script>
+    
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+            --secondary-gradient: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+            --glass-bg: rgba(30, 30, 46, 0.7);
+            --glass-border: rgba(99, 102, 241, 0.2);
+        }
+        
+        body { 
+            font-family: 'Inter', sans-serif;
+            background: #0f0f23; 
+            color: #e2e8f0;
+            background-image: radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.1) 0%, transparent 20%), radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 20%);
+        }
+        
+        .glass { 
+            background: var(--glass-bg); 
+            backdrop-filter: blur(10px); 
+            border: 1px solid var(--glass-border); 
+        }
+        
+        .gradient-text { 
+            background: var(--primary-gradient); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+            background-clip: text; 
+        }
+        
+        .gradient-bg { 
+            background: var(--primary-gradient); 
+        }
+
+        .gradient-bg-secondary {
+            background: var(--secondary-gradient);
+        }
+
+        .form-input {
+            background-color: rgba(15, 15, 35, 0.8); /* Darker input */
+            border: 1px solid var(--glass-border);
+            color: #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            width: 100%;
+            transition: all 0.2s ease;
+        }
+        .form-input:focus {
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.3);
+            outline: none;
+        }
+        
+        .tab-chip {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            color: #9ca3af; /* gray-400 */
+            background-color: transparent;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        .tab-chip:hover {
+            color: #e2e8f0;
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        .tab-chip.active {
+            color: white;
+            font-weight: 600;
+            background: var(--primary-gradient);
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+        }
+        
+        .tab-panel {
+            display: none; /* Hidden by default */
+        }
+        .tab-panel.active {
+            display: block; /* Shown by JS */
+        }
+
+        /* Scrollbar */
+        .scrollbar-thin { scrollbar-width: thin; scrollbar-color: rgba(99, 102, 241, 0.5) rgba(30, 30, 46, 0.5); }
+        .scrollbar-thin::-webkit-scrollbar { width: 6px; }
+        .scrollbar-thin::-webkit-scrollbar-track { background: rgba(30, 30, 46, 0.5); border-radius: 10px; }
+        .scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.5); border-radius: 10px; }
+        .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, 0.8); }
+        
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+
+        /* Modal */
+        #post-editor-modal {
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s ease, visibility 0.3s;
+        }
+        #post-editor-modal.open {
+            visibility: visible;
+            opacity: 1;
+        }
+        #post-editor-modal-content {
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+        }
+        #post-editor-modal.open #post-editor-modal-content {
+            transform: scale(1);
+        }
+        
+        /* --- NEW: Custom Tag Input Styles --- */
+        .tag-input-container {
+            /* Mimic .form-input */
+            background-color: rgba(15, 15, 35, 0.8);
+            border: 1px solid var(--glass-border);
+            border-radius: 0.5rem;
+            padding: 0.5rem; /* A bit less padding to fit pills */
+            width: 100%;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.375rem; /* 6px */
+        }
+        .tag-input-container:focus-within {
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.3);
+            outline: none;
+        }
+        .tag-pill {
+            display: flex;
+            align-items: center;
+            background-color: #4f46e5; /* indigo-600 */
+            color: white;
+            border-radius: 9999px; /* rounded-full */
+            padding: 0.25rem 0.75rem; /* py-1 px-3 */
+            font-size: 0.875rem; /* text-sm */
+            font-weight: 500;
+        }
+        .tag-pill-remove {
+            margin-left: 0.5rem; /* ml-2 */
+            width: 1.25rem; /* w-5 */
+            height: 1.25rem; /* h-5 */
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            line-height: 1;
+            font-weight: bold;
+            transition: background-color 0.2s ease;
+        }
+        .tag-pill-remove:hover {
+            background-color: rgba(255, 255, 255, 0.4);
+        }
+        .tag-input-field {
+            background-color: transparent;
+            border: none;
+            outline: none;
+            color: #e2e8f0;
+            padding: 0.25rem;
+            flex-grow: 1;
+            min-width: 120px;
+        }
+        .tag-input-field::placeholder {
+            color: #9ca3af;
+        }
+        
+        /* NEW: Tag Suggestions Dropdown */
+        .tag-suggestions-list {
+            position: absolute;
+            z-index: 60; /* Above modal content */
+            margin-top: 0.25rem;
+            width: 100%;
+            background: var(--glass-bg); 
+            backdrop-filter: blur(10px); 
+            border: 1px solid var(--glass-border);
+            border-radius: 0.75rem; /* rounded-xl */
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            max-h: 15rem; /* max-h-60 */
+            overflow-y: auto;
+            /* Using dark bg with opacity to feel "on-top" */
+            background-color: #0f0f23e6; 
+        }
+        .tag-suggestion-item {
+            padding: 0.75rem 1rem; /* px-4 py-3 */
+            color: #cbd5e1; /* slate-300 */
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .tag-suggestion-item:hover, .tag-suggestion-item.active {
+            background-color: #4f46e5; /* indigo-600 */
+            color: white;
+        }
+        /* --- End of Custom Tag Input Styles --- */
+
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8">
+
+    <div class="max-w-7xl mx-auto">
+        <div class="flex flex-col md:flex-row justify-between md:items-center mb-6 px-2 gap-4">
+            <h1 class="text-3xl font-bold gradient-text">Ridhi's Blog - Admin Panel</h1>
+            <div class="flex items-center gap-4">
+                <a href="../index.html" target="_blank" class="flex items-center text-sm text-indigo-400 hover:text-indigo-300 transition-colors">
+                    <i data-lucide="eye" class="w-4 h-4 mr-1.5"></i>
+                    View Public Site
+                </a>
+                <a href="/admin/logout" class="flex items-center text-sm text-red-400 hover:text-red-300 transition-colors">
+                    <i data-lucide="log-out" class="w-4 h-4 mr-1.5"></i>
+                    Logout
+                </a>
+            </div>
+            </div>
+        
+        <div class="glass rounded-xl p-2 flex items-center justify-start gap-2 mb-6 overflow-x-auto hide-scrollbar">
+            <button class="tab-chip active" data-tab="posts-panel">
+                <i data-lucide="file-text" class="w-4 h-4 inline-block mr-1.5"></i>
+                Manage Posts
+            </button>
+            <button class="tab-chip" data-tab="categories-panel">
+                <i data-lucide="layout-list" class="w-4 h-4 inline-block mr-1.5"></i>
+                Manage Categories
+            </button>
+            <button class="tab-chip" data-tab="tags-panel">
+                <i data-lucide="tags" class="w-4 h-4 inline-block mr-1.5"></i>
+                Manage Tags
+            </button>
+        </div>
+
+        <div id="global-status-message" class="text-center text-sm mb-4 h-5"></div>
+
+        <div class="tab-content">
+            
+            <div id="posts-panel" class="tab-panel active">
+                <div class="flex justify-end mb-4">
+                    <button id="open-modal-btn" class="gradient-bg text-white font-bold py-2 px-4 rounded-lg shadow-lg flex items-center transition-transform hover:scale-105">
+                        <i data-lucide="plus" class="w-5 h-5 mr-2"></i>
+                        Create New Post
+                    </button>
+                </div>
+                <div class="glass rounded-2xl shadow-xl overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full min-w-[600px]">
+                            <thead class="border-b border-gray-700">
+                                <tr>
+                                    <th class="p-4 text-left text-sm font-semibold uppercase">Status</th>
+                                    <th class="p-4 text-left text-sm font-semibold uppercase">Title</th>
+                                    <th class="p-4 text-left text-sm font-semibold uppercase">Category</th>
+                                    <th class="p-4 text-left text-sm font-semibold uppercase">Date</th>
+                                    <th class="p-4 text-left text-sm font-semibold uppercase">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="posts-list-table">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="categories-panel" class="tab-panel">
+                <div class="glass p-6 md:p-8 rounded-2xl shadow-xl">
+                    <h2 class="text-2xl font-semibold mb-6 text-white flex items-center">
+                        <i data-lucide="layout-list" class="w-6 h-6 mr-3"></i>
+                        Manage Categories
+                    </h2>
+                    
+                    <form id="new-category-form" class="flex gap-2 mb-6">
+                        <input type="text" id="new-category-name" class="form-input flex-grow" placeholder="New Category Name" required>
+                        <button type="submit" class="gradient-bg text-white font-medium p-3 rounded-lg flex items-center justify-center shadow-lg transition-transform hover:scale-105">
+                            <i data-lucide="plus" class="w-5 h-5"></i>
+                        </button>
+                    </form>
+
+                    <h3 class="text-lg font-medium text-gray-200 mb-3">Existing Categories</h3>
+                    <div id="category-list-ui" class="space-y-2 max-h-96 overflow-y-auto scrollbar-thin pr-2">
+                        </div>
+                </div>
+            </div>
+            
+            <div id="tags-panel" class="tab-panel">
+                <div class="glass p-6 md:p-8 rounded-2xl shadow-xl">
+                    <h2 class="text-2xl font-semibold mb-6 text-white flex items-center">
+                        <i data-lucide="tags" class="w-6 h-6 mr-3"></i>
+                        Manage Tags by Category
+                    </h2>
+                    
+                    <div class="mb-4">
+                        <label for="tag-category-select" class="block text-sm font-medium mb-2">Select Category to Manage</label>
+                        <div id="tag-category-select-wrapper">
+                            <select id="tag-category-select" class="form-input">
+                                <option value="">-- Select a Category --</option>
+                                </select>
+                        </div>
+                    </div>
+
+                    <form id="new-tag-form" class="flex gap-2 mb-6 hidden">
+                        <input type="text" id="new-tag-name" class="form-input flex-grow" placeholder="New Tag Name" required>
+                        <button type="submit" class="gradient-bg text-white font-medium p-3 rounded-lg flex items-center justify-center shadow-lg transition-transform hover:scale-105">
+                            <i data-lucide="plus" class="w-5 h-5"></i>
+                        </button>
+                    </form>
+
+                    <h3 class="text-lg font-medium text-gray-200 mb-3">Existing Tags</h3>
+                    <div id="tag-list-ui" class="space-y-2 max-h-96 overflow-y-auto scrollbar-thin pr-2">
+                        <p class="text-gray-400 text-sm">Please select a category above.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="post-editor-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
+        <div id="modal-backdrop" class="fixed inset-0 bg-black/70 backdrop-blur-sm"></div>
+        
+        <div id="post-editor-modal-content" class="glass rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] z-10 my-auto">
+            <form id="post-editor-form" class="flex flex-col max-h-[90vh]">
+                <div class="p-6 md:p-8 border-b border-gray-700">
+                    <div class="flex justify-between items-center">
+                        <h2 id="modal-title" class="text-2xl font-semibold text-white">Create New Post</h2>
+                        <button type="button" id="close-modal-btn" class="text-gray-400 hover:text-white">
+                            <i data-lucide="x" class="w-6 h-6"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="p-6 md:p-8 space-y-5 overflow-y-auto scrollbar-thin">
+                    <input type="hidden" id="post-id"> <div>
+                        <label for="title" class="block text-sm font-medium mb-2">Post Title</label>
+                        <input type="text" id="title" name="title" class="form-input" required>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div>
+                            <label for="post-category-select" class="block text-sm font-medium mb-2">Category</label>
+                            <div id="post-category-select-wrapper">
+                                <select id="post-category-select" class="form-input" required>
+                                    <option value="">-- Select a Category --</option>
+                                    </select>
+                            </div>
+                        </div>
+                        
+                        <div class="relative">
+                            <label for="tag-input-field" class="block text-sm font-medium mb-2">Tags</label>
+                            
+                            <div id="tag-input-container" class="tag-input-container">
+                                <input type="text" id="tag-input-field" class="tag-input-field" placeholder="Type and press Enter...">
+                            </div>
+                            
+                            <div id="tag-suggestions-list" class="tag-suggestions-list hidden">
+                                </div>
+            
+                            <input type="text" id="tags" name="tags" class="hidden">
+                        </div>
+                        </div>
+                    
+                    <div>
+                        <label for="image" class="block text-sm font-medium mb-2">Image URL</label>
+                        <input type="url" id="image" name="image" class="form-input" placeholder="https://images.unsplash.com/..." required>
+                    </div>
+                    
+                    <div>
+                        <label for="excerpt" class="block text-sm font-medium mb-2">Excerpt (Short Summary)</label>
+                        <textarea id="excerpt" name="excerpt" rows="3" class="form-input" placeholder="A short, compelling summary for the post card..." required></textarea>
+                    </div>
+                    
+                    <div>
+                        <label for="blog-editor" class="block text-sm font-medium mb-2">Full Post Content</label>
+                        <textarea id="blog-editor"></textarea>
+                    </div>
+                </div>
+                
+                <div class="p-6 md:p-8 flex justify-between items-center border-t border-gray-700 mt-auto">
+                    <label class="flex items-center gap-2 text-gray-300">
+                        <input type="checkbox" id="published" name="published" class="w-5 h-5 rounded text-indigo-500 bg-gray-700 border-gray-600 focus:ring-indigo-500">
+                        Publish Post
+                    </label>
+
+                    <button type="submit" class="gradient-bg text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-transform hover:scale-105">
+                        Save Post
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Global Data Store ---
+            let allPosts = [];
+            let allCategories = {}; // New structure: { "Essay": ["Tag1", "Tag2"], ... }
+            let currentPostTags = []; // NEW: State for the tag input
+            let suggestionIndex = -1; // NEW: State for suggestion keyboard navigation
+
+            // --- Tab Elements ---
+            const tabChips = document.querySelectorAll('.tab-chip');
+            const tabPanels = document.querySelectorAll('.tab-panel');
+
+            // --- Post Panel Elements ---
+            const postsListTable = document.getElementById('posts-list-table');
+
+            // --- Category Panel Elements ---
+            const categoryForm = document.getElementById('new-category-form');
+            const categoryFormInput = document.getElementById('new-category-name');
+            const categoryListUI = document.getElementById('category-list-ui');
+
+            // --- Tag Panel Elements ---
+            const tagCategorySelect = document.getElementById('tag-category-select');
+            const tagForm = document.getElementById('new-tag-form');
+            const tagFormInput = document.getElementById('new-tag-name');
+            const tagListUI = document.getElementById('tag-list-ui');
+
+            // --- Modal Elements ---
+            const modal = document.getElementById('post-editor-modal');
+            const modalBackdrop = document.getElementById('modal-backdrop');
+            const modalTitle = document.getElementById('modal-title');
+            const closeModalBtn = document.getElementById('close-modal-btn');
+            const openModalBtn = document.getElementById('open-modal-btn');
+            const postForm = document.getElementById('post-editor-form');
+            const postCategorySelect = document.getElementById('post-category-select');
+            const hiddenPostId = document.getElementById('post-id');
+
+            // --- Global Status ---
+            const globalStatus = document.getElementById('global-status-message');
+
+
+            // --- 1. DATA LOADING & INITIALIZATION ---
+            
+            // NEW: Helper function to check for unauthorized API responses
+            function checkApiResponse(response) {
+                if (response.status === 401) {
+                    // Session expired or not logged in
+                    showGlobalStatus('Session expired. Redirecting to login...', 'error');
+                    setTimeout(() => {
+                        window.location.href = '/admin/login.html';
+                    }, 2000);
+                    return false; // Stop further execution
+                }
+                return true;
+            }
+
+            async function loadData() {
+                try {
+                    const response = await fetch('/api/data?cachebust=' + new Date().getTime());
+                    
+                    if (!checkApiResponse(response)) return; // <-- ADDED AUTH CHECK
+
+                    if (!response.ok) throw new Error('Could not load site data');
+                    
+                    const data = await response.json();
+                    allPosts = data.posts || [];
+                    allCategories = data.categories || {};
+                    
+                    // Render all parts of the UI
+                    renderPostsTable(allPosts);
+                    renderCategoriesPanel(allCategories);
+                    renderTagsPanelSelector(allCategories);
+                    
+                } catch (error) {
+                    showGlobalStatus(`Error: ${error.message}`, 'error');
+                }
+            }
+
+            // --- 2. RENDER FUNCTIONS ---
+            
+            function renderPostsTable(posts) {
+                postsListTable.innerHTML = '';
+                if (posts.length === 0) {
+                    postsListTable.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-400">No posts found. Create one!</td></tr>`;
+                    return;
+                }
+
+                // Sort by ID (assuming higher is newer, which it is with Supabase)
+                posts.sort((a, b) => (b.id - a.id)); 
+
+                posts.forEach(post => {
+                    const row = document.createElement('tr');
+                    row.className = 'border-b border-gray-800 hover:bg-gray-800/50';
+                    const postStatus = post.published ? 
+                        `<span class="text-green-400 flex items-center"><i data-lucide="eye" class="w-4 h-4 mr-1.5"></i>Published</span>` : 
+                        `<span class="text-gray-400 flex items-center"><i data-lucide="eye-off" class="w-4 h-4 mr-1.5"></i>Unpublished</span>`;
+                    
+                    // Use the 'date' field, fallback to created_at if 'date' is missing
+                    const postDate = post.date || new Date(post.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+
+                    row.innerHTML = `
+                        <td class="p-4">${postStatus}</td>
+                        <td class="p-4 font-medium text-white">${post.title}</td>
+                        <td class="p-4">${post.category}</td>
+                        <td class="p-4 text-sm text-gray-400">${postDate}</td>
+                        <td class="p-4 flex items-center gap-2">
+                            <button class="toggle-publish-btn p-2 text-gray-400 hover:text-white" data-id="${post.id}" title="${post.published ? 'Unpublish' : 'Publish'}">
+                                <i data-lucide="${post.published ? 'eye-off' : 'eye'}" class="w-4 h-4"></i>
+                            </button>
+                            <button class="edit-post-btn p-2 text-blue-400 hover:text-blue-300" data-id="${post.id}" title="Edit">
+                                <i data-lucide="edit" class="w-4 h-4"></i>
+                            </button>
+                            <button class="delete-post-btn p-2 text-red-500 hover:text-red-400" data-id="${post.id}" title="Delete">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </td>
+                    `;
+                    postsListTable.appendChild(row);
+                });
+                lucide.createIcons();
+            }
+
+            function renderCategoriesPanel(categoriesObj) {
+                categoryListUI.innerHTML = '';
+                postCategorySelect.innerHTML = '<option value="">-- Select a Category --</option>'; // For modal
+                
+                const categoryNames = Object.keys(categoriesObj).sort();
+
+                if (categoryNames.length === 0) {
+                    categoryListUI.innerHTML = `<p class="text-gray-400 text-sm">No categories found. Add one!</p>`;
+                }
+                
+                categoryNames.forEach(cat => {
+                    // Add to "Manage Categories" list
+                    const div = document.createElement('div');
+                    div.className = 'flex items-center justify-between bg-gray-900/50 p-3 rounded-lg';
+                    div.innerHTML = `
+                        <span class="text-gray-300 flex-grow">${cat}</span>
+                        <div class="flex-shrink-0 flex items-center gap-2">
+                            <button class="edit-category-btn p-1 text-blue-400 hover:text-blue-300" data-category="${cat}" title="Edit Category">
+                                <i data-lucide="edit" class="w-4 h-4"></i>
+                            </button>
+                            <button class="delete-category-btn p-1 text-red-500 hover:text-red-400" data-category="${cat}" title="Delete Category">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    `;
+                    categoryListUI.appendChild(div);
+
+                    // Add to "Create Post" modal dropdown
+                    const option = document.createElement('option');
+                    option.value = cat;
+                    option.textContent = cat;
+                    postCategorySelect.appendChild(option);
+                });
+                lucide.createIcons();
+                initCustomDropdown(postCategorySelect, 'post-category-select-wrapper');
+            }
+
+            function renderTagsPanelSelector(categoriesObj) {
+                tagCategorySelect.innerHTML = '<option value="">-- Select a Category --</option>';
+                Object.keys(categoriesObj).sort().forEach(cat => {
+                    const option = document.createElement('option');
+                    option.value = cat;
+                    option.textContent = cat;
+                    tagCategorySelect.appendChild(option);
+                });
+                initCustomDropdown(tagCategorySelect, 'tag-category-select-wrapper');
+            }
+
+            function renderTagList(categoryName) {
+                tagListUI.innerHTML = '';
+                const tags = allCategories[categoryName];
+
+                if (!tags || tags.length === 0) {
+                    tagListUI.innerHTML = `<p class="text-gray-400 text-sm">No tags found for this category.</p>`;
+                    return;
+                }
+
+                tags.sort().forEach(tag => {
+                    const div = document.createElement('div');
+                    div.className = 'flex items-center justify-between bg-gray-900/50 p-3 rounded-lg';
+                    div.innerHTML = `
+                        <span class="text-gray-300 flex-grow">${tag}</span>
+                        <div class="flex-shrink-0 flex items-center gap-2">
+                            <button class="edit-tag-btn p-1 text-blue-400 hover:text-blue-300" data-tag="${tag}" data-category="${categoryName}" title="Edit Tag">
+                                <i data-lucide="edit" class="w-4 h-4"></i>
+                            </button>
+                            <button class="delete-tag-btn p-1 text-red-500 hover:text-red-400" data-tag="${tag}" data-category="${categoryName}" title="Delete Tag">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    `;
+                    tagListUI.appendChild(div);
+                });
+                lucide.createIcons();
+            }
+
+            // --- 3. MODAL & TAB LOGIC ---
+
+            function handleTabClick(e) {
+                const clickedTab = e.target.closest('.tab-chip');
+                if (!clickedTab) return;
+
+                tabChips.forEach(chip => chip.classList.remove('active'));
+                clickedTab.classList.add('active');
+
+                const targetPanelId = clickedTab.dataset.tab;
+                tabPanels.forEach(panel => {
+                    if (panel.id === targetPanelId) {
+                        panel.classList.add('active');
+                    } else {
+                        panel.classList.remove('active');
+                    }
+                });
+            }
+
+            function openPostModal(postId = null) {
+                postForm.reset(); 
+                tinymce.get('blog-editor').setContent('');
+                hiddenPostId.value = '';
+                document.getElementById('tags').value = ''; // Clear hidden tag input
+
+                if (postId) {
+                    // EDIT MODE
+                    modalTitle.textContent = 'Edit Post';
+                    const post = allPosts.find(p => p.id == postId);
+                    if (post) {
+                        hiddenPostId.value = post.id;
+                        document.getElementById('title').value = post.title;
+                        document.getElementById('post-category-select').value = post.category; 
+                        document.getElementById('tags').value = post.tags ? post.tags.join(', ') : ''; // Set hidden tag input
+                        document.getElementById('image').value = post.image;
+                        document.getElementById('excerpt').value = post.excerpt;
+                        tinymce.get('blog-editor').setContent(post.fullContent || '');
+                        document.getElementById('published').checked = post.published;
+                    }
+                } else {
+                    // CREATE MODE
+                    modalTitle.textContent = 'Create New Post';
+                    document.getElementById('published').checked = true; 
+                }
+                
+                initCustomDropdown(postCategorySelect, 'post-category-select-wrapper');
+                initTagInput(); // NEW: Call our tag input initializer
+                
+                modal.classList.add('open');
+            }
+
+            function closePostModal() {
+                modal.classList.remove('open');
+            }
+
+            // --- 4. EVENT HANDLERS ---
+            
+            // --- Tab Handlers ---
+            document.querySelector('.glass.rounded-xl.p-2').addEventListener('click', handleTabClick);
+            
+            // --- Modal Handlers ---
+            openModalBtn.addEventListener('click', () => openPostModal());
+            closeModalBtn.addEventListener('click', closePostModal);
+            modalBackdrop.addEventListener('click', closePostModal);
+
+            // --- Post Form Handlers ---
+            postCategorySelect.addEventListener('change', (e) => {
+                const tagInputField = document.getElementById('tag-input-field');
+                if (tagInputField) tagInputField.value = '';
+            });
+
+            postForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                showGlobalStatus('Saving post...', 'loading');
+
+                const postId = hiddenPostId.value;
+                const isEditMode = !!postId;
+
+                const fullContent = tinymce.get('blog-editor').getContent();
+                const tagsRaw = document.getElementById('tags').value; // Reads from hidden input
+                const category = document.getElementById('post-category-select').value;
+                
+                // Get existing date if editing, otherwise create a new one
+                const postDate = isEditMode ? allPosts.find(p=>p.id == postId).date : new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+                const postData = {
+                    // --- ID IS REMOVED ---
+                    // ID is now handled by Supabase (on create) 
+                    // or by the URL param (on update)
+                    title: document.getElementById('title').value,
+                    category: category,
+                    tags: tagsRaw.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0),
+                    image: document.getElementById('image').value,
+                    excerpt: document.getElementById('excerpt').value,
+                    fullContent: fullContent,
+                    published: document.getElementById('published').checked,
+                    date: postDate
+                };
+
+                try {
+                    const url = isEditMode ? `/api/posts/${postId}` : '/api/posts';
+                    const method = isEditMode ? 'PUT' : 'POST';
+
+                    const response = await fetch(url, {
+                        method: method,
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(postData)
+                    });
+
+                    if (!checkApiResponse(response)) return; // <-- ADDED AUTH CHECK
+
+                    if (!response.ok) {
+                        const err = await response.json();
+                        throw new Error(err.message);
+                    }
+                    
+                    const result = await response.json();
+                    showGlobalStatus(result.message, 'success');
+                    closePostModal();
+                    loadData(); 
+
+                } catch (error) {
+                    showGlobalStatus(`Error: ${error.message}`, 'error');
+                }
+            });
+
+            // --- Post List Handlers ---
+            postsListTable.addEventListener('click', async (e) => {
+                const editBtn = e.target.closest('.edit-post-btn');
+                const deleteBtn = e.target.closest('.delete-post-btn');
+                const toggleBtn = e.target.closest('.toggle-publish-btn');
+
+                if (editBtn) {
+                    openPostModal(editBtn.dataset.id);
+                }
+                
+                if (deleteBtn) {
+                    const postId = deleteBtn.dataset.id;
+                    if (!confirm('Are you sure you want to delete this post permanently?')) return;
+                    
+                    showGlobalStatus('Deleting post...', 'loading');
+                    try {
+                        const response = await fetch(`/api/posts/${postId}`, { method: 'DELETE' });
+                        
+                        if (!checkApiResponse(response)) return; // <-- ADDED AUTH CHECK
+
+                        if (!response.ok) {
+                            const err = await response.json();
+                            throw new Error(err.message);
+                        }
+                        const result = await response.json();
+                        showGlobalStatus(result.message, 'success');
+                        loadData();
+                    } catch (error) {
+                        showGlobalStatus(`Error: ${error.message}`, 'error');
+                    }
+                }
+                
+                if (toggleBtn) {
+                    const postId = toggleBtn.dataset.id;
+                    showGlobalStatus('Updating status...', 'loading');
+                    try {
+                        const response = await fetch(`/api/posts/toggle-publish/${postId}`, { method: 'PUT' });
+                        
+                        if (!checkApiResponse(response)) return; // <-- ADDED AUTH CHECK
+                        
+                        if (!response.ok) {
+                            const err = await response.json();
+                            throw new Error(err.message);
+                        }
+                        const result = await response.json();
+                        showGlobalStatus(result.message, 'success');
+                        loadData();
+                    } catch (error) {
+                        showGlobalStatus(`Error: ${error.message}`, 'error');
+                    }
+                }
+            });
+
+            // --- Category Panel Handlers ---
+            categoryForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const categoryName = categoryFormInput.value;
+                if (!categoryName) return;
+
+                showGlobalStatus('Adding category...', 'loading');
+                try {
+                    const response = await fetch('/api/categories', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ name: categoryName })
+                    });
+                    
+                    if (!checkApiResponse(response)) return; // <-- ADDED AUTH CHECK
+                    
+                    if (!response.ok) {
+                        const err = await response.json();
+                        throw new Error(err.message);
+                    }
+                    const result = await response.json();
+                    showGlobalStatus(result.message, 'success');
+                    categoryFormInput.value = '';
+                    loadData();
+                } catch (error) {
+                    showGlobalStatus(`Error: ${error.message}`, 'error');
+                }
+            });
+
+            categoryListUI.addEventListener('click', async (e) => {
+                const deleteBtn = e.target.closest('.delete-category-btn');
+                const editBtn = e.target.closest('.edit-category-btn');
+                
+                if (deleteBtn) {
+                    const categoryName = deleteBtn.dataset.category;
+                    if (!confirm(`Are you sure you want to delete the category "${categoryName}"? This will also remove all tags associated with it AND un-categorize any posts using it.`)) return;
+
+                    showGlobalStatus('Deleting category...', 'loading');
+                    try {
+                        const response = await fetch(`/api/categories/${encodeURIComponent(categoryName)}`, { method: 'DELETE' });
+                        
+                        if (!checkApiResponse(response)) return; // <-- ADDED AUTH CHECK
+                        
+                        if (!response.ok) {
+                            const err = await response.json();
+                            throw new Error(err.message);
+                        }
+                        const result = await response.json();
+                        showGlobalStatus(result.message, 'success');
+                        loadData();
+                    } catch (error) {
+                        showGlobalStatus(`Error: ${error.message}`, 'error');
+                    }
+                }
+                
+                if (editBtn) {
+                    const oldName = editBtn.dataset.category;
+                    const newName = prompt('Enter new category name:', oldName);
+                    
+                    if (newName && newName.trim() !== '' && newName !== oldName) {
+                        await updateCategoryName(oldName, newName.trim());
+                    }
+                }
+            });
+
+            async function updateCategoryName(oldName, newName) {
+                showGlobalStatus('Renaming category...', 'loading');
+                try {
+                    const response = await fetch(`/api/categories/${encodeURIComponent(oldName)}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ newName: newName })
+                    });
+                    
+                    if (!checkApiResponse(response)) return; // <-- ADDED AUTH CHECK
+                    
+                    if (!response.ok) {
+                        const err = await response.json();
+                        throw new Error(err.message);
+                    }
+                    const result = await response.json();
+                    showGlobalStatus(result.message, 'success');
+                    loadData();
+                } catch (error) {
+                    showGlobalStatus(`Error: ${error.message}`, 'error');
+                }
+            }
+            
+            // --- Tag Panel Handlers ---
+            tagCategorySelect.addEventListener('change', () => {
+                const selectedCategory = tagCategorySelect.value;
+                if (selectedCategory) {
+                    tagForm.classList.remove('hidden');
+                    renderTagList(selectedCategory);
+                } else {
+                    tagForm.classList.add('hidden');
+                    tagListUI.innerHTML = `<p class="text-gray-400 text-sm">Please select a category above.</p>`;
+                }
+            });
+
+            tagForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const categoryName = tagCategorySelect.value;
+                const tagName = tagFormInput.value;
+                if (!categoryName || !tagName) return;
+
+                showGlobalStatus('Adding tag...', 'loading');
+                try {
+                    const response = await fetch('/api/tags', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ categoryName: categoryName, tagName: tagName })
+                    });
+                    
+                    if (!checkApiResponse(response)) return; // <-- ADDED AUTH CHECK
+                    
+                    if (!response.ok) {
+                        const err = await response.json();
+                        throw new Error(err.message);
+                    }
+                    const result = await response.json();
+                    showGlobalStatus(result.message, 'success');
+                    tagFormInput.value = '';
+                    await loadData(); 
+                    renderTagList(categoryName);
+                } catch (error) {
+                    showGlobalStatus(`Error: ${error.message}`, 'error');
+                }
+            });
+
+            tagListUI.addEventListener('click', async (e) => {
+                const deleteBtn = e.target.closest('.delete-tag-btn');
+                const editBtn = e.target.closest('.edit-tag-btn');
+                
+                if (deleteBtn) {
+                    const categoryName = deleteBtn.dataset.category;
+                    const tagName = deleteBtn.dataset.tag;
+                    if (!confirm(`Are you sure you want to delete the tag "${tagName}" from "${categoryName}"?`)) return;
+
+                    showGlobalStatus('Deleting tag...', 'loading');
+                    try {
+                        const response = await fetch(`/api/tags/${encodeURIComponent(categoryName)}/${encodeURIComponent(tagName)}`, { method: 'DELETE' });
+                        
+                        if (!checkApiResponse(response)) return; // <-- ADDED AUTH CHECK
+                        
+                        if (!response.ok) {
+                            const err = await response.json();
+                            throw new Error(err.message);
+                        }
+                        const result = await response.json();
+                        showGlobalStatus(result.message, 'success');
+                        await loadData(); 
+                        renderTagList(categoryName); 
+                    } catch (error) {
+                        showGlobalStatus(`Error: ${error.message}`, 'error');
+                    }
+                }
+                
+                if (editBtn) {
+                    const oldTagName = editBtn.dataset.tag;
+                    const categoryName = editBtn.dataset.category;
+                    const newTagName = prompt('Enter new tag name:', oldTagName);
+
+                    if (newTagName && newTagName.trim() !== '' && newTagName !== oldTagName) {
+                        await updateTagName(categoryName, oldTagName, newTagName.trim());
+                    }
+                }
+            });
+
+            async function updateTagName(categoryName, oldTagName, newTagName) {
+                showGlobalStatus('Renaming tag...', 'loading');
+                try {
+                    const response = await fetch(`/api/tags/${encodeURIComponent(categoryName)}/${encodeURIComponent(oldTagName)}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ newTagName: newTagName })
+                    });
+                    
+                    if (!checkApiResponse(response)) return; // <-- ADDED AUTH CHECK
+                    
+                    if (!response.ok) {
+                        const err = await response.json();
+                        throw new Error(err.message);
+                    }
+                    const result = await response.json();
+                    showGlobalStatus(result.message, 'success');
+                    await loadData();
+                    renderTagList(categoryName);
+                } catch (error) {
+                    showGlobalStatus(`Error: ${error.message}`, 'error');
+                }
+            }
+
+
+            // --- UTILITY ---
+            
+            function initCustomDropdown(selectElement, wrapperId) {
+                const wrapper = document.getElementById(wrapperId);
+                if (!wrapper) return;
+
+                const oldCustom = wrapper.querySelector('.custom-dropdown-container');
+                if (oldCustom) oldCustom.remove();
+
+                selectElement.classList.add('hidden');
+
+                const options = Array.from(selectElement.options);
+                const selectedOption = selectElement.options[selectElement.selectedIndex];
+
+                const customDropdown = document.createElement('div');
+                customDropdown.className = 'relative custom-dropdown-container';
+
+                const trigger = document.createElement('button');
+                trigger.type = 'button';
+                trigger.className = 'custom-dropdown-trigger form-input flex justify-between items-center w-full';
+                trigger.innerHTML = `
+                    <span class="custom-dropdown-label text-left truncate ${selectedOption.value ? 'text-white' : 'text-gray-400'}">${selectedOption.textContent}</span>
+                    <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400 transition-transform duration-200"></i>
+                `;
+
+                const zIndex = wrapper.closest('#post-editor-modal') ? 'z-60' : 'z-20';
+                const menu = document.createElement('div');
+                menu.className = `hidden custom-dropdown-menu absolute ${zIndex} mt-1 w-full glass rounded-xl shadow-lg max-h-60 overflow-y-auto scrollbar-thin border border-gray-700 bg-slate-900/95`;
+                
+                const list = document.createElement('ul');
+                list.className = 'py-1';
+
+                options.forEach(option => {
+                    const li = document.createElement('li');
+                    li.className = 'px-4 py-2 text-gray-300 hover:bg-gray-800 cursor-pointer truncate';
+                    li.textContent = option.textContent;
+                    li.dataset.value = option.value;
+                    
+                    if (option.value === selectedOption.value) {
+                        li.classList.add('bg-indigo-600', 'text-white');
+                    }
+                    
+                    li.addEventListener('click', () => {
+                        selectElement.value = option.value;
+                        selectElement.dispatchEvent(new Event('change', { bubbles: true }));
+
+                        trigger.querySelector('.custom-dropdown-label').textContent = option.textContent;
+                        if (option.value) {
+                            trigger.querySelector('.custom-dropdown-label').classList.remove('text-gray-400');
+                            trigger.querySelector('.custom-dropdown-label').classList.add('text-white');
+                        } else {
+                            trigger.querySelector('.custom-dropdown-label').classList.add('text-gray-400');
+                            trigger.querySelector('.custom-dropdown-label').classList.remove('text-white');
+                        }
+
+                        list.querySelectorAll('li').forEach(item => item.classList.remove('bg-indigo-600', 'text-white'));
+                        li.classList.add('bg-indigo-600', 'text-white');
+                        
+                        menu.classList.add('hidden');
+                        trigger.querySelector('i').style.transform = 'rotate(0deg)';
+                    });
+                    list.appendChild(li);
+                });
+
+                menu.appendChild(list);
+                customDropdown.appendChild(trigger);
+                customDropdown.appendChild(menu);
+                wrapper.appendChild(customDropdown);
+
+                lucide.createIcons({ nodes: [trigger.querySelector('i')] });
+
+                trigger.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const isHidden = menu.classList.toggle('hidden');
+                    trigger.querySelector('i').style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
+                    
+                    document.querySelectorAll('.custom-dropdown-menu').forEach(m => {
+                        if (m !== menu) {
+                            m.classList.add('hidden');
+                            const otherTrigger = m.previousElementSibling.querySelector('i');
+                            if (otherTrigger) otherTrigger.style.transform = 'rotate(0deg)';
+                        }
+                    });
+                });
+            }
+
+            window.addEventListener('click', () => {
+                document.querySelectorAll('.custom-dropdown-menu').forEach(menu => {
+                    if (!menu.classList.contains('hidden')) {
+                        menu.classList.add('hidden');
+                        const triggerIcon = menu.previousElementSibling.querySelector('i');
+                        if (triggerIcon) triggerIcon.style.transform = 'rotate(0deg)';
+                    }
+                });
+            });
+
+            function showGlobalStatus(message, type = 'loading') {
+                globalStatus.classList.remove('text-green-400', 'text-red-400', 'text-yellow-400');
+                if (type === 'success') {
+                    globalStatus.classList.add('text-green-400');
+                } else if (type === 'error') {
+                    globalStatus.classList.add('text-red-400');
+                } else {
+                    globalStatus.classList.add('text-yellow-400'); // loading
+                }
+                globalStatus.textContent = message;
+
+                if (type !== 'loading') {
+                    setTimeout(() => {
+                        if (globalStatus.textContent === message) {
+                            globalStatus.textContent = '';
+                        }
+                    }, 3000);
+                }
+            }
+
+            // --- *** NEW: CUSTOM TAG INPUT LOGIC *** ---
+            function initTagInput() {
+                currentPostTags = []; // Reset state
+                suggestionIndex = -1;
+                const hiddenInput = document.getElementById('tags');
+                const container = document.getElementById('tag-input-container');
+                const inputField = document.getElementById('tag-input-field');
+                const suggestionsList = document.getElementById('tag-suggestions-list');
+
+                // 1. Populate initial tags from hidden input
+                const initialTags = hiddenInput.value.split(',').map(t => t.trim()).filter(Boolean);
+                initialTags.forEach(tag => {
+                    if (!currentPostTags.includes(tag)) {
+                        currentPostTags.push(tag);
+                    }
+                });
+                renderTagPills();
+
+                // 2. Clear old listeners (important when re-opening modal)
+                inputField.onkeydown = null;
+                inputField.oninput = null;
+                inputField.onblur = null;
+                container.onclick = null;
+
+                // 3. Event Listeners
+                container.onclick = () => {
+                    inputField.focus();
+                };
+                
+                inputField.onblur = () => {
+                    // Use a timeout to allow click on suggestion to register
+                    setTimeout(() => hideSuggestions(), 150);
+                };
+
+                inputField.oninput = () => {
+                    const query = inputField.value.trim();
+                    if (query) {
+                        showSuggestions(query);
+                    } else {
+                        hideSuggestions();
+                    }
+                };
+
+                inputField.onkeydown = (e) => {
+                    const key = e.key;
+                    const value = inputField.value.trim();
+                    
+                    if (key === 'Enter' || key === ',') {
+                        e.preventDefault();
+                        if (suggestionIndex > -1) {
+                            // If a suggestion is highlighted, add it
+                            const activeSuggestion = suggestionsList.querySelector('.active');
+                            if (activeSuggestion) {
+                                addTag(activeSuggestion.textContent);
+                            }
+                        } else if (value) {
+                            // Otherwise, add the typed value
+                            addTag(value);
+                        }
+                        inputField.value = '';
+                        return;
+                    }
+                    
+                    if (key === 'Backspace' && value === '' && currentPostTags.length > 0) {
+                        // Remove last tag
+                        removeTag(currentPostTags[currentPostTags.length - 1]);
+                        return;
+                    }
+
+                    if (key === 'ArrowDown') {
+                        e.preventDefault();
+                        navigateSuggestions(1);
+                        return;
+                    }
+                    
+                    if (key === 'ArrowUp') {
+                        e.preventDefault();
+                        navigateSuggestions(-1);
+                        return;
+                    }
+                    
+                    if (key === 'Escape') {
+                        hideSuggestions();
+                        return;
+                    }
+                };
+            }
+
+            function renderTagPills() {
+                const container = document.getElementById('tag-input-container');
+                const inputField = document.getElementById('tag-input-field');
+                
+                // Remove all existing pills
+                container.querySelectorAll('.tag-pill').forEach(pill => pill.remove());
+
+                // Add pills from state
+                currentPostTags.forEach(tag => {
+                    const pill = document.createElement('span');
+                    pill.className = 'tag-pill';
+                    
+                    const text = document.createTextNode(tag);
+                    
+                    const removeBtn = document.createElement('button');
+                    removeBtn.type = 'button';
+                    removeBtn.className = 'tag-pill-remove';
+                    removeBtn.innerHTML = '&times;'; // Simple 'x'
+                    removeBtn.onclick = (e) => {
+                        e.stopPropagation(); // Prevent container click
+                        removeTag(tag);
+                    };
+                    
+                    pill.appendChild(text);
+                    pill.appendChild(removeBtn);
+                    
+                    // Add pill *before* the input field
+                    container.insertBefore(pill, inputField);
+                });
+                
+                updateHiddenTagInput();
+            }
+
+            function addTag(tag) {
+                const trimmedTag = tag.trim();
+                if (trimmedTag && !currentPostTags.includes(trimmedTag)) {
+                    currentPostTags.push(trimmedTag);
+                    renderTagPills();
+                }
+                document.getElementById('tag-input-field').value = '';
+                hideSuggestions();
+            }
+
+            function removeTag(tag) {
+                currentPostTags = currentPostTags.filter(t => t !== tag);
+                renderTagPills();
+                document.getElementById('tag-input-field').focus();
+            }
+
+            function updateHiddenTagInput() {
+                // This is the key: it keeps the hidden input in sync
+                document.getElementById('tags').value = currentPostTags.join(', ');
+            }
+
+            function showSuggestions(query) {
+                const category = postCategorySelect.value;
+                if (!category) {
+                    hideSuggestions();
+                    return;
+                }
+                
+                const allTagsForCategory = allCategories[category] || [];
+                const filteredTags = allTagsForCategory.filter(tag => 
+                    tag.toLowerCase().includes(query.toLowerCase()) &&
+                    !currentPostTags.includes(tag)
+                );
+                
+                const suggestionsList = document.getElementById('tag-suggestions-list');
+                suggestionsList.innerHTML = '';
+                
+                if (filteredTags.length === 0) {
+                    hideSuggestions();
+                    return;
+                }
+
+                filteredTags.forEach(tag => {
+                    const item = document.createElement('div');
+                    item.className = 'tag-suggestion-item';
+                    item.textContent = tag;
+                    item.onmousedown = (e) => { // Use mousedown to fire before blur
+                        e.preventDefault();
+                        addTag(tag);
+                    };
+                    suggestionsList.appendChild(item);
+                });
+                
+                suggestionsList.classList.remove('hidden');
+                suggestionIndex = -1; // Reset navigation
+            }
+            
+            function hideSuggestions() {
+                document.getElementById('tag-suggestions-list').classList.add('hidden');
+                suggestionIndex = -1;
+            }
+
+            function navigateSuggestions(direction) {
+                const suggestionsList = document.getElementById('tag-suggestions-list');
+                const items = suggestionsList.querySelectorAll('.tag-suggestion-item');
+                if (items.length === 0) return;
+
+                // Remove old active class
+                if (suggestionIndex > -1) {
+                    items[suggestionIndex].classList.remove('active');
+                }
+                
+                // Calculate new index
+                suggestionIndex = suggestionIndex + direction;
+                
+                if (suggestionIndex < 0) {
+                    suggestionIndex = items.length - 1; // Wrap to bottom
+                } else if (suggestionIndex >= items.length) {
+                    suggestionIndex = 0; // Wrap to top
+                }
+
+                // Add new active class
+                items[suggestionIndex].classList.add('active');
+                items[suggestionIndex].scrollIntoView({ block: 'nearest' });
+            }
+            // --- *** End of Custom Tag Input Logic *** ---
+
+            
+            // --- INITIAL LOAD ---
+            loadData();
+            lucide.createIcons();
+        });
+    </script>
+
+</body>
+</html>

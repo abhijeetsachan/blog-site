@@ -2,7 +2,10 @@
  * ==========================================================================
  * !! IMPORTANT: SUPABASE SETUP INSTRUCTIONS !!
  * ==========================================================================
- * (Your setup is likely complete, but this is kept for reference)
+ * * Before this server will work, you MUST set up your Supabase database.
+ * * 1. Create a new project in Supabase.
+ * 2. Go to the "SQL Editor" section (the one with the `>` icon).
+ * 3. Click "New query" and paste ALL of the code below and click "RUN".
  *
  * ------------------- PASTE THIS IN SUPABASE SQL EDITOR --------------------
  *
@@ -26,24 +29,51 @@
  * name TEXT NOT NULL UNIQUE,
  * tags TEXT[] DEFAULT ARRAY[]::TEXT[]
  * );
+ * * -- Create a helper function to remove an item from a text array
+ * CREATE OR REPLACE FUNCTION array_remove(arr TEXT[], item TEXT)
+ * RETURNS TEXT[] AS $$
+ * BEGIN
+ * RETURN array_agg(elem) FROM unnest(arr) AS elem WHERE elem <> item;
+ * END;
+ * $$ LANGUAGE plpgsql;
+ * * -- Create a helper function to replace an item in a text array
+ * CREATE OR REPLACE FUNCTION array_replace(arr TEXT[], old_item TEXT, new_item TEXT)
+ * RETURNS TEXT[] AS $$
+ * DECLARE
+ * new_arr TEXT[];
+ * BEGIN
+ * SELECT array_agg(CASE WHEN elem = old_item THEN new_item ELSE elem END)
+ * INTO new_arr
+ * FROM unnest(arr) AS elem;
+ * RETURN new_arr;
+ * END;
+ * $$ LANGUAGE plpgsql;
  * * -- Enable Row Level Security (RLS)
+ * -- This is good practice. We disable it for 'public' tables and use the ANON_KEY
+ * -- which has read/write. For a real app, you would set up policies.
  * ALTER TABLE public.posts ENABLE ROW LEVEL SECURITY;
  * ALTER TABLE public.categories ENABLE ROW LEVEL SECURITY;
- * * -- Create policies (This is what you've already done!)
- * CREATE POLICY "Public tables are viewable by everyone" 
+ * * CREATE POLICY "Public tables are viewable by everyone" 
  * ON public.posts FOR SELECT USING (true);
  * * CREATE POLICY "Public categories are viewable by everyone" 
  * ON public.categories FOR SELECT USING (true);
- *
- * -- !! BONUS PERFORMANCE FIX: Add an index !!
- * -- (Run this in your SQL editor if you haven't)
- * CREATE INDEX idx_posts_published ON public.posts (published);
- *
- * -- *** NEW: Add an index for the date field for faster sorting ***
- * CREATE INDEX idx_posts_date ON public.posts (date DESC);
+ * * -- For a real app, you'd lock down insert/update/delete to auth users.
+ * -- For this project, the ANON_KEY has full rights, which is fine
+ * -- because our *server* is the only thing that uses it, and our
+ * -- *server* is protected by session auth.
  * * ------------------------- END OF SQL CODE --------------------------------
  *
- * ==========================================================================
+ * 4. Go to "Project Settings" (the gear icon).
+ * 5. Go to "API".
+ * 6. Find the "Project URL" and "Project API Keys" (the `anon` `public` key).
+ * 7. You will add these to your environment variables (e.g., in a `.env` file
+ * or in your hosting provider's settings) along with your other secrets.
+ * * SUPABASE_URL="YOUR_PROJECT_URL"
+ * SUPABASE_ANON_KEY="YOUR_ANON_KEY"
+ * ADMIN_USER="admin"
+ * ADMIN_PASS="password123"
+ * SESSION_SECRET="your-very-secret-key-change-this"
+ * * ==========================================================================
  */
 
 const express = require('express');
@@ -78,9 +108,6 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY || !ADMIN_USER || !ADMIN_PASS || !SESSIO
 // --- Initialize Supabase Client ---
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// --- !! PERFORMANCE FIX: CACHE VARIABLE !! ---
-let publicDataCache = null;
-
 // --- Middleware ---
 app.use(cors()); 
 app.use(express.json({ limit: '10mb' })); 
@@ -107,12 +134,6 @@ function formatCategories(categoryList) {
         acc[cat.name] = cat.tags || [];
         return acc;
     }, {});
-}
-
-// --- !! HELPER: Clear cache when data changes !! ---
-function clearCache() {
-    console.log("Cache cleared due to data change.");
-    publicDataCache = null;
 }
 
 // --- Authentication Middleware ---
@@ -174,22 +195,13 @@ app.get('/admin/login.html', (req, res) => {
 
 // --- PUBLIC API ENDPOINT ---
 app.get('/api/public-data', async (req, res) => {
-    
-    // --- !! PERFORMANCE FIX: CHECK CACHE FIRST !! ---
-    if (publicDataCache) {
-        console.log(`[GET /api/public-data] Serving from cache...`);
-        return res.status(200).json(publicDataCache);
-    }
-    // --- !! END OF CACHE CHECK !! ---
-
     console.log(`[GET /api/public-data] Reading from Supabase for public...`);
     
     const { data: posts, error: postsError } = await supabase
         .from('posts')
         .select('*')
         .eq('published', true)
-        // *** MODIFIED: Sort by date (newest first) instead of id ***
-        .order('date', { ascending: false });
+        .order('id', { ascending: false });
 
     if (postsError) {
         console.error('Supabase error (posts):', postsError.message);
@@ -210,10 +222,6 @@ app.get('/api/public-data', async (req, res) => {
         categories: formatCategories(categoriesList),
         posts: posts || []
     };
-    
-    // --- !! PERFORMANCE FIX: SAVE TO CACHE !! ---
-    publicDataCache = publicData;
-    
     res.status(200).json(publicData);
 });
 
@@ -226,8 +234,7 @@ app.get('/api/data', checkApiAuth, async (req, res) => {
     const { data: posts, error: postsError } = await supabase
         .from('posts')
         .select('*')
-        // *** MODIFIED: Sort by date (newest first) instead of id ***
-        .order('date', { ascending: false });
+        .order('id', { ascending: false });
 
     if (postsError) {
         console.error('Supabase error (posts):', postsError.message);
@@ -251,7 +258,6 @@ app.get('/api/data', checkApiAuth, async (req, res) => {
 });
 
 // --- POST MANAGEMENT (CRUD) ROUTES ---
-// (All routes below now include clearCache())
 
 // CREATE: POST /api/posts
 app.post('/api/posts', checkApiAuth, async (req, res) => {
@@ -269,7 +275,6 @@ app.post('/api/posts', checkApiAuth, async (req, res) => {
         return res.status(500).json({ message: 'Error saving post.' });
     }
     
-    clearCache(); // !! CLEAR CACHE !!
     console.log('Post saved successfully!');
     res.status(200).json({ message: 'Post saved successfully!' });
 });
@@ -293,7 +298,6 @@ app.put('/api/posts/:id', checkApiAuth, async (req, res) => {
         return res.status(500).json({ message: 'Error updating post.' });
     }
 
-    clearCache(); // !! CLEAR CACHE !!
     console.log('Post updated successfully!');
     res.status(200).json({ message: 'Post updated successfully!' });
 });
@@ -310,7 +314,6 @@ app.delete('/api/posts/:id', checkApiAuth, async (req, res) => {
         return res.status(500).json({ message: 'Error deleting post.' });
     }
 
-    clearCache(); // !! CLEAR CACHE !!
     console.log('Post deleted successfully!');
     res.status(200).json({ message: 'Post deleted successfully!' });
 });
@@ -341,7 +344,6 @@ app.put('/api/posts/toggle-publish/:id', checkApiAuth, async (req, res) => {
         return res.status(500).json({ message: 'Error updating status.' });
     }
 
-    clearCache(); // !! CLEAR CACHE !!
     console.log(`Post ${postId} status set to: ${!post.published}`);
     res.status(200).json({ message: 'Publish status updated successfully!' });
 });
@@ -369,7 +371,6 @@ app.post('/api/categories', checkApiAuth, async (req, res) => {
         return res.status(500).json({ message: 'Error adding category.' });
     }
 
-    clearCache(); // !! CLEAR CACHE !!
     console.log(`Added new category: ${newCategoryName}`);
     res.status(200).json({ message: 'Category added successfully!' });
 });
@@ -398,7 +399,6 @@ app.delete('/api/categories/:name', checkApiAuth, async (req, res) => {
         console.error('Supabase error (updating posts):', postError.message);
     }
     
-    clearCache(); // !! CLEAR CACHE !!
     console.log(`Deleted category: ${categoryToDelete} and updated posts.`);
     res.status(200).json({ message: 'Category deleted successfully!' });
 });
@@ -435,7 +435,6 @@ app.put('/api/categories/:name', checkApiAuth, async (req, res) => {
          console.error('Supabase error (updating posts):', postError.message);
     }
 
-    clearCache(); // !! CLEAR CACHE !!
     console.log(`Renamed category to '${newName}' and updated posts.`);
     res.status(200).json({ message: 'Category renamed successfully!' });
 });
@@ -476,7 +475,6 @@ app.post('/api/tags', checkApiAuth, async (req, res) => {
         return res.status(500).json({ message: 'Error adding tag.' });
     }
 
-    clearCache(); // !! CLEAR CACHE !!
     console.log('Tag added successfully');
     res.status(200).json({ message: 'Tag added successfully!' });
 });
@@ -532,7 +530,6 @@ app.delete('/api/tags/:categoryName/:tagName', checkApiAuth, async (req, res) =>
     
     await Promise.all(updates); 
 
-    clearCache(); // !! CLEAR CACHE !!
     console.log('Tag deleted successfully and removed from posts.');
     res.status(200).json({ message: 'Tag deleted successfully!' });
 });
@@ -597,7 +594,6 @@ app.put('/api/tags/:categoryName/:tagName', checkApiAuth, async (req, res) => {
     
     await Promise.all(updates);
 
-    clearCache(); // !! CLEAR CACHE !!
     console.log(`Renamed tag to '${newTagName}' and updated posts.`);
     res.status(200).json({ message: 'Tag renamed successfully!' });
 });

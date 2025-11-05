@@ -132,6 +132,31 @@
                         <div id="post-content" class="max-w-none prose prose-lg prose-headings:font-bold">
                             </div>
 
+                        <div id="post-actions" class="border-t border-b py-6 my-8" style="border-color: var(--glass-border);">
+                            <div class="flex flex-col sm:flex-row justify-between items-center gap-6">
+                                
+                                <div class="flex-shrink-0">
+                                    <button id="like-button" class="inline-flex items-center gap-3 text-lg font-medium px-6 py-3 rounded-full transition-all duration-200" style="background-color: var(--glass-bg); border: 1px solid var(--glass-border); color: var(--nav-link-color);">
+                                        <i data-lucide="heart" class="w-5 h-5 transition-all"></i>
+                                        <span id="like-count" class="font-semibold">0</span>
+                                        <span class="hidden sm:inline">Likes</span>
+                                    </button>
+                                </div>
+                                
+                                <div class="flex items-center gap-3">
+                                    <span class="text-sm font-medium" style="color: var(--nav-link-color);">Share:</span>
+                                    <a id="share-x" href="#" target="_blank" rel="noopener noreferrer" class="p-3 rounded-full transition-colors" style="background-color: var(--glass-bg); border: 1px solid var(--glass-border); color: var(--nav-link-color);" title="Share on X (Twitter)">
+                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.25 2.25h6.588l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                                    </a>
+                                    <a id="share-linkedin" href="#" target="_blank" rel="noopener noreferrer" class="p-3 rounded-full transition-colors" style="background-color: var(--glass-bg); border: 1px solid var(--glass-border); color: var(--nav-link-color);" title="Share on LinkedIn">
+                                        <i data-lucide="linkedin" class="w-4 h-4"></i>
+                                    </a>
+                                    <a id="share-reddit" href="#" target="_blank" rel="noopener noreferrer" class="p-3 rounded-full transition-colors" style="background-color: var(--glass-bg); border: 1px solid var(--glass-border); color: var(--nav-link-color);" title="Share on Reddit">
+                                        <i data-lucide="reddit" class="w-4 h-4"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
                         <div class="comment-form-container">
                             <h3 class="comment-form-title">Leave a Comment</h3>
                             <form id="comment-form" class="comment-form">
@@ -313,4 +338,3 @@
 </body>
 
 </html>
-

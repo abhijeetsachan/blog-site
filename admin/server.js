@@ -616,7 +616,7 @@ app.put('/api/tags/:categoryName/:tagName', checkApiAuth, async (req, res) => {
 });
 
 
-// === NEW: ADMIN COMMENT MODERATION ROUTES ===
+// === ADMIN COMMENT MODERATION ROUTES ===
 
 // GET: Fetch ALL comments (pending and approved) for admin
 app.get('/api/admin/comments', checkApiAuth, async (req, res) => {
@@ -681,7 +681,7 @@ app.delete('/api/comments/:id', checkApiAuth, async (req, res) => {
 });
 
 
-// === NEW: PUBLIC COMMENT ROUTES ===
+// === PUBLIC COMMENT ROUTES ===
 
 // GET: Fetch all *APPROVED* comments for a specific post
 app.get('/api/comments/:postId', async (req, res) => {
@@ -704,16 +704,26 @@ app.get('/api/comments/:postId', async (req, res) => {
 
 // POST: Submit a new comment (will be 'is_approved: false' by default)
 app.post('/api/comments', async (req, res) => {
-    const { post_id, name, content } = req.body;
+    
+    // === THIS IS THE FIX ===
+    // We parse the post_id to a number, as it comes from the client as a string
+    const { name, content } = req.body;
+    const post_id = parseInt(req.body.post_id, 10);
+    // === END FIX ===
 
-    if (!post_id || !name || !content) {
+    // Trim content to prevent empty strings
+    const trimmedName = name.trim();
+    const trimmedContent = content.trim();
+
+    if (!post_id || !trimmedName || !trimmedContent) {
         return res.status(400).json({ message: 'Missing required fields.' });
     }
     
     const { data, error } = await supabase
         .from('comments')
         .insert([
-            { post_id: post_id, name: name, content: content }
+            // Use the parsed/trimmed values
+            { post_id: post_id, name: trimmedName, content: trimmedContent }
         ])
         .select();
 

@@ -87,11 +87,12 @@
  *
  * 4. Go to "Project Settings" (the gear icon).
  * 5. Go to "API".
- * 6. Find the "Project URL" and "Project API Keys" (the `anon` `public` key).
+ * 6. Find the "Project URL", "anon" "public" key, and "service_role" "secret" key.
  * 7. You will add these to your environment variables (e.g., in a `.env` file
  * or in your hosting provider's settings) along with your other secrets.
  * * SUPABASE_URL="YOUR_PROJECT_URL"
- * SUPABASE_ANON_KEY="YOUR_ANON_KEY"
+ * SUPABASE_ANON_KEY="YOUR_ANON_KEY" (This is still needed for public)
+ * SUPABASE_SERVICE_KEY="YOUR_SERVICE_ROLE_KEY" (This is the new one)
  * ADMIN_USER="admin"
  * ADMIN_PASS="password123"
  * SESSION_SECRET="your-very-secret-key-change-this"
@@ -116,19 +117,23 @@ const PORT = process.env.PORT || 3000;
 // --- SUPABASE & ADMIN CREDENTIALS ---
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
+// === NEW: Add the Service Role Key ===
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
 const ADMIN_USER = process.env.ADMIN_USER;
 const ADMIN_PASS = process.env.ADMIN_PASS;
 const SESSION_SECRET = process.env.SESSION_SECRET;
 
-// Check if all required env vars are set
-if (!SUPABASE_URL || !SUPABASE_ANON_KEY || !ADMIN_USER || !ADMIN_PASS || !SESSION_SECRET) {
-    console.error('FATAL ERROR: Missing required environment variables.');
+// === MODIFIED: Check for the new key ===
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY || !SUPABASE_SERVICE_KEY || !ADMIN_USER || !ADMIN_PASS || !SESSION_SECRET) {
+    console.error('FATAL ERROR: Missing required environment variables. (SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_KEY, ADMIN_USER, ADMIN_PASS, SESSION_SECRET)');
     console.log('Please check your .env file or hosting environment.');
     process.exit(1);
 }
 
-// --- Initialize Supabase Client ---
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// === MODIFIED: Initialize Supabase Client with the Service Role Key ===
+// This gives the server "admin" rights, bypassing RLS.
+const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+// === END MODIFICATION ===
 
 // --- Middleware ---
 app.use(cors()); 
@@ -736,7 +741,7 @@ app.post('/api/comments', async (req, res) => {
     // === END FIX ===
 
     if (error) {
-        console.error('Supabase error (inserting comment):', error.message);
+        console.error('SupABASE ERROR (inserting comment):', error.message); // <-- More specific log
         console.error('Data sent to Supabase:', { post_id: numeric_post_id, name: trimmedName, content: trimmedContent });
         return res.status(500).json({ message: 'Error posting comment.' });
     }

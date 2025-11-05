@@ -151,6 +151,9 @@ app.use(express.urlencoded({ extended: true }));
 
 // --- NEW: SET CONTENT SECURITY POLICY (CSP) ---
 app.use((req, res, next) => {
+  // IMPORTANT: The SUPABASE_URL is needed here to fetch posts on the public site!
+  const supabaseDomain = SUPABASE_URL ? new URL(SUPABASE_URL).hostname : '';
+
   res.setHeader(
     'Content-Security-Policy',
     "default-src 'self'; " +
@@ -158,7 +161,7 @@ app.use((req, res, next) => {
     "style-src 'self' https://fonts.googleapis.com https://cdnjs.cloudflare.com 'unsafe-inline'; " +
     "font-src 'self' https://fonts.gstatic.com; " +
     "img-src 'self' https: data:; " +
-    "connect-src 'self' https://raw.githubusercontent.com; " +
+    `connect-src 'self' https://raw.githubusercontent.com https://${supabaseDomain}; ` + // <--- FIXED: Added Supabase Domain
     "frame-src 'self' https://cdn.tiny.cloud"
   );
   next();
@@ -729,7 +732,8 @@ app.delete('/api/comments/:id', checkApiAuth, async (req, res) => {
 
     if (error) {
         console.error('Supabase error (deleting comment):', error.message);
-        return res.status(5D).json({ message: 'Error deleting comment.' });
+        // *** FIX APPLIED HERE: Changed 5D to 500 ***
+        return res.status(500).json({ message: 'Error deleting comment.' }); 
     }
 
     res.status(200).json({ message: 'Comment deleted!' });
@@ -820,7 +824,7 @@ app.post('/api/posts/like/:id', likeLimiter, async (req, res) => {
         return res.status(500).json({ message: 'Error updating like count.' });
     }
 
-    console.log(\`Like incremented for post \${postId}\`);
+    console.log(`Like incremented for post ${postId}`);
     res.status(200).json({ message: 'Like registered!' });
 });
 
@@ -848,10 +852,9 @@ app.get('/', (req, res) => {
 
 // --- Start the Server ---
 app.listen(PORT, () => {
-    console.log(\`--- Blog Server & Admin Panel (Supabase Mode) ---\`);
-    console.log(\`Server running on http://localhost:\${PORT}\`);
-    console.log(\`Public Blog: http://localhost:\${PORT}\`);
-    console.log(\`Admin Login: http://localhost:\${PORT}/admin/login.html\`);
-    console.log(\`-------------------------------------------------\`);
+    console.log(`--- Blog Server & Admin Panel (Supabase Mode) ---`);
+    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`Public Blog: http://localhost:${PORT}`);
+    console.log(`Admin Login: http://localhost:${PORT}/admin/login.html`);
+    console.log(`-------------------------------------------------`);
 });
-

@@ -754,7 +754,7 @@ app.use(express.static(path.join(__dirname, '..'), {
     setHeaders: (res, filePath) => {
         // Block sensitive files just in case
         if (filePath.endsWith('admin.html') || filePath.endsWith('db.json')) {
-            res.status(4OS3).send('Forbidden');
+            res.status(403).send('Forbidden');
         }
     }
 }));

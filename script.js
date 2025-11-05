@@ -140,7 +140,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     
                     renderCategories();
                     renderMoreBlogsList();
-                    filterAndRender(); 
+                    checkUrlHashAndRoute(); // <-- MODIFIED: Was filterAndRender()
                     lucide.createIcons();
                 
                 } catch (error) {
@@ -565,6 +565,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const post = blogPosts.find(p => p.id == postId);
                 if (!post) return;
 
+                // --- NEW: Set URL Hash ---
+                window.location.hash = '#post/' + postId;
+
                 document.getElementById('post-title').innerHTML = `<i data-lucide="book-open" class="w-10 h-10 -mt-2 mr-3 inline-block text-gray-500"></i> ${post.title}`;
                 document.getElementById('post-date').innerHTML = `<i data-lucide="calendar-days" class="w-4 h-4 mr-2 inline-block text-gray-500"></i> ${post.date}`;
                 document.getElementById('post-image').src = post.image; 
@@ -617,7 +620,29 @@ document.addEventListener('DOMContentLoaded', async () => {
                 feedView.classList.remove('hidden');
                 feedView.classList.add('md:flex'); 
                 feedView.classList.add('animate__fadeIn');
-                updateFeedTitle(); 
+                
+                // --- NEW: Render the feed and clear the hash ---
+                filterAndRender(); // <-- ADDED
+                window.location.hash = ''; // <-- ADDED
+            }
+            
+            // --- NEW: Router function ---
+            function checkUrlHashAndRoute() {
+                const hash = window.location.hash;
+                if (hash && hash.startsWith('#post/')) {
+                    const postId = hash.substring(6); // Grabs the ID after '#post/'
+                    
+                    if (blogPosts.length === 0) {
+                        // If posts aren't loaded, wait a tiny bit and try again
+                        setTimeout(() => checkUrlHashAndRoute(), 100); 
+                    } else {
+                        // Posts are loaded, so find and show the post
+                        showPost(postId);
+                    }
+                } else {
+                    // No hash or an unknown hash, just show the main feed
+                    showFeed();
+                }
             }
             
             function closeMobileMenu() {
@@ -637,7 +662,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 e.preventDefault();
                 activeCategory = link.dataset.category;
                 activeTag = null; 
-                filterAndRender();
+                // --- MODIFIED: showFeed() handles rendering ---
                 showFeed();
             };
             categoryList.addEventListener('click', handleCategoryClick);
@@ -656,7 +681,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     activeTag = null;
                     mobileCategoryMenu.classList.add('hidden');
                     mobileCategoryChevron.style.transform = 'rotate(0deg)';
-                    filterAndRender();
+                    // --- MODIFIED: showFeed() handles rendering ---
                     showFeed();
                 }
             });
@@ -676,6 +701,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     e.preventDefault();
                     const tag = tagChip.dataset.tag;
                     activeTag = (tag === 'all' || activeTag === tag) ? null : tag;
+                    // --- MODIFIED: filterAndRender() is correct here as it's just a filter ---
                     filterAndRender();
                 }
             };
@@ -709,7 +735,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 e.preventDefault();
                 activeCategory = 'all';
                 activeTag = null;
-                filterAndRender();
                 showFeed();
                 window.scrollTo(0, 0); 
             };
@@ -753,5 +778,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // --- INITIAL LOAD ---
             loadBlogData(); 
+
+            // --- NEW: Handle browser back/forward buttons ---
+            window.addEventListener('hashchange', () => {
+                checkUrlHashAndRoute();
+            });
 
         });

@@ -123,29 +123,21 @@
             --category-hover-bg: #ecfdf5;
         }
         
-        /* Apply the variables to the body */
+        /* Apply the variables */
         body { 
             background: var(--body-bg); 
             color: var(--body-color); 
             background-image: var(--body-gradient); 
         }
-
-        /* Apply the variables to your .glass class */
         .glass { 
             background: var(--glass-bg); 
             backdrop-filter: blur(10px); 
             border: 1px solid var(--glass-border); 
             transition: background-color 0.3s ease, border-color 0.3s ease;
         }
-
-        /* Make the prose content in post-view theme-aware */
         #post-content {
-             color: var(--body-color); /* Use body-color for prose */
+             color: var(--body-color);
         }
-        
-        /* Tailwind's default 'prose' (not inverted) works perfectly for light themes */
-        /* We only need to specify 'prose-invert' for dark themes, which the JS handles */
-
         .gradient-text { background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
         .gradient-bg { background: var(--primary-gradient); }
         .post-card { transition: all 0.3s ease; background: var(--glass-bg); border: 1px solid var(--glass-border); overflow: hidden; }
@@ -159,15 +151,33 @@
         .nav-link::after { content: ''; position: absolute; width: 0; height: 2px; bottom: -4px; left: 0; background: var(--primary-gradient); transition: width 0.3s ease; }
         .nav-link:hover::after { width: 100%; }
 
-        /* Themed mobile menu link */
         .mobile-nav-link { color: var(--nav-link-color); }
         .mobile-nav-link:hover { background-color: var(--mobile-menu-hover); color: var(--nav-link-hover); }
 
-        /* Themed category link */
         .category-link { color: var(--category-link-color); }
         .category-link:hover { background-color: var(--category-hover-bg); }
 
-        /* Other styles... */
+        /* === NEW: Styles for "More Blogs" list === */
+        .more-blog-link {
+            display: block;
+            font-weight: 500;
+            color: var(--nav-link-color);
+            transition: all 0.2s ease;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.5rem;
+            line-height: 1.4;
+        }
+        .more-blog-link:hover {
+            background-color: var(--mobile-menu-hover);
+            color: var(--nav-link-hover);
+        }
+        .more-blog-active {
+            background-color: var(--mobile-menu-hover);
+            color: var(--nav-link-hover);
+            font-weight: 600;
+        }
+        /* === End New Styles === */
+
         .floating-element { animation: float 6s ease-in-out infinite; }
         @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
         .scrollbar-thin { scrollbar-width: thin; scrollbar-color: rgba(99, 102, 241, 0.5) rgba(30, 30, 46, 0.5); }
@@ -311,27 +321,40 @@
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 relative z-10">
 
-        <div id="post-view" class="hidden animate__animated animate__fadeIn">
-            <div class="glass rounded-2xl overflow-hidden">
-                <div class="p-6 md:p-10">
-                    <a href="#" id="back-button" class="inline-flex items-center text-blue-400 hover:text-blue-300 transition-colors group mb-6 glass px-4 py-2 rounded-full w-fit">
-                        <svg class="w-5 h-5 mr-2 transition-transform duration-200 group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                        Back to Blog
-                    </a>
-                    
-                    <h1 id="post-title" class="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 text-shadow" style="color: var(--body-color);">
-                    </h1>
-                    <p id="post-date" class="flex items-center text-base md:text-lg text-gray-400 mb-6">
-                    </p>
-                    
-                    <img id="post-image" class="w-full h-48 sm:h-64 md:h-80 max-h-[500px] object-cover rounded-xl shadow-lg mb-8 post-image" src="" alt="Post Image">
-                    
-                    <div id="post-content" class="max-w-none prose prose-lg prose-headings:font-bold">
-                        </div>
+        <div id="post-view" class="hidden animate__animated"> <div class="w-full md:w-2/3">
+                <div class="glass rounded-2xl overflow-hidden">
+                    <div class="p-6 md:p-10">
+                        <a href="#" id="back-button" class="inline-flex items-center text-blue-400 hover:text-blue-300 transition-colors group mb-6 glass px-4 py-2 rounded-full w-fit">
+                            <svg class="w-5 h-5 mr-2 transition-transform duration-200 group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                            Back to Blog
+                        </a>
+                        
+                        <h1 id="post-title" class="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 text-shadow" style="color: var(--body-color);">
+                        </h1>
+                        <p id="post-date" class="flex items-center text-base md:text-lg text-gray-400 mb-6">
+                        </p>
+                        
+                        <img id="post-image" class="w-full h-48 sm:h-64 md:h-80 max-h-[500px] object-cover rounded-xl shadow-lg mb-8 post-image" src="" alt="Post Image">
+                        
+                        <div id="post-content" class="max-w-none prose prose-lg prose-headings:font-bold">
+                            </div>
+                    </div>
                 </div>
             </div>
-        </div>
 
+            <aside class="w-full md:w-1/3 mt-8 md:mt-0 hidden md:block">
+                <div class="glass p-6 rounded-2xl shadow-xl sticky top-24"> <h3 class="text-2xl font-bold mb-4 flex items-center" style="color: var(--body-color);">
+                        <div class="w-8 h-8 rounded-full gradient-bg flex items-center justify-center mr-3">
+                            <i data-lucide="book-copy" class="w-4 h-4 text-white"></i>
+                        </div>
+                        More Blogs
+                    </h3>
+                    <div id="more-blogs-list" class="space-y-2 max-h-[70vh] overflow-y-auto scrollbar-thin pr-2">
+                        <p class="more-blog-link">Loading...</p>
+                    </div>
+                </div>
+            </aside>
+            </div>
         <div id="feed-view" class="md:flex md:space-x-4 lg:space-x-8 animate__animated animate__fadeIn">
 
             <div class="block lg:hidden mb-8">
@@ -571,6 +594,7 @@
             const postView = document.getElementById('post-view');
             const backButton = document.getElementById('back-button');
             const homeLink = document.getElementById('home-link');
+            const moreBlogsList = document.getElementById('more-blogs-list'); // <-- NEW ELEMENT
             
             const mobileMenuButton = document.getElementById('mobile-menu-button');
             const mobileMenu = document.getElementById('mobile-menu');
@@ -593,6 +617,7 @@
                     allCategories = data.categories || {};
                     
                     renderCategories();
+                    renderMoreBlogsList(); // <-- NEW FUNCTION CALL
                     filterAndRender(); 
                     lucide.createIcons();
                 
@@ -609,6 +634,31 @@
             }
 
             // --- FUNCTIONS ---
+
+            // === NEW FUNCTION to populate the "More Blogs" list ===
+            function renderMoreBlogsList() {
+                if (!moreBlogsList) return; 
+                moreBlogsList.innerHTML = '';
+                
+                const sortedPosts = [...blogPosts].sort((a, b) => b.id - a.id);
+                
+                if (sortedPosts.length === 0) {
+                     moreBlogsList.innerHTML = `<p class="more-blog-link">No other posts found.</p>`;
+                     return;
+                }
+
+                sortedPosts.forEach(post => {
+                    const link = document.createElement('a');
+                    link.href = '#';
+                    link.className = 'more-blog-link truncate';
+                    link.dataset.postId = post.id;
+                    link.textContent = post.title;
+                    link.title = post.title;
+                    moreBlogsList.appendChild(link);
+                });
+            }
+            // === END NEW FUNCTION ===
+
             function renderCurrentPage() {
                 const startIndex = (currentPage - 1) * postsPerPage;
                 const endIndex = currentPage * postsPerPage;
@@ -871,6 +921,7 @@
                 }, typingSpeed);
             }
 
+            // === MODIFIED: showPost() function ===
             function showPost(postId) {
                 const post = blogPosts.find(p => p.id == postId);
                 if (!post) return;
@@ -893,22 +944,43 @@
                 postContent.innerHTML = post.fullContent;
                 postContent.classList.add('prose-headings:font-bold');
 
+                // --- NEW: Highlight active post in "More Blogs" list ---
+                if (moreBlogsList) {
+                    moreBlogsList.querySelectorAll('.more-blog-link').forEach(link => {
+                        if (link.dataset.postId == postId) {
+                            link.classList.add('more-blog-active');
+                            // Scroll it into view in the panel
+                            link.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        } else {
+                            link.classList.remove('more-blog-active');
+                        }
+                    });
+                }
+                // --- END NEW ---
+
+                // --- MODIFIED: Toggle view classes ---
                 feedView.classList.add('hidden');
-                feedView.classList.remove('md:flex', 'animate__fadeIn'); 
+                feedView.classList.remove('md:flex'); 
                 postView.classList.remove('hidden');
-                postView.classList.add('animate__fadeIn'); 
+                // Add flex classes for desktop two-column layout
+                postView.classList.add('md:flex', 'md:space-x-4', 'lg:space-x-8', 'animate__fadeIn'); 
+                // --- END MODIFICATION ---
 
                 window.scrollTo(0, 0);
                 lucide.createIcons();
             }
 
+            // === MODIFIED: showFeed() function ===
             function showFeed() {
                 postView.classList.add('hidden');
-                postView.classList.remove('animate__fadeIn');
+                // Remove flex classes to hide the two-column layout
+                postView.classList.remove('md:flex', 'md:space-x-4', 'lg:space-x-8', 'animate__fadeIn');
                 feedView.classList.remove('hidden');
-                feedView.classList.add('md:flex', 'animate__fadeIn'); 
+                feedView.classList.add('md:flex'); 
+                feedView.classList.add('animate__fadeIn');
                 updateFeedTitle(); 
             }
+            // === END MODIFICATION ===
             
             function closeMobileMenu() {
                 if (!mobileMenu.classList.contains('hidden')) {
@@ -979,6 +1051,18 @@
                     showPost(link.dataset.postId);
                 }
             });
+
+            // --- NEW: Event listener for "More Blogs" list ---
+            if (moreBlogsList) {
+                moreBlogsList.addEventListener('click', (e) => {
+                    const link = e.target.closest('.more-blog-link');
+                    if (link && link.dataset.postId) {
+                        e.preventDefault();
+                        showPost(link.dataset.postId);
+                    }
+                });
+            }
+            // --- END NEW ---
 
             backButton.addEventListener('click', (e) => {
                 e.preventDefault();

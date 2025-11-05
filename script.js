@@ -659,7 +659,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 likeButton.disabled = false;
                 
                 const likedPosts = getLikedPosts();
-                if (likedPosts.includes(post.id)) {
+                if (likedPosts.includes(post.id.toString())) {
                     likeButton.classList.add('liked');
                     likeButton.disabled = true; // Already liked
                 }

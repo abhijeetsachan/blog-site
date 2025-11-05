@@ -768,12 +768,16 @@ console.log("Found share-x link:", shareX);
             mobileTagList.addEventListener('click', handleTagClick);
 
             blogFeed.addEventListener('click', (e) => {
-                const link = e.target.closest('.view-post-link');
-                if (link && link.dataset.postId) {
-                    e.preventDefault();
-                    window.location.hash = '#post/' + link.dataset.postId; // <-- Set hash
-                }
-            });
+    console.log("--- BLOG FEED CLICK DETECTED ---"); // <-- NEW
+    const link = e.target.closest('.view-post-link');
+    if (link && link.dataset.postId) {
+        console.log("Post link found! Setting hash to:", '#post/' + link.dataset.postId); // <-- NEW
+        e.preventDefault();
+        window.location.hash = '#post/' + link.dataset.postId; // <-- Set hash
+    } else {
+        console.log("Click was not on a 'view-post-link'."); // <-- NEW
+    }
+});
 
             if (moreBlogsList) {
                 moreBlogsList.addEventListener('click', (e) => {

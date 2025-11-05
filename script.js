@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             let activeCategory = 'all';
             let activeTag = null; 
             let typewriterInterval = null; 
-            const LIKED_POSTS_KEY = 'likedPosts'; // --- NEW: localStorage key
+            const LIKED_POSTS_KEY = 'likedPosts';
 
             // --- PAGINATION STATE ---
             let filteredPosts = []; // Holds ALL filtered posts
@@ -119,12 +119,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             const commentContentInput = document.getElementById('comment-content');
             const commentSubmitBtn = document.getElementById('comment-submit-btn');
             
-            // --- NEW: LIKE & SHARE REFERENCES ---
+            // --- UPDATED: LIKE & SHARE REFERENCES ---
             const likeButton = document.getElementById('like-button');
             const likeCount = document.getElementById('like-count');
             const shareX = document.getElementById('share-x');
-            const shareLinkedin = document.getElementById('share-linkedin');
-            const shareReddit = document.getElementById('share-reddit');
+            const shareFacebook = document.getElementById('share-facebook');
+            const shareWhatsapp = document.getElementById('share-whatsapp');
+            const shareTelegram = document.getElementById('share-telegram');
 
             // --- Shared Category Colors Map ---
             const categoryColors = {
@@ -187,7 +188,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // --- START: COMMENT LOGIC ---
             
-            // Fetches *approved* comments from the API
             async function loadComments(postId) {
                 if (!commentsList) return;
                 commentsList.innerHTML = `<p style="color: var(--nav-link-color);">Loading comments...</p>`;
@@ -204,7 +204,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             }
 
-            // Renders the list of approved comments
             function renderComments(comments) {
                 if (!commentsList) return;
                 commentsList.innerHTML = ''; // Clear loading/error message
@@ -226,13 +225,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                         minute: '2-digit'
                     });
 
-                    // === MODIFIED: Create avatar URL ===
                     const avatarName = encodeURIComponent(comment.name);
-                    // Generate a colorful, rounded avatar from the user's name
                     const avatarURL = `https://ui-avatars.com/api/?name=${avatarName}&background=6366f1&color=fff&size=40&rounded=true&font-size=0.33`;
-                    // === END MODIFICATION ===
 
-                    // === MODIFIED: New HTML structure with avatar ===
                     commentEl.innerHTML = `
                         <div class="comment-avatar">
                             <img src="${avatarURL}" alt="${escapeHTML(comment.name)}" />
@@ -245,13 +240,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <p class="comment-body">${escapeHTML(comment.content)}</p>
                         </div>
                     `;
-                    // === END MODIFICATION ===
 
                     commentsList.appendChild(commentEl);
                 });
             }
 
-            // Handles the comment form submission
             if (commentForm) {
                 commentForm.addEventListener('submit', async (e) => {
                     e.preventDefault();
@@ -283,7 +276,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 });
             }
 
-            // Helper function to prevent XSS attacks
             function escapeHTML(str) {
                 return str.replace(/[&<>"']/g, function(m) {
                     return {
@@ -415,10 +407,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const postElement = document.createElement('article');
                     postElement.className = 'post-card rounded-2xl overflow-hidden';
                     const color = categoryColors[post.category] || "bg-gray-500/20 text-gray-300 border-gray-500/30";
-
-                    // --- MODIFIED: Added Likes to Post Card ---
-                    // (Note: The HTML file provided didn't add this, but it's logical)
-                    // We will add it next to the "Read More" link
                     const postLikes = post.likes || 0;
                     
                     postElement.innerHTML = `
@@ -600,7 +588,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }, typingSpeed);
             }
 
-            // --- MODIFIED: showPost() ---
+            // --- FIXED: showPost() ---
             // This function ONLY renders the post view. It does NOT change the hash.
             function showPost(postId) {
                 const post = blogPosts.find(p => p.id == postId);
@@ -650,9 +638,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (commentPostIdInput) commentPostIdInput.value = post.id;
                 loadComments(post.id);
 
-                // --- NEW: Likes & Share Logic ---
+                // --- UPDATED: Likes & Share Logic ---
                 const postUrl = `${window.location.origin}${window.location.pathname}#post/${post.id}`;
                 const postTitle = post.title;
+                const encodedUrl = encodeURIComponent(postUrl);
+                const encodedTitle = encodeURIComponent(postTitle);
+
 
                 // 1. Set Like Button State
                 const currentLikes = post.likes || 0;
@@ -661,22 +652,23 @@ document.addEventListener('DOMContentLoaded', async () => {
                 likeButton.disabled = false;
                 
                 const likedPosts = getLikedPosts();
-                if (likedPosts.includes(post.id.toString())) { // <-- This is your original fix
+                if (likedPosts.includes(post.id.toString())) {
                     likeButton.classList.add('liked');
                     likeButton.disabled = true; // Already liked
                 }
 
                 // 2. Set Share URLs
-                shareX.href = `https://twitter.com/intent/tweet?url=${encodeURIComponent(postUrl)}&text=${encodeURIComponent(postTitle)}`;
-                shareLinkedin.href = `https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(postUrl)}&title=${encodeURIComponent(postTitle)}`;
-                shareReddit.href = `https://www.reddit.com/submit?url=${encodeURIComponent(postUrl)}&title=${encodeURIComponent(postTitle)}`;
-                // --- END: New Logic ---
+                shareX.href = `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`;
+                shareFacebook.href = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
+                shareWhatsapp.href = `https://api.whatsapp.com/send?text=${encodedTitle} ${encodedUrl}`;
+                shareTelegram.href = `https://t.me/share/url?url=${encodedUrl}&text=${encodedTitle}`;
+                // --- END: Updated Logic ---
 
                 window.scrollTo(0, 0);
                 lucide.createIcons();
             }
 
-            // This function ONLY renders the feed view. It does NOT change the hash.
+            // This function ONLY renders the feed view.
             function showFeed() {
                 postView.classList.add('hidden');
                 postView.classList.remove('md:flex', 'md:space-x-4', 'lg:space-x-8', 'animate__fadeIn');
@@ -684,7 +676,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 feedView.classList.add('md:flex'); 
                 feedView.classList.add('animate__fadeIn');
                 
-                // Render the feed based on current state
                 filterAndRender(); 
             }
             
@@ -719,7 +710,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             // --- EVENT LISTENERS ---
 
-            // === MODIFIED: All navigation clicks now ONLY change the hash ===
+            // === FIXED: All navigation clicks now ONLY change the hash ===
             
             const handleCategoryClick = (e) => {
                 const link = e.target.closest('.category-link');
@@ -727,7 +718,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 e.preventDefault();
                 activeCategory = link.dataset.category;
                 activeTag = null; 
-                window.location.hash = ''; // <-- CHANGE: Set hash to navigate
+                window.location.hash = ''; // <-- Set hash to navigate
             };
             categoryList.addEventListener('click', handleCategoryClick);
             
@@ -745,7 +736,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     activeTag = null;
                     mobileCategoryMenu.classList.add('hidden');
                     mobileCategoryChevron.style.transform = 'rotate(0deg)';
-                    window.location.hash = ''; // <-- CHANGE: Set hash to navigate
+                    window.location.hash = ''; // <-- Set hash to navigate
                 }
             });
 
@@ -758,7 +749,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             });
 
-            // This filter does not change views, so it's fine as-is.
             const handleTagClick = (e) => {
                 const tagChip = e.target.closest('.tag-chip');
                 if (tagChip) {
@@ -775,7 +765,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const link = e.target.closest('.view-post-link');
                 if (link && link.dataset.postId) {
                     e.preventDefault();
-                    window.location.hash = '#post/' + link.dataset.postId; // <-- CHANGE: Set hash
+                    window.location.hash = '#post/' + link.dataset.postId; // <-- Set hash
                 }
             });
 
@@ -784,21 +774,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const link = e.target.closest('.more-blog-link');
                     if (link && link.dataset.postId) {
                         e.preventDefault();
-                        window.location.hash = '#post/' + link.dataset.postId; // <-- CHANGE: Set hash
+                        window.location.hash = '#post/' + link.dataset.postId; // <-- Set hash
                     }
                 });
             }
 
             backButton.addEventListener('click', (e) => {
                 e.preventDefault();
-                window.location.hash = ''; // <-- CHANGE: Set hash
+                window.location.hash = ''; // <-- Set hash
             });
 
             const goHome = (e) => {
                 e.preventDefault();
                 activeCategory = 'all';
                 activeTag = null;
-                window.location.hash = ''; // <-- CHANGE: Set hash
+                window.location.hash = ''; // <-- Set hash
                 window.scrollTo(0, 0); 
             };
             homeLink.addEventListener('click', goHome);
@@ -839,14 +829,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             });
 
-            // --- NEW: Like Button Click Handler ---
+            // --- Like Button Click Handler ---
             async function handleLikePost(postId) {
                 // 1. Prevent double-clicks
                 likeButton.disabled = true;
 
                 // 2. Optimistic UI update
                 const likedPosts = getLikedPosts();
-                if (likedPosts.includes(postId)) return; // Already liked, shouldn't happen
+                if (likedPosts.includes(postId)) return;
                 
                 likedPosts.push(postId);
                 saveLikedPosts(likedPosts);
@@ -860,11 +850,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const response = await fetch(`/api/posts/like/${postId}`, { method: 'POST' });
                     
                     if (!response.ok) {
-                        // Failed, so roll back the UI
                         throw new Error('Like request failed');
                     }
                     
-                    // Success! UI is already updated.
                     console.log('Post liked successfully');
                     
                 } catch (error) {
@@ -882,7 +870,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (likeButton) {
                 likeButton.addEventListener('click', () => {
-                    const postId = commentPostIdInput.value; // Get current post ID
+                    const postId = commentPostIdInput.value;
                     if (postId && !likeButton.disabled) {
                         handleLikePost(postId);
                     }

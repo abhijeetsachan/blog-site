@@ -220,7 +220,7 @@
             color: var(--nav-link-hover);
         }
 
-        /* === NEW: Styles for Comment Section === */
+        /* Styles for Comment Section */
         .comment-form-container {
             border-top: 1px solid var(--glass-border);
             padding-top: 1.5rem;
@@ -300,7 +300,6 @@
             line-height: 1.6;
             white-space: pre-wrap; /* Preserves line breaks */
         }
-        /* === End New Styles === */
 
         .floating-element { animation: float 6s ease-in-out infinite; }
         @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
@@ -752,7 +751,7 @@
             const snackbarMessage = document.getElementById('snackbar-message');
             const toTopButton = document.getElementById('to-top-button');
 
-            // --- NEW: COMMENT ELEMENT REFERENCES ---
+            // --- COMMENT ELEMENT REFERENCES ---
             const commentForm = document.getElementById('comment-form');
             const commentsList = document.getElementById('comments-list');
             const commentPostIdInput = document.getElementById('comment-post-id');
@@ -799,7 +798,7 @@
 
             // --- FUNCTIONS ---
 
-            // --- START: NEW COMMENT LOGIC ---
+            // --- START: COMMENT LOGIC ---
             
             // Fetches *approved* comments from the API
             async function loadComments(postId) {
@@ -871,10 +870,8 @@
 
                         if (!response.ok) throw new Error('Failed to post comment');
                         
-                        // Show success message for moderation
                         showSnackbar('Comment submitted for moderation!');
                         commentForm.reset(); 
-                        // We DON'T reload comments, as the new one isn't approved yet.
                     } catch (error) {
                         console.error(error);
                         showSnackbar('Error: Could not post comment.');
@@ -897,7 +894,7 @@
                     }[m];
                 });
             }
-            // --- END: NEW COMMENT LOGIC ---
+            // --- END: COMMENT LOGIC ---
 
             function renderMoreBlogsList() {
                 if (!moreBlogsList) return; 
@@ -934,6 +931,7 @@
                     moreBlogsList.appendChild(link);
                 });
             }
+
 
             function renderCurrentPage() {
                 const startIndex = (currentPage - 1) * postsPerPage;
@@ -1190,7 +1188,6 @@
                 }, typingSpeed);
             }
 
-            // === MODIFIED: showPost() function ===
             function showPost(postId) {
                 const post = blogPosts.find(p => p.id == postId);
                 if (!post) return;
@@ -1228,11 +1225,14 @@
                 postView.classList.remove('hidden');
                 postView.classList.add('md:flex', 'md:space-x-4', 'lg:space-x-8', 'animate__fadeIn'); 
 
-                // --- MODIFIED to load comments ---
-                if (commentPostIdInput) commentPostIdInput.value = post.id;
+                // === THIS IS THE FIX ===
+                // 1. Reset the form first (clears all fields)
                 if (commentForm) commentForm.reset();
-                loadComments(post.id); // <-- This is the new line
-                // --- END MODIFICATION ---
+                // 2. THEN set the hidden post ID
+                if (commentPostIdInput) commentPostIdInput.value = post.id;
+                // 3. Load the comments for this post
+                loadComments(post.id);
+                // === END FIX ===
 
                 window.scrollTo(0, 0);
                 lucide.createIcons();

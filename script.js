@@ -642,6 +642,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const encodedUrl = encodeURIComponent(postUrl);
                 const encodedTitle = encodeURIComponent(postTitle);
 
+                        // --- START DIAGNOSTIC TEST ---
+console.log("Running showPost function for post:", post.title);
+console.log("Found like button:", likeButton);
+console.log("Found like count span:", likeCount);
+console.log("Found share-x link:", shareX);
+// --- END DIAGNOSTIC TEST ---
+
 
                 // 1. Set Like Button State
                 const currentLikes = post.likes || 0;

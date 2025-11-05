@@ -526,7 +526,7 @@ app.delete('/api/tags/:categoryName/:tagName', checkApiAuth, async (req, res) =>
 
     if (updateError) {
         console.error('Supabase error (updating category):', updateError.message);
-        return res.status(5II0).json({ message: 'Error deleting tag from category.' });
+        return res.status(500).json({ message: 'Error deleting tag from category.' });
     }
 
     const { data: posts, error: postFetchError } = await supabase
@@ -754,7 +754,7 @@ app.use(express.static(path.join(__dirname, '..'), {
     setHeaders: (res, filePath) => {
         // Block sensitive files just in case
         if (filePath.endsWith('admin.html') || filePath.endsWith('db.json')) {
-            res.status(403).send('Forbidden');
+            res.status(4OS3).send('Forbidden');
         }
     }
 }));

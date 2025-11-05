@@ -219,6 +219,21 @@
         }
         /* --- End of Custom Tag Input Styles --- */
 
+        /* === NEW: Comment Moderation Styles === */
+        .comment-content-cell {
+            max-width: 300px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-style: italic;
+            color: #9ca3af;
+        }
+        .comment-post-title {
+            font-weight: 500;
+            color: #e2e8f0;
+        }
+        /* === End of New Styles === */
+
     </style>
 </head>
 <body class="min-h-screen p-4 md:p-8">
@@ -243,6 +258,10 @@
                 <i data-lucide="file-text" class="w-4 h-4 inline-block mr-1.5"></i>
                 Manage Posts
             </button>
+            <button class="tab-chip" data-tab="comments-panel">
+                <i data-lucide="message-square" class="w-4 h-4 inline-block mr-1.5"></i>
+                Manage Comments
+            </button>
             <button class="tab-chip" data-tab="categories-panel">
                 <i data-lucide="layout-list" class="w-4 h-4 inline-block mr-1.5"></i>
                 Manage Categories
@@ -252,7 +271,6 @@
                 Manage Tags
             </button>
         </div>
-
         <div id="global-status-message" class="text-center text-sm mb-4 h-5"></div>
 
         <div class="tab-content">
@@ -282,7 +300,27 @@
                     </div>
                 </div>
             </div>
-            
+
+            <div id="comments-panel" class="tab-panel">
+                <div class="glass rounded-2xl shadow-xl overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full min-w-[700px]">
+                            <thead class="border-b border-gray-700">
+                                <tr>
+                                    <th class="p-4 text-left text-sm font-semibold uppercase">Status</th>
+                                    <th class="p-4 text-left text-sm font-semibold uppercase">Comment</th>
+                                    <th class="p-4 text-left text-sm font-semibold uppercase">Author</th>
+                                    <th class="p-4 text-left text-sm font-semibold uppercase">Post</th>
+                                    <th class="p-4 text-left text-sm font-semibold uppercase">Date</th>
+                                    <th class="p-4 text-left text-sm font-semibold uppercase">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="comments-list-table">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
             <div id="categories-panel" class="tab-panel">
                 <div class="glass p-6 md:p-8 rounded-2xl shadow-xl">
                     <h2 class="text-2xl font-semibold mb-6 text-white flex items-center">
@@ -415,9 +453,10 @@
         document.addEventListener('DOMContentLoaded', () => {
             // --- Global Data Store ---
             let allPosts = [];
-            let allCategories = {}; // New structure: { "Essay": ["Tag1", "Tag2"], ... }
-            let currentPostTags = []; // NEW: State for the tag input
-            let suggestionIndex = -1; // NEW: State for suggestion keyboard navigation
+            let allCategories = {}; // { "Essay": ["Tag1", "Tag2"], ... }
+            let allComments = []; // <-- NEW
+            let currentPostTags = [];
+            let suggestionIndex = -1;
 
             // --- Tab Elements ---
             const tabChips = document.querySelectorAll('.tab-chip');
@@ -425,6 +464,9 @@
 
             // --- Post Panel Elements ---
             const postsListTable = document.getElementById('posts-list-table');
+
+            // --- Comment Panel Elements ---
+            const commentsListTable = document.getElementById('comments-list-table'); // <-- NEW
 
             // --- Category Panel Elements ---
             const categoryForm = document.getElementById('new-category-form');
@@ -453,33 +495,38 @@
 
             // --- 1. DATA LOADING & INITIALIZATION ---
             
-            // NEW: Helper function to check for unauthorized API responses
             function checkApiResponse(response) {
                 if (response.status === 401) {
-                    // Session expired or not logged in
                     showGlobalStatus('Session expired. Redirecting to login...', 'error');
                     setTimeout(() => {
                         window.location.href = '/admin/login.html';
                     }, 2000);
-                    return false; // Stop further execution
+                    return false;
                 }
                 return true;
             }
 
             async function loadData() {
                 try {
-                    const response = await fetch('/api/data?cachebust=' + new Date().getTime());
+                    // Fetch posts and categories
+                    const dataResponse = await fetch('/api/data?cachebust=' + new Date().getTime());
+                    if (!checkApiResponse(dataResponse)) return;
+                    if (!dataResponse.ok) throw new Error('Could not load site data');
                     
-                    if (!checkApiResponse(response)) return; // <-- ADDED AUTH CHECK
-
-                    if (!response.ok) throw new Error('Could not load site data');
-                    
-                    const data = await response.json();
+                    const data = await dataResponse.json();
                     allPosts = data.posts || [];
                     allCategories = data.categories || {};
                     
+                    // Fetch comments
+                    const commentsResponse = await fetch('/api/admin/comments?cachebust=' + new Date().getTime());
+                    if (!checkApiResponse(commentsResponse)) return;
+                    if (!commentsResponse.ok) throw new Error('Could not load comments');
+                    
+                    allComments = await commentsResponse.json();
+
                     // Render all parts of the UI
                     renderPostsTable(allPosts);
+                    renderCommentsTable(allComments); // <-- NEW
                     renderCategoriesPanel(allCategories);
                     renderTagsPanelSelector(allCategories);
                     
@@ -496,10 +543,7 @@
                     postsListTable.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-400">No posts found. Create one!</td></tr>`;
                     return;
                 }
-
-                // Sort by ID (assuming higher is newer, which it is with Supabase)
                 posts.sort((a, b) => (b.id - a.id)); 
-
                 posts.forEach(post => {
                     const row = document.createElement('tr');
                     row.className = 'border-b border-gray-800 hover:bg-gray-800/50';
@@ -507,10 +551,7 @@
                         `<span class="text-green-400 flex items-center"><i data-lucide="eye" class="w-4 h-4 mr-1.5"></i>Published</span>` : 
                         `<span class="text-gray-400 flex items-center"><i data-lucide="eye-off" class="w-4 h-4 mr-1.5"></i>Unpublished</span>`;
                     
-                    // Use the 'date' field, fallback to created_at if 'date' is missing
                     const postDate = post.date || new Date(post.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-
-
                     row.innerHTML = `
                         <td class="p-4">${postStatus}</td>
                         <td class="p-4 font-medium text-white">${post.title}</td>
@@ -533,9 +574,61 @@
                 lucide.createIcons();
             }
 
+            // === NEW: Render Comments Table ===
+            function renderCommentsTable(comments) {
+                commentsListTable.innerHTML = '';
+                if (comments.length === 0) {
+                    commentsListTable.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-gray-400">No comments found.</td></tr>`;
+                    return;
+                }
+                
+                // Newest first is already handled by server
+                comments.forEach(comment => {
+                    const row = document.createElement('tr');
+                    row.className = 'border-b border-gray-800 hover:bg-gray-800/50';
+                    
+                    const commentStatus = comment.is_approved ? 
+                        `<span class="text-green-400 flex items-center"><i data-lucide="check-circle" class="w-4 h-4 mr-1.5"></i>Approved</span>` : 
+                        `<span class="text-yellow-400 flex items-center"><i data-lucide="clock" class="w-4 h-4 mr-1.5"></i>Pending</span>`;
+                    
+                    const commentDate = new Date(comment.created_at).toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+                    // Helper to prevent XSS
+                    const escapeHTML = (str) => str.replace(/[&<>"']/g, m => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'})[m]);
+
+                    const postTitle = comment.post ? escapeHTML(comment.post.title) : '<i>Unknown Post</i>';
+
+                    row.innerHTML = `
+                        <td class="p-4">${commentStatus}</td>
+                        <td class="p-4 comment-content-cell" title="${escapeHTML(comment.content)}">
+                            ${escapeHTML(comment.content)}
+                        </td>
+                        <td class="p-4 font-medium text-white">${escapeHTML(comment.name)}</td>
+                        <td class="p-4 text-sm comment-post-title">${postTitle}</td>
+                        <td class="p-4 text-sm text-gray-400">${commentDate}</td>
+                        <td class="p-4 flex items-center gap-2">
+                            ${!comment.is_approved ? 
+                                `<button class="approve-comment-btn p-2 text-green-400 hover:text-green-300" data-id="${comment.id}" title="Approve">
+                                    <i data-lucide="check" class="w-4 h-4"></i>
+                                </button>` 
+                                : 
+                                `<span class="p-2 w-8 h-8"></span>`
+                            }
+                            <button class="delete-comment-btn p-2 text-red-500 hover:text-red-400" data-id="${comment.id}" title="Delete">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </td>
+                    `;
+                    commentsListTable.appendChild(row);
+                });
+                lucide.createIcons();
+            }
+            // === END NEW FUNCTION ===
+
+
             function renderCategoriesPanel(categoriesObj) {
                 categoryListUI.innerHTML = '';
-                postCategorySelect.innerHTML = '<option value="">-- Select a Category --</option>'; // For modal
+                postCategorySelect.innerHTML = '<option value="">-- Select a Category --</option>'; 
                 
                 const categoryNames = Object.keys(categoriesObj).sort();
 
@@ -544,7 +637,6 @@
                 }
                 
                 categoryNames.forEach(cat => {
-                    // Add to "Manage Categories" list
                     const div = document.createElement('div');
                     div.className = 'flex items-center justify-between bg-gray-900/50 p-3 rounded-lg';
                     div.innerHTML = `
@@ -560,7 +652,6 @@
                     `;
                     categoryListUI.appendChild(div);
 
-                    // Add to "Create Post" modal dropdown
                     const option = document.createElement('option');
                     option.value = cat;
                     option.textContent = cat;
@@ -632,30 +723,28 @@
                 postForm.reset(); 
                 tinymce.get('blog-editor').setContent('');
                 hiddenPostId.value = '';
-                document.getElementById('tags').value = ''; // Clear hidden tag input
+                document.getElementById('tags').value = ''; 
 
                 if (postId) {
-                    // EDIT MODE
                     modalTitle.textContent = 'Edit Post';
                     const post = allPosts.find(p => p.id == postId);
                     if (post) {
                         hiddenPostId.value = post.id;
                         document.getElementById('title').value = post.title;
                         document.getElementById('post-category-select').value = post.category; 
-                        document.getElementById('tags').value = post.tags ? post.tags.join(', ') : ''; // Set hidden tag input
+                        document.getElementById('tags').value = post.tags ? post.tags.join(', ') : '';
                         document.getElementById('image').value = post.image;
                         document.getElementById('excerpt').value = post.excerpt;
                         tinymce.get('blog-editor').setContent(post.fullContent || '');
                         document.getElementById('published').checked = post.published;
                     }
                 } else {
-                    // CREATE MODE
                     modalTitle.textContent = 'Create New Post';
                     document.getElementById('published').checked = true; 
                 }
                 
                 initCustomDropdown(postCategorySelect, 'post-category-select-wrapper');
-                initTagInput(); // NEW: Call our tag input initializer
+                initTagInput(); 
                 
                 modal.classList.add('open');
             }
@@ -686,18 +775,13 @@
 
                 const postId = hiddenPostId.value;
                 const isEditMode = !!postId;
-
                 const fullContent = tinymce.get('blog-editor').getContent();
-                const tagsRaw = document.getElementById('tags').value; // Reads from hidden input
+                const tagsRaw = document.getElementById('tags').value;
                 const category = document.getElementById('post-category-select').value;
                 
-                // Get existing date if editing, otherwise create a new one
                 const postDate = isEditMode ? allPosts.find(p=>p.id == postId).date : new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
                 const postData = {
-                    // --- ID IS REMOVED ---
-                    // ID is now handled by Supabase (on create) 
-                    // or by the URL param (on update)
                     title: document.getElementById('title').value,
                     category: category,
                     tags: tagsRaw.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0),
@@ -718,7 +802,7 @@
                         body: JSON.stringify(postData)
                     });
 
-                    if (!checkApiResponse(response)) return; // <-- ADDED AUTH CHECK
+                    if (!checkApiResponse(response)) return;
 
                     if (!response.ok) {
                         const err = await response.json();
@@ -747,14 +831,12 @@
                 
                 if (deleteBtn) {
                     const postId = deleteBtn.dataset.id;
-                    if (!confirm('Are you sure you want to delete this post permanently?')) return;
+                    if (!confirm('Are you sure you want to delete this post permanently? This will also delete all comments on this post.')) return;
                     
                     showGlobalStatus('Deleting post...', 'loading');
                     try {
                         const response = await fetch(`/api/posts/${postId}`, { method: 'DELETE' });
-                        
-                        if (!checkApiResponse(response)) return; // <-- ADDED AUTH CHECK
-
+                        if (!checkApiResponse(response)) return;
                         if (!response.ok) {
                             const err = await response.json();
                             throw new Error(err.message);
@@ -772,9 +854,7 @@
                     showGlobalStatus('Updating status...', 'loading');
                     try {
                         const response = await fetch(`/api/posts/toggle-publish/${postId}`, { method: 'PUT' });
-                        
-                        if (!checkApiResponse(response)) return; // <-- ADDED AUTH CHECK
-                        
+                        if (!checkApiResponse(response)) return;
                         if (!response.ok) {
                             const err = await response.json();
                             throw new Error(err.message);
@@ -787,6 +867,54 @@
                     }
                 }
             });
+
+            // === NEW: Comment List Handlers ===
+            if (commentsListTable) {
+                commentsListTable.addEventListener('click', async (e) => {
+                    const approveBtn = e.target.closest('.approve-comment-btn');
+                    const deleteBtn = e.target.closest('.delete-comment-btn');
+
+                    if (approveBtn) {
+                        const commentId = approveBtn.dataset.id;
+                        showGlobalStatus('Approving comment...', 'loading');
+                        try {
+                            const response = await fetch(`/api/comments/approve/${commentId}`, { method: 'PUT' });
+                            if (!checkApiResponse(response)) return;
+                            if (!response.ok) {
+                                const err = await response.json();
+                                throw new Error(err.message);
+                            }
+                            const result = await response.json();
+                            showGlobalStatus(result.message, 'success');
+                            loadData(); // Reload all data
+                        } catch (error) {
+                            showGlobalStatus(`Error: ${error.message}`, 'error');
+                        }
+                    }
+
+                    if (deleteBtn) {
+                        const commentId = deleteBtn.dataset.id;
+                        if (!confirm('Are you sure you want to delete this comment permanently?')) return;
+
+                        showGlobalStatus('Deleting comment...', 'loading');
+                        try {
+                            const response = await fetch(`/api/comments/${commentId}`, { method: 'DELETE' });
+                            if (!checkApiResponse(response)) return;
+                            if (!response.ok) {
+                                const err = await response.json();
+                                throw new Error(err.message);
+                            }
+                            const result = await response.json();
+                            showGlobalStatus(result.message, 'success');
+                            loadData(); // Reload all data
+                        } catch (error) {
+                            showGlobalStatus(`Error: ${error.message}`, 'error');
+                        }
+                    }
+                });
+            }
+            // === END NEW HANDLERS ===
+
 
             // --- Category Panel Handlers ---
             categoryForm.addEventListener('submit', async (e) => {
@@ -802,7 +930,7 @@
                         body: JSON.stringify({ name: categoryName })
                     });
                     
-                    if (!checkApiResponse(response)) return; // <-- ADDED AUTH CHECK
+                    if (!checkApiResponse(response)) return;
                     
                     if (!response.ok) {
                         const err = await response.json();
@@ -828,9 +956,7 @@
                     showGlobalStatus('Deleting category...', 'loading');
                     try {
                         const response = await fetch(`/api/categories/${encodeURIComponent(categoryName)}`, { method: 'DELETE' });
-                        
-                        if (!checkApiResponse(response)) return; // <-- ADDED AUTH CHECK
-                        
+                        if (!checkApiResponse(response)) return;
                         if (!response.ok) {
                             const err = await response.json();
                             throw new Error(err.message);
@@ -862,7 +988,7 @@
                         body: JSON.stringify({ newName: newName })
                     });
                     
-                    if (!checkApiResponse(response)) return; // <-- ADDED AUTH CHECK
+                    if (!checkApiResponse(response)) return;
                     
                     if (!response.ok) {
                         const err = await response.json();
@@ -902,7 +1028,7 @@
                         body: JSON.stringify({ categoryName: categoryName, tagName: tagName })
                     });
                     
-                    if (!checkApiResponse(response)) return; // <-- ADDED AUTH CHECK
+                    if (!checkApiResponse(response)) return;
                     
                     if (!response.ok) {
                         const err = await response.json();
@@ -930,9 +1056,7 @@
                     showGlobalStatus('Deleting tag...', 'loading');
                     try {
                         const response = await fetch(`/api/tags/${encodeURIComponent(categoryName)}/${encodeURIComponent(tagName)}`, { method: 'DELETE' });
-                        
-                        if (!checkApiResponse(response)) return; // <-- ADDED AUTH CHECK
-                        
+                        if (!checkApiResponse(response)) return;
                         if (!response.ok) {
                             const err = await response.json();
                             throw new Error(err.message);
@@ -966,7 +1090,7 @@
                         body: JSON.stringify({ newTagName: newTagName })
                     });
                     
-                    if (!checkApiResponse(response)) return; // <-- ADDED AUTH CHECK
+                    if (!checkApiResponse(response)) return;
                     
                     if (!response.ok) {
                         const err = await response.json();
@@ -1098,16 +1222,15 @@
                 }
             }
 
-            // --- *** NEW: CUSTOM TAG INPUT LOGIC *** ---
+            // --- *** CUSTOM TAG INPUT LOGIC *** ---
             function initTagInput() {
-                currentPostTags = []; // Reset state
+                currentPostTags = [];
                 suggestionIndex = -1;
                 const hiddenInput = document.getElementById('tags');
                 const container = document.getElementById('tag-input-container');
                 const inputField = document.getElementById('tag-input-field');
                 const suggestionsList = document.getElementById('tag-suggestions-list');
 
-                // 1. Populate initial tags from hidden input
                 const initialTags = hiddenInput.value.split(',').map(t => t.trim()).filter(Boolean);
                 initialTags.forEach(tag => {
                     if (!currentPostTags.includes(tag)) {
@@ -1116,19 +1239,16 @@
                 });
                 renderTagPills();
 
-                // 2. Clear old listeners (important when re-opening modal)
                 inputField.onkeydown = null;
                 inputField.oninput = null;
                 inputField.onblur = null;
                 container.onclick = null;
 
-                // 3. Event Listeners
                 container.onclick = () => {
                     inputField.focus();
                 };
                 
                 inputField.onblur = () => {
-                    // Use a timeout to allow click on suggestion to register
                     setTimeout(() => hideSuggestions(), 150);
                 };
 
@@ -1148,13 +1268,11 @@
                     if (key === 'Enter' || key === ',') {
                         e.preventDefault();
                         if (suggestionIndex > -1) {
-                            // If a suggestion is highlighted, add it
                             const activeSuggestion = suggestionsList.querySelector('.active');
                             if (activeSuggestion) {
                                 addTag(activeSuggestion.textContent);
                             }
                         } else if (value) {
-                            // Otherwise, add the typed value
                             addTag(value);
                         }
                         inputField.value = '';
@@ -1162,23 +1280,19 @@
                     }
                     
                     if (key === 'Backspace' && value === '' && currentPostTags.length > 0) {
-                        // Remove last tag
                         removeTag(currentPostTags[currentPostTags.length - 1]);
                         return;
                     }
-
                     if (key === 'ArrowDown') {
                         e.preventDefault();
                         navigateSuggestions(1);
                         return;
                     }
-                    
                     if (key === 'ArrowUp') {
                         e.preventDefault();
                         navigateSuggestions(-1);
                         return;
                     }
-                    
                     if (key === 'Escape') {
                         hideSuggestions();
                         return;
@@ -1190,29 +1304,22 @@
                 const container = document.getElementById('tag-input-container');
                 const inputField = document.getElementById('tag-input-field');
                 
-                // Remove all existing pills
                 container.querySelectorAll('.tag-pill').forEach(pill => pill.remove());
 
-                // Add pills from state
                 currentPostTags.forEach(tag => {
                     const pill = document.createElement('span');
                     pill.className = 'tag-pill';
-                    
                     const text = document.createTextNode(tag);
-                    
                     const removeBtn = document.createElement('button');
                     removeBtn.type = 'button';
                     removeBtn.className = 'tag-pill-remove';
-                    removeBtn.innerHTML = '&times;'; // Simple 'x'
+                    removeBtn.innerHTML = '&times;';
                     removeBtn.onclick = (e) => {
-                        e.stopPropagation(); // Prevent container click
+                        e.stopPropagation();
                         removeTag(tag);
                     };
-                    
                     pill.appendChild(text);
                     pill.appendChild(removeBtn);
-                    
-                    // Add pill *before* the input field
                     container.insertBefore(pill, inputField);
                 });
                 
@@ -1236,7 +1343,6 @@
             }
 
             function updateHiddenTagInput() {
-                // This is the key: it keeps the hidden input in sync
                 document.getElementById('tags').value = currentPostTags.join(', ');
             }
 
@@ -1265,7 +1371,7 @@
                     const item = document.createElement('div');
                     item.className = 'tag-suggestion-item';
                     item.textContent = tag;
-                    item.onmousedown = (e) => { // Use mousedown to fire before blur
+                    item.onmousedown = (e) => {
                         e.preventDefault();
                         addTag(tag);
                     };
@@ -1273,7 +1379,7 @@
                 });
                 
                 suggestionsList.classList.remove('hidden');
-                suggestionIndex = -1; // Reset navigation
+                suggestionIndex = -1;
             }
             
             function hideSuggestions() {
@@ -1286,21 +1392,18 @@
                 const items = suggestionsList.querySelectorAll('.tag-suggestion-item');
                 if (items.length === 0) return;
 
-                // Remove old active class
                 if (suggestionIndex > -1) {
                     items[suggestionIndex].classList.remove('active');
                 }
                 
-                // Calculate new index
                 suggestionIndex = suggestionIndex + direction;
                 
                 if (suggestionIndex < 0) {
-                    suggestionIndex = items.length - 1; // Wrap to bottom
+                    suggestionIndex = items.length - 1;
                 } else if (suggestionIndex >= items.length) {
-                    suggestionIndex = 0; // Wrap to top
+                    suggestionIndex = 0;
                 }
 
-                // Add new active class
                 items[suggestionIndex].classList.add('active');
                 items[suggestionIndex].scrollIntoView({ block: 'nearest' });
             }

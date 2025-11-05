@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     
                     renderCategories();
                     renderMoreBlogsList();
-                    checkUrlHashAndRoute(); // <-- MODIFIED: Was filterAndRender()
+                    checkUrlHashAndRoute(); // <-- This will now correctly route on initial load
                     lucide.createIcons();
                 
                 } catch (error) {
@@ -601,12 +601,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             // --- MODIFIED: showPost() ---
+            // This function ONLY renders the post view. It does NOT change the hash.
             function showPost(postId) {
                 const post = blogPosts.find(p => p.id == postId);
-                if (!post) return;
-
-                // --- Hash Routing ---
-                window.location.hash = '#post/' + postId;
+                if (!post) {
+                    // If post not found (e.g., bad hash), go back to feed
+                    window.location.hash = '';
+                    return;
+                }
 
                 // --- Basic Post Info ---
                 document.getElementById('post-title').innerHTML = `<i data-lucide="book-open" class="w-10 h-10 -mt-2 mr-3 inline-block text-gray-500"></i> ${post.title}`;
@@ -659,7 +661,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 likeButton.disabled = false;
                 
                 const likedPosts = getLikedPosts();
-                if (likedPosts.includes(post.id.toString())) {
+                if (likedPosts.includes(post.id.toString())) { // <-- This is your original fix
                     likeButton.classList.add('liked');
                     likeButton.disabled = true; // Already liked
                 }
@@ -674,6 +676,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 lucide.createIcons();
             }
 
+            // This function ONLY renders the feed view. It does NOT change the hash.
             function showFeed() {
                 postView.classList.add('hidden');
                 postView.classList.remove('md:flex', 'md:space-x-4', 'lg:space-x-8', 'animate__fadeIn');
@@ -681,12 +684,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 feedView.classList.add('md:flex'); 
                 feedView.classList.add('animate__fadeIn');
                 
-                // --- MODIFIED: Render the feed and clear the hash ---
+                // Render the feed based on current state
                 filterAndRender(); 
-                window.location.hash = ''; 
             }
             
             // --- NEW: Router function ---
+            // This is the SINGLE source of truth for navigation.
             function checkUrlHashAndRoute() {
                 const hash = window.location.hash;
                 if (hash && hash.startsWith('#post/')) {
@@ -716,14 +719,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             // --- EVENT LISTENERS ---
 
+            // === MODIFIED: All navigation clicks now ONLY change the hash ===
+            
             const handleCategoryClick = (e) => {
                 const link = e.target.closest('.category-link');
                 if (!link) return; 
                 e.preventDefault();
                 activeCategory = link.dataset.category;
                 activeTag = null; 
-                // --- MODIFIED: showFeed() handles rendering ---
-                showFeed();
+                window.location.hash = ''; // <-- CHANGE: Set hash to navigate
             };
             categoryList.addEventListener('click', handleCategoryClick);
             
@@ -741,8 +745,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     activeTag = null;
                     mobileCategoryMenu.classList.add('hidden');
                     mobileCategoryChevron.style.transform = 'rotate(0deg)';
-                    // --- MODIFIED: showFeed() handles rendering ---
-                    showFeed();
+                    window.location.hash = ''; // <-- CHANGE: Set hash to navigate
                 }
             });
 
@@ -755,13 +758,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             });
 
+            // This filter does not change views, so it's fine as-is.
             const handleTagClick = (e) => {
                 const tagChip = e.target.closest('.tag-chip');
                 if (tagChip) {
                     e.preventDefault();
                     const tag = tagChip.dataset.tag;
                     activeTag = (tag === 'all' || activeTag === tag) ? null : tag;
-                    // --- MODIFIED: filterAndRender() is correct here as it's just a filter ---
                     filterAndRender();
                 }
             };
@@ -772,7 +775,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const link = e.target.closest('.view-post-link');
                 if (link && link.dataset.postId) {
                     e.preventDefault();
-                    showPost(link.dataset.postId);
+                    window.location.hash = '#post/' + link.dataset.postId; // <-- CHANGE: Set hash
                 }
             });
 
@@ -781,21 +784,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const link = e.target.closest('.more-blog-link');
                     if (link && link.dataset.postId) {
                         e.preventDefault();
-                        showPost(link.dataset.postId);
+                        window.location.hash = '#post/' + link.dataset.postId; // <-- CHANGE: Set hash
                     }
                 });
             }
 
             backButton.addEventListener('click', (e) => {
                 e.preventDefault();
-                showFeed();
+                window.location.hash = ''; // <-- CHANGE: Set hash
             });
 
             const goHome = (e) => {
                 e.preventDefault();
                 activeCategory = 'all';
                 activeTag = null;
-                showFeed();
+                window.location.hash = ''; // <-- CHANGE: Set hash
                 window.scrollTo(0, 0); 
             };
             homeLink.addEventListener('click', goHome);
@@ -892,6 +895,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             loadBlogData(); 
 
             // --- NEW: Handle browser back/forward buttons ---
+            // This is now the main controller for navigation.
             window.addEventListener('hashchange', () => {
                 checkUrlHashAndRoute();
             });

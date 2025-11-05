@@ -33,25 +33,141 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     
     <style>
-        :root {
+        html { scroll-behavior: smooth; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* === 1. DARK THEME (Original) === */
+        html[data-theme="dark"] {
             --primary-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
             --secondary-gradient: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
             --glass-bg: rgba(255, 255, 255, 0.08);
             --glass-border: rgba(255, 255, 255, 0.2);
+            --body-bg: #0f0f23;
+            --body-color: #e2e8f0;
+            --body-gradient: radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.1) 0%, transparent 20%), 
+                             radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 20%), 
+                             radial-gradient(circle at 50% 50%, rgba(236, 72, 153, 0.05) 0%, transparent 30%);
+            --nav-link-color: #d1d5db; /* gray-300 */
+            --nav-link-hover: #ffffff;
+            --mobile-menu-hover: #1f2937; /* gray-800 */
+            --category-link-color: #d1d5db; /* gray-300 */
+            --category-hover-bg: #1f2937; /* gray-800 */
         }
-        html { scroll-behavior: smooth; }
-        body { font-family: 'Inter', sans-serif; background: #0f0f23; color: #e2e8f0; background-image: radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.1) 0%, transparent 20%), radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 20%), radial-gradient(circle at 50% 50%, rgba(236, 72, 153, 0.05) 0%, transparent 30%); }
-        .glass { background: var(--glass-bg); backdrop-filter: blur(10px); border: 1px solid var(--glass-border); }
+
+        /* === 2. LIGHT THEME (Refined) === */
+        html[data-theme="light"] {
+            --primary-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+            --secondary-gradient: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(0, 0, 0, 0.08);
+            --body-bg: #ffffff; /* Pure White */
+            --body-color: #334155; /* Slate-700 */
+            --body-gradient: radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.05) 0%, transparent 20%), 
+                             radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.05) 0%, transparent 20%);
+            --nav-link-color: #475569; /* Slate-600 */
+            --nav-link-hover: #0f172a; /* Slate-900 */
+            --mobile-menu-hover: #f1f5f9; /* Slate-100 */
+            --category-link-color: #475569;
+            --category-hover-bg: #f1f5f9;
+        }
+        
+        /* === 3. SEPIA THEME (Refined) === */
+        html[data-theme="sepia"] {
+            --primary-gradient: linear-gradient(135deg, #8d6e63 0%, #a1887f 100%); /* Muted brown */
+            --secondary-gradient: linear-gradient(135deg, #d2691e 0%, #cd853f 100%); /* Chocolate/Peru */
+            --glass-bg: rgba(245, 241, 233, 0.7); /* Warm glass */
+            --glass-border: rgba(120, 89, 70, 0.2);
+            --body-bg: #fbfaf5; /* Warm off-white */
+            --body-color: #5d4037; /* Dark Brown */
+            --body-gradient: radial-gradient(circle at 10% 20%, rgba(120, 89, 70, 0.05) 0%, transparent 20%);
+            --nav-link-color: #785946; /* Medium brown */
+            --nav-link-hover: #3e2723; /* Darkest brown */
+            --mobile-menu-hover: #f5f1e9;
+            --category-link-color: #785946;
+            --category-hover-bg: #f5f1e9;
+        }
+        
+        /* === 4. SLATE THEME (Blue-Dark) === */
+        html[data-theme="slate"] {
+            --primary-gradient: linear-gradient(135deg, #475569 0%, #64748b 50%, #94a3b8 100%); /* Slate */
+            --secondary-gradient: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+            --glass-bg: rgba(51, 65, 85, 0.7); /* slate-700 alpha */
+            --glass-border: rgba(100, 116, 139, 0.3); /* slate-500 alpha */
+            --body-bg: #1e293b; /* slate-900 */
+            --body-color: #e2e8f0; /* slate-200 */
+            --body-gradient: radial-gradient(circle at 10% 20%, rgba(100, 116, 139, 0.1) 0%, transparent 20%), 
+                             radial-gradient(circle at 90% 80%, rgba(148, 163, 184, 0.1) 0%, transparent 20%);
+            --nav-link-color: #cbd5e1; /* slate-300 */
+            --nav-link-hover: #ffffff;
+            --mobile-menu-hover: #334155; /* slate-800 */
+            --category-link-color: #cbd5e1;
+            --category-hover-bg: #334155;
+        }
+
+        /* === 5. MATCHA THEME (Refined) === */
+        html[data-theme="matcha"] {
+            --primary-gradient: linear-gradient(135deg, #10b981 0%, #22c55e 100%); /* Green */
+            --secondary-gradient: linear-gradient(135deg, #84cc16 0%, #a3e635 100%); /* Lime */
+            --glass-bg: rgba(236, 253, 245, 0.7); /* green-50 alpha */
+            --glass-border: rgba(17, 94, 89, 0.2); /* green-800 alpha */
+            --body-bg: #fafff5; /* Very light mint */
+            --body-color: #1a3a3a; /* Dark Teal */
+            --body-gradient: radial-gradient(circle at 10% 20%, rgba(16, 185, 129, 0.05) 0%, transparent 20%);
+            --nav-link-color: #047857; /* Green-600 */
+            --nav-link-hover: #064e3b; /* Green-900 */
+            --mobile-menu-hover: #ecfdf5; /* Green-100 */
+            --category-link-color: #047857;
+            --category-hover-bg: #ecfdf5;
+        }
+        
+        /* Apply the variables to the body */
+        body { 
+            background: var(--body-bg); 
+            color: var(--body-color); 
+            background-image: var(--body-gradient); 
+        }
+
+        /* Apply the variables to your .glass class */
+        .glass { 
+            background: var(--glass-bg); 
+            backdrop-filter: blur(10px); 
+            border: 1px solid var(--glass-border); 
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+
+        /* Make the prose content in post-view theme-aware */
+        #post-content {
+             color: var(--body-color); /* Use body-color for prose */
+        }
+        
+        /* Tailwind's default 'prose' (not inverted) works perfectly for light themes */
+        /* We only need to specify 'prose-invert' for dark themes, which the JS handles */
+
         .gradient-text { background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
         .gradient-bg { background: var(--primary-gradient); }
-        .post-card { transition: all 0.3s ease; background: rgba(30, 30, 46, 0.7); border: 1px solid rgba(99, 102, 241, 0.2); overflow: hidden; }
+        .post-card { transition: all 0.3s ease; background: var(--glass-bg); border: 1px solid var(--glass-border); overflow: hidden; }
         .post-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3); border-color: rgba(99, 102, 241, 0.5); }
-        .category-active { background: var(--primary-gradient); color: white; font-weight: 600; }
+        .category-active { background: var(--primary-gradient); color: white !important; font-weight: 600; }
         .category-link-custom-active { background: rgba(99, 102, 241, 0.1); color: #c7d2fe; font-weight: 600; }
-        .tag-active { background: var(--secondary-gradient) !important; color: white !important; font-weight: 700; transform: scale(1.05); box-shadow: 0 0 0 2px #0f0f23, 0 0 0 4px #f59e0b; }
-        .nav-link { position: relative; }
+        .tag-active { background: var(--secondary-gradient) !important; color: white !important; font-weight: 700; transform: scale(1.05); box-shadow: 0 0 0 2px var(--body-bg), 0 0 0 4px #f59e0b; }
+        
+        .nav-link { position: relative; color: var(--nav-link-color); }
+        .nav-link:hover { color: var(--nav-link-hover); }
         .nav-link::after { content: ''; position: absolute; width: 0; height: 2px; bottom: -4px; left: 0; background: var(--primary-gradient); transition: width 0.3s ease; }
         .nav-link:hover::after { width: 100%; }
+
+        /* Themed mobile menu link */
+        .mobile-nav-link { color: var(--nav-link-color); }
+        .mobile-nav-link:hover { background-color: var(--mobile-menu-hover); color: var(--nav-link-hover); }
+
+        /* Themed category link */
+        .category-link { color: var(--category-link-color); }
+        .category-link:hover { background-color: var(--category-hover-bg); }
+
+        /* Other styles... */
         .floating-element { animation: float 6s ease-in-out infinite; }
         @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
         .scrollbar-thin { scrollbar-width: thin; scrollbar-color: rgba(99, 102, 241, 0.5) rgba(30, 30, 46, 0.5); }
@@ -60,7 +176,7 @@
         .scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.5); border-radius: 10px; }
         .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, 0.8); }
         .text-shadow { text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); }
-        .snackbar { visibility: hidden; min-width: 250px; transform: translateX(-50%); background: rgba(30, 30, 46, 0.9); color: #e2e8f0; text-align: center; border-radius: 12px; padding: 16px; position: fixed; z-index: 100; left: 50%; bottom: 30px; font-size: 17px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3); display: flex; align-items: center; border: 1px solid rgba(99, 102, 241, 0.3); backdrop-filter: blur(10px); }
+        .snackbar { visibility: hidden; min-width: 250px; transform: translateX(-50%); background: var(--glass-bg); color: var(--body-color); text-align: center; border-radius: 12px; padding: 16px; position: fixed; z-index: 100; left: 50%; bottom: 30px; font-size: 17px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3); display: flex; align-items: center; border: 1px solid var(--glass-border); backdrop-filter: blur(10px); }
         .snackbar.show { visibility: visible; animation: snackFadeIn 0.5s, snackFadeOut 0.5s 3.5s; }
         @keyframes snackFadeIn { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
         @keyframes snackFadeOut { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
@@ -93,7 +209,6 @@
         .morph { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; animation: morph 8s ease-in-out infinite; }
         @keyframes morph { 0% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; } 50% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; } 100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; } }
         
-        /* --- NEW: Pagination Button Style --- */
         .pagination-btn {
             display: inline-flex;
             align-items: center;
@@ -101,7 +216,7 @@
             background: var(--glass-bg);
             border: 1px solid var(--glass-border);
             border-radius: 0.75rem;
-            color: #e2e8f0;
+            color: var(--body-color);
             font-weight: 500;
             transition: all 0.2s ease;
         }
@@ -126,7 +241,7 @@
         <div class="absolute bottom-1/4 left-1/2 w-80 h-80 bg-pink-500/10 rounded-full blur-3xl floating-element" style="animation-delay: 4s;"></div>
     </div>
 
-    <header class="glass sticky top-0 z-50 transition-all duration-300 border-b border-gray-800">
+    <header class="glass sticky top-0 z-50 transition-all duration-300" style="border-color: var(--glass-border);">
         <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 <div class="flex-shrink-0">
@@ -139,18 +254,26 @@
                 </div>
                 
                 <div class="hidden lg:flex lg:items-center lg:space-x-8">
-                    <a href="#about-section" class="nav-link flex items-center text-gray-300 hover:text-white font-medium transition-all duration-300 group">
+                    <a href="#about-section" class="nav-link flex items-center font-medium transition-all duration-300 group">
                         <i data-lucide="user-circle" class="w-5 h-5 mr-1.5 transition-transform duration-300 group-hover:rotate-6"></i> 
                         About
                     </a>
-                    <a href="mailto:ridhii1999@gmail.com" class="nav-link flex items-center text-gray-300 hover:text-white font-medium transition-all duration-300 group">
+                    <a href="mailto:ridhii1999@gmail.com" class="nav-link flex items-center font-medium transition-all duration-300 group">
                         <i data-lucide="mail" class="w-5 h-5 mr-1.5 transition-transform duration-300 group-hover:text-blue-400"></i>
                         Contact
                     </a>
+                    
+                    <button id="theme-toggle-btn" class="p-2 rounded-full transition-all" style="color: var(--nav-link-color); background-color: var(--mobile-menu-hover);">
+                        <i data-theme-icon="dark" data-lucide="moon" class="w-5 h-5 hidden"></i>
+                        <i data-theme-icon="light" data-lucide="sun" class="w-5 h-5 hidden"></i>
+                        <i data-theme-icon="sepia" data-lucide="book-open" class="w-5 h-5 hidden"></i>
+                        <i data-theme-icon="slate" data-lucide="layers" class="w-5 h-5 hidden"></i>
+                        <i data-theme-icon="matcha" data-lucide="leaf" class="w-5 h-5 hidden"></i>
+                    </button>
                 </div>
 
                 <div class="lg:hidden flex items-center">
-                    <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-purple-500" aria-expanded="false">
+                    <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md" style="color: var(--nav-link-color);" aria-expanded="false">
                         <span class="sr-only">Open main menu</span>
                         <svg id="menu-icon-closed" class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -165,11 +288,22 @@
 
         <div class="lg:hidden hidden glass mt-2 rounded-lg mx-4" id="mobile-menu">
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                <a href="#about-section-mobile" class="mobile-nav-link flex items-center text-gray-300 hover:bg-gray-800 hover:text-white block px-3 py-2 rounded-md text-base font-medium">
+                <a href="#about-section-mobile" class="mobile-nav-link flex items-center block px-3 py-2 rounded-md text-base font-medium">
                     <i data-lucide="user-circle" class="w-5 h-5 mr-2"></i> About
                 </a>
-                <a href="mailto:ridhii1999@gmail.com" class="mobile-nav-link flex items-center text-gray-300 hover:bg-gray-800 hover:text-white block px-3 py-2 rounded-md text-base font-medium">
+                <a href="mailto:ridhii1999@gmail.com" class="mobile-nav-link flex items-center block px-3 py-2 rounded-md text-base font-medium">
                     <i data-lucide="mail" class="w-5 h-5 mr-2"></i> Contact
+                </a>
+                
+                <a href="#" id="mobile-theme-toggle" class="mobile-nav-link flex items-center block px-3 py-2 rounded-md text-base font-medium">
+                    <span class="w-5 h-5 mr-2">
+                        <i data-theme-icon-mobile="dark" data-lucide="moon" class="w-5 h-5 hidden"></i>
+                        <i data-theme-icon-mobile="light" data-lucide="sun" class="w-5 h-5 hidden"></i>
+                        <i data-theme-icon-mobile="sepia" data-lucide="book-open" class="w-5 h-5 hidden"></i>
+                        <i data-theme-icon-mobile="slate" data-lucide="layers" class="w-5 h-5 hidden"></i>
+                        <i data-theme-icon-mobile="matcha" data-lucide="leaf" class="w-5 h-5 hidden"></i>
+                    </span>
+                    <span id="mobile-theme-label">Change Theme</span>
                 </a>
             </div>
         </div>
@@ -185,15 +319,15 @@
                         Back to Blog
                     </a>
                     
-                    <h1 id="post-title" class="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 text-shadow">
+                    <h1 id="post-title" class="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 text-shadow" style="color: var(--body-color);">
                     </h1>
                     <p id="post-date" class="flex items-center text-base md:text-lg text-gray-400 mb-6">
                     </p>
                     
                     <img id="post-image" class="w-full h-48 sm:h-64 md:h-80 max-h-[500px] object-cover rounded-xl shadow-lg mb-8 post-image" src="" alt="Post Image">
                     
-                    <div id="post-content" class="max-w-none prose prose-lg prose-invert prose-headings:text-white prose-p:text-gray-300 prose-strong:text-white prose-a:text-blue-400">
-                    </div>
+                    <div id="post-content" class="max-w-none prose prose-lg prose-headings:font-bold">
+                        </div>
                 </div>
             </div>
         </div>
@@ -202,38 +336,38 @@
 
             <div class="block lg:hidden mb-8">
                 <div class="mb-6">
-                    <label class="block text-sm font-medium text-gray-300 mb-1">
+                    <label class="block text-sm font-medium mb-1" style="color: var(--nav-link-color);">
                         Filter by Category
                     </label>
                     <div class="relative z-20">
-                        <button id="mobile-category-toggle" type="button" class="relative w-full glass border border-gray-700 rounded-xl shadow-sm pl-3 pr-10 py-2.5 text-left cursor-pointer focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500">
+                        <button id="mobile-category-toggle" type="button" class="relative w-full glass rounded-xl shadow-sm pl-3 pr-10 py-2.5 text-left cursor-pointer focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500" style="color: var(--body-color); border-color: var(--glass-border);">
                             <span id="mobile-category-label" class="block truncate">All Categories</span>
                             <span class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
                                 <i id="mobile-category-chevron" data-lucide="chevron-down" class="w-5 h-5 text-gray-400 transition-transform duration-200"></i>
                             </span>
                         </button>
                         
-                        <div id="mobile-category-menu" class="hidden absolute z-30 mt-1 w-full glass rounded-xl shadow-lg max-h-60 overflow-y-auto scrollbar-thin border border-gray-700 bg-slate-900/95">
+                        <div id="mobile-category-menu" class="hidden absolute z-30 mt-1 w-full glass rounded-xl shadow-lg max-h-60 overflow-y-auto scrollbar-thin">
                             <ul id="mobile-category-list-custom" class="py-1">
-                            </ul>
+                                </ul>
                         </div>
                     </div>
                 </div>
 
                 <div>
-                    <span id="mobile-tag-list-label" class="block text-sm font-medium text-gray-300 mb-2">
+                    <span id="mobile-tag-list-label" class="block text-sm font-medium mb-2" style="color: var(--nav-link-color);">
                         Filter by Tag
                     </span>
                     <div id="mobile-tag-list" class="flex items-center overflow-x-auto overflow-y-visible py-2 px-2 gap-2 hide-scrollbar scrollbar-thin">
-                    </div>
+                        </div>
                 </div>
             </div>
 
 
             <main class="w-full md:w-3/4 lg:w-2/3">
                 <div class="mb-10 text-left">
-                    <h1 id="feed-title" class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 text-shadow typewriter"></h1>
-                    <p class="text-gray-400 text-base sm:text-lg">Exploring philosophy, poetry, and stories that shape our understanding of the world</p>
+                    <h1 id="feed-title" class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-shadow typewriter" style="color: var(--body-color);"></h1>
+                    <p class="text-base sm:text-lg" style="color: var(--nav-link-color);">Exploring philosophy, poetry, and stories that shape our understanding of the world</p>
                 </div>
                 <div id="blog-feed" class="space-y-8">
                     <div id="loading-placeholder" class="text-center p-6 glass rounded-xl">
@@ -248,13 +382,13 @@
 
             <div id="about-section-mobile" class="block md:hidden glass p-6 rounded-2xl shadow-xl relative overflow-hidden mt-8">
                 <div class="absolute -top-10 -right-10 w-20 h-20 bg-purple-500/20 rounded-full blur-xl"></div>
-                    <h3 class="text-2xl font-bold text-white mb-4 flex items-center relative z-10">
+                    <h3 class="text-2xl font-bold mb-4 flex items-center relative z-10" style="color: var(--body-color);">
                     <div class="w-8 h-8 rounded-full gradient-bg flex items-center justify-center mr-3">
                         <i data-lucide="user-circle" class="w-4 h-4 text-white"></i>
                     </div>
                     About Ridhi's Blog
                 </h3>
-                <p class="text-gray-300 leading-relaxed relative z-10">
+                <p class="leading-relaxed relative z-10" style="color: var(--nav-link-color);">
                     Welcome to "Ridhi's Blog" - a digital sanctuary exploring the depths of philosophy, sociology, poetry, and storytelling. Here, we unravel the complexities of human existence through thoughtful essays, evocative poetry, and compelling narratives.
                 </p>
             </div>
@@ -262,7 +396,7 @@
             <aside class="hidden md:block md:w-1/4 lg:w-1/3 md:mt-0">
                 
                 <div class="glass p-6 rounded-2xl shadow-xl mb-8">
-                    <h3 class="text-2xl font-bold text-white mb-4 flex items-center">
+                    <h3 class="text-2xl font-bold mb-4 flex items-center" style="color: var(--body-color);">
                         <div class="w-8 h-8 rounded-full gradient-bg flex items-center justify-center mr-3">
                             <i data-lucide="layout-list" class="w-4 h-4 text-white"></i>
                         </div>
@@ -270,31 +404,31 @@
                     </h3>
                     <ul id="category-list" class="space-y-2">
                         <li>
-                            <a href="#" class="block px-4 py-2 rounded-xl text-gray-300 hover:bg-gray-800 hover:translate-x-1 transition-all duration-200 category-link category-active" data-category="all">All Posts</a>
+                            <a href="#" class="block px-4 py-2 rounded-xl transition-all duration-200 category-link category-active" data-category="all">All Posts</a>
                         </li>
-                    </ul>
+                        </ul>
                 </div>
 
                 <div id="tag-container" class="glass p-6 rounded-2xl shadow-xl mb-8">
-                    <h3 class="text-2xl font-bold text-white mb-4 flex items-center">
+                    <h3 class="text-2xl font-bold mb-4 flex items-center" style="color: var(--body-color);">
                         <div class="w-8 h-8 rounded-full gradient-bg flex items-center justify-center mr-3" style="background: var(--secondary-gradient);">
                             <i data-lucide="tags" class="w-4 h-4 text-white"></i>
                         </div>
                         Tags
                     </h3>
                     <div id="tag-list" class="flex flex-wrap gap-2">
-                    </div>
+                        </div>
                 </div>
 
                 <div id="about-section" class="glass p-6 rounded-2xl shadow-xl relative overflow-hidden">
                     <div class="absolute -top-10 -right-10 w-20 h-20 bg-purple-500/20 rounded-full blur-xl"></div>
-                    <h3 class="text-2xl font-bold text-white mb-4 flex items-center relative z-10">
+                    <h3 class="text-2xl font-bold mb-4 flex items-center relative z-10" style="color: var(--body-color);">
                         <div class="w-8 h-8 rounded-full gradient-bg flex items-center justify-center mr-3">
                             <i data-lucide="user-circle" class="w-4 h-4 text-white"></i>
                         </div>
                         About Ridhi's Blog
                     </h3>
-                    <p class="text-gray-300 leading-relaxed relative z-10">
+                    <p class="leading-relaxed relative z-10" style="color: var(--nav-link-color);">
                         Welcome to "Ridhi's Blog" - a digital sanctuary exploring the depths of philosophy, sociology, poetry, and storytelling. Here, we unravel the complexities of human existence through thoughtful essays, evocative poetry, and compelling narratives.
                     </p>
                 </div>
@@ -303,22 +437,22 @@
         </div>
     </div>
 
-    <footer class="bg-gray-900/80 backdrop-blur-lg text-gray-300 mt-16 border-t border-gray-800">
+    <footer class="mt-16 border-t" style="background-color: var(--glass-bg); border-color: var(--glass-border); backdrop-filter: blur(10px);">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div class="flex flex-col md:flex-row justify-between items-center text-center md:text-left">
                 <div class="mb-4 md:mb-0">
-                    <h3 class="text-2xl font-bold text-white gradient-text">Ridhi's Blog</h3>
-                    <p class="text-gray-400">Philosophy, Poetry, and Stories.</p>
+                    <h3 class="text-2xl font-bold gradient-text">Ridhi's Blog</h3>
+                    <p style="color: var(--nav-link-color);">Philosophy, Poetry, and Stories.</p>
                 </div>
                 <div class="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-6">
-                    <a href="#about-section" class="hover:text-white transition-colors nav-link">About</a>
-                    <a href="mailto:ridhii1999@gmail.com" class="flex items-center hover:text-white transition-colors nav-link">
+                    <a href="#about-section" class="nav-link">About</a>
+                    <a href="mailto:ridhii1999@gmail.com" class="flex items-center nav-link">
                         Contact
                     </a>
-                    <a href="/admin/admin.html" class="hover:text-white transition-colors nav-link" target="_blank" rel="noopener noreferrer">Admin LogIn</a>
+                    <a href="/admin/admin.html" class="nav-link" target="_blank" rel="noopener noreferrer">Admin LogIn</a>
                 </div>
             </div>
-            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+            <div class="border-t mt-8 pt-8 text-center" style="border-color: var(--glass-border); color: var(--nav-link-color);">
                 <p>&copy; 2025 Ridhi's Blog. All rights reserved.</p>
             </div>
         </div>
@@ -337,6 +471,74 @@
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
 
+            // --- START: MULTI-THEME TOGGLE LOGIC ---
+            
+            const THEMES = [
+                { name: 'dark', icon: 'moon', label: 'Dark Theme' },
+                { name: 'light', icon: 'sun', label: 'Light Theme' },
+                { name: 'sepia', icon: 'book-open', label: 'Sepia Theme' },
+                { name: 'slate', icon: 'layers', label: 'Slate Theme' },
+                { name: 'matcha', icon: 'leaf', label: 'Matcha Theme' },
+            ];
+            
+            const themeToggleButton = document.getElementById('theme-toggle-btn');
+            const mobileThemeToggle = document.getElementById('mobile-theme-toggle');
+            const mobileThemeLabel = document.getElementById('mobile-theme-label');
+            const postContent = document.getElementById('post-content');
+            
+            const desktopIcons = document.querySelectorAll('[data-theme-icon]');
+            const mobileIcons = document.querySelectorAll('[data-theme-icon-mobile]');
+
+            function applyTheme(themeName) {
+                const theme = THEMES.find(t => t.name === themeName) || THEMES[0];
+                document.documentElement.setAttribute('data-theme', theme.name);
+                localStorage.setItem('theme', theme.name);
+                
+                if (theme.name === 'dark' || theme.name === 'slate') {
+                    if (postContent) postContent.classList.add('prose-invert');
+                } else {
+                    if (postContent) postContent.classList.remove('prose-invert');
+                }
+                
+                desktopIcons.forEach(icon => {
+                    icon.classList.toggle('hidden', icon.dataset.themeIcon !== theme.name);
+                });
+                
+                mobileIcons.forEach(icon => {
+                    icon.classList.toggle('hidden', icon.dataset.themeIconMobile !== theme.name);
+                });
+                
+                if (mobileThemeLabel) {
+                    mobileThemeLabel.textContent = theme.label;
+                }
+            }
+
+            function cycleTheme(e) {
+                e.preventDefault(); 
+                const currentThemeName = localStorage.getItem('theme') || 'dark';
+                const currentIndex = THEMES.findIndex(t => t.name === currentThemeName);
+                const nextIndex = (currentIndex + 1) % THEMES.length;
+                applyTheme(THEMES[nextIndex].name);
+                
+                if (e.currentTarget.id === 'mobile-theme-toggle') {
+                    closeMobileMenu();
+                }
+            }
+
+            themeToggleButton.addEventListener('click', cycleTheme);
+            mobileThemeToggle.addEventListener('click', cycleTheme);
+
+            function loadInitialTheme() {
+                const savedTheme = localStorage.getItem('theme');
+                const osPreference = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+                const initialTheme = THEMES.find(t => t.name === savedTheme) ? savedTheme : osPreference;
+                applyTheme(initialTheme);
+            }
+            
+            loadInitialTheme();
+            // --- END: MULTI-THEME TOGGLE LOGIC ---
+
+
             // --- DATA (Will be populated from fetch) ---
             let blogPosts = [];
             let allCategories = {};
@@ -346,14 +548,14 @@
             let activeTag = null; 
             let typewriterInterval = null; 
 
-            // --- *** NEW: PAGINATION STATE *** ---
+            // --- PAGINATION STATE ---
             let filteredPosts = []; // Holds ALL filtered posts
             let currentPage = 1;
             const postsPerPage = 4;
 
             // --- ELEMENT REFERENCES ---
             const blogFeed = document.getElementById('blog-feed');
-            const paginationControls = document.getElementById('pagination-controls'); // <-- NEW
+            const paginationControls = document.getElementById('pagination-controls');
             const categoryList = document.getElementById('category-list');
             const tagContainer = document.getElementById('tag-container');
             const tagList = document.getElementById('tag-list');
@@ -381,21 +583,17 @@
             // --- FETCH LOGIC ---
             async function loadBlogData() {
                 try {
-                    // --- THIS IS THE KEY CHANGE ---
                     const response = await fetch('/api/public-data?cachebust=' + new Date().getTime());
-                    // --- END OF CHANGE ---
-
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
                     }
                     const data = await response.json();
                     
-                    // The new API endpoint *already* filters published posts
                     blogPosts = data.posts || [];
                     allCategories = data.categories || {};
                     
                     renderCategories();
-                    filterAndRender(); // This will now call renderCurrentPage()
+                    filterAndRender(); 
                     lucide.createIcons();
                 
                 } catch (error) {
@@ -403,62 +601,44 @@
                     blogFeed.innerHTML = `
                             <div class="text-center p-6 glass rounded-xl border border-red-700">
                             <i data-lucide="alert-triangle" class="w-16 h-16 mx-auto text-red-500 mb-4"></i>
-                            <h3 class="text-2xl font-semibold text-white">Error Loading Posts</h3>
-                            <p class="text-gray-400 mt-2">Could not fetch data from the server. Please try again later.</p>
+                            <h3 class="text-2xl font-semibold" style="color: var(--body-color)">Error Loading Posts</h3>
+                            <p class="mt-2" style="color: var(--nav-link-color)">Could not fetch data from the server. Please try again later.</p>
                             </div>`;
                     lucide.createIcons(); 
                 }
             }
 
             // --- FUNCTIONS ---
-
-            // *** NEW: Renders just the posts for the current page ***
             function renderCurrentPage() {
-                // 1. Calculate pagination slice
                 const startIndex = (currentPage - 1) * postsPerPage;
                 const endIndex = currentPage * postsPerPage;
                 const paginatedPosts = filteredPosts.slice(startIndex, endIndex);
-
-                // 2. Render the sliced posts
                 renderPosts(paginatedPosts);
-                
-                // 3. Render the pagination controls
                 renderPaginationControls();
             }
 
-            // *** NEW: Renders the pagination buttons ***
             function renderPaginationControls() {
-                paginationControls.innerHTML = ''; // Clear old buttons
-                
+                paginationControls.innerHTML = ''; 
                 const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
+                if (totalPages <= 1) return;
 
-                if (totalPages <= 1) {
-                    return; // No controls needed if 1 page or less
-                }
-
-                // Previous Button
                 const prevButton = document.createElement('button');
                 prevButton.id = 'prev-page-btn';
                 prevButton.className = 'pagination-btn';
                 prevButton.innerHTML = `<i data-lucide="arrow-left" class="w-4 h-4 mr-2"></i> Previous`;
-                if (currentPage === 1) {
-                    prevButton.disabled = true;
-                }
+                prevButton.disabled = (currentPage === 1);
                 prevButton.addEventListener('click', prevPage);
                 
-                // Page Status
                 const pageStatus = document.createElement('span');
-                pageStatus.className = 'text-gray-400 text-sm font-medium';
+                pageStatus.className = 'text-sm font-medium';
+                pageStatus.style.color = "var(--nav-link-color)";
                 pageStatus.textContent = `Page ${currentPage} of ${totalPages}`;
 
-                // Next Button
                 const nextButton = document.createElement('button');
                 nextButton.id = 'next-page-btn';
                 nextButton.className = 'pagination-btn';
                 nextButton.innerHTML = `Next <i data-lucide="arrow-right" class="w-4 h-4 ml-2"></i>`;
-                if (currentPage === totalPages) {
-                    nextButton.disabled = true;
-                }
+                nextButton.disabled = (currentPage === totalPages);
                 nextButton.addEventListener('click', nextPage);
 
                 paginationControls.appendChild(prevButton);
@@ -467,13 +647,11 @@
                 lucide.createIcons();
             }
 
-            // *** NEW: Pagination click handlers ***
             function nextPage() {
                 const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
                 if (currentPage < totalPages) {
                     currentPage++;
                     renderCurrentPage();
-                    // Scroll to top of feed
                     blogFeed.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
             }
@@ -482,108 +660,95 @@
                 if (currentPage > 1) {
                     currentPage--;
                     renderCurrentPage();
-                    // Scroll to top of feed
                     blogFeed.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
             }
 
-
             function renderPosts(postsToRender) {
                 blogFeed.innerHTML = ''; 
-
                 if (postsToRender.length === 0) {
-                    let message = `<div class="text-center p-6 glass rounded-xl border border-gray-700">
-                                            <i data-lucide="archive-x" class="w-16 h-16 mx-auto text-gray-500 mb-4"></i>
-                                            <h3 class="text-2xl font-semibold text-white">No Posts Found</h3>
-                                            <p class="text-gray-400 mt-2">No posts found matching your criteria.</p>
-                                        </div>`;
+                    let message = `<div class="text-center p-6 glass rounded-xl" style="border-color: var(--glass-border);">
+                                        <i data-lucide="archive-x" class="w-16 h-16 mx-auto text-gray-500 mb-4"></i>
+                                        <h3 class="text-2xl font-semibold" style="color: var(--body-color);">No Posts Found</h3>
+                                        <p class="mt-2" style="color: var(--nav-link-color);">No posts found matching your criteria.</p>
+                                   </div>`;
                     
-                    // This logic remains valid
                     if (activeCategory !== 'all' && filteredPosts.length === 0) {
-                        message = `<div class="text-center p-6 glass rounded-xl border border-gray-700">
-                                            <i data-lucide="archive-x" class="w-16 h-16 mx-auto text-gray-500 mb-4"></i>
-                                            <h3 class="text-2xl font-semibold text-white">This Archive is Quiet</h3>
-                                            <p class="text-gray-400 mt-2">There are no posts in the '${activeCategory}' category just yet. Check back soon!</p>
-                                    </div>`;
-                            showSnackbar(`No posts yet in '${activeCategory}'.`);
-                    } else if (filteredPosts.length > 0 && postsToRender.length === 0) {
-                        // This case should not happen with correct pagination, but good to have
-                        message = `<div class="text-center p-6 glass rounded-xl border border-gray-700">
-                                            <i data-lucide="alert-circle" class="w-16 h-16 mx-auto text-gray-500 mb-4"></i>
-                                            <h3 class="text-2xl font-semibold text-white">Pagination Error</h3>
-                                            <p class="text-gray-400 mt-2">Could not load posts for this page.</p>
-                                    </div>`;
+                        message = `<div class="text-center p-6 glass rounded-xl" style="border-color: var(--glass-border);">
+                                        <i data-lucide="archive-x" class="w-16 h-16 mx-auto text-gray-500 mb-4"></i>
+                                        <h3 class="text-2xl font-semibold" style="color: var(--body-color);">This Archive is Quiet</h3>
+                                        <p class="mt-2" style="color: var(--nav-link-color);">There are no posts in the '${activeCategory}' category just yet. Check back soon!</p>
+                                   </div>`;
+                        showSnackbar(`No posts yet in '${activeCategory}'.`);
                     }
-
                     blogFeed.innerHTML = message;
                     lucide.createIcons(); 
                     return; 
                 }
 
-            const categoryColors = {
-                "Aphorism": "bg-purple-500/20 text-purple-300 border-purple-500/30",
-                "Essay": "bg-blue-500/20 text-blue-300 border-blue-500/30",
-                "Story writing": "bg-green-500/20 text-green-300 border-green-500/30",
-                "Poetry": "bg-pink-500/20 text-pink-300 border-pink-500/30"
-            };
+                const categoryColors = {
+                    "Aphorism": "bg-purple-500/20 text-purple-300 border-purple-500/30",
+                    "Essay": "bg-blue-500/20 text-blue-300 border-blue-500/30",
+                    "Story writing": "bg-green-500/20 text-green-300 border-green-500/30",
+                    "Poetry": "bg-pink-500/20 text-pink-300 border-pink-500/30"
+                };
 
-            postsToRender.forEach(post => {
-                const postElement = document.createElement('article');
-                postElement.className = 'post-card rounded-2xl overflow-hidden';
-                
-                const color = categoryColors[post.category] || "bg-gray-500/20 text-gray-300 border-gray-500/30";
+                postsToRender.forEach(post => {
+                    const postElement = document.createElement('article');
+                    postElement.className = 'post-card rounded-2xl overflow-hidden';
+                    const color = categoryColors[post.category] || "bg-gray-500/20 text-gray-300 border-gray-500/30";
 
-                postElement.innerHTML = `
-                    <img class="w-full h-64 object-cover post-image" src="${post.image}" alt="${post.title}" onerror="this.src='https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80'">
-                    <div class="p-6 flex flex-col flex-grow">
-                        <div>
-                            <span class="${color} text-xs font-medium px-2.5 py-0.5 rounded-full border">${post.category}</span>
-                            <h2 class="mt-3 mb-2 text-2xl font-semibold text-white hover:text-blue-400 transition-colors">
-                                <a href="#" class="view-post-link" data-post-id="${post.id}">${post.title}</a>
-                            </h2>
-                            <div class="flex items-center text-sm text-gray-400 mb-3">
-                                <i data-lucide="calendar-days" class="w-4 h-4 mr-1.5"></i>
-                                <span>${post.date}</span>
+                    postElement.innerHTML = `
+                        <img class="w-full h-64 object-cover post-image" src="${post.image}" alt="${post.title}" onerror="this.src='https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80'">
+                        <div class="p-6 flex flex-col flex-grow">
+                            <div>
+                                <span class="${color} text-xs font-medium px-2.5 py-0.5 rounded-full border">${post.category}</span>
+                                <h2 class="mt-3 mb-2 text-2xl font-semibold hover:text-blue-400 transition-colors" style="color: var(--body-color);">
+                                    <a href="#" class="view-post-link" data-post-id="${post.id}">${post.title}</a>
+                                </h2>
+                                <div class="flex items-center text-sm text-gray-400 mb-3">
+                                    <i data-lucide="calendar-days" class="w-4 h-4 mr-1.5"></i>
+                                    <span>${post.date}</span>
+                                </div>
+                                <p class="leading-relaxed mb-4" style="color: var(--nav-link-color);">${post.excerpt}</p>
                             </div>
-                            <p class="text-gray-300 leading-relaxed mb-4">${post.excerpt}</p>
-                        </div>
-                        <div class="mt-auto">
-                            <a href="#" class="view-post-link inline-flex items-center text-blue-400 hover:text-blue-300 font-medium group" data-post-id="${post.id}">
-                            Read More
-                            <i data-lucide="arrow-right" class="w-4 h-4 ml-1 transition-transform duration-200 group-hover:translate-x-1"></i>
-                            </a>
-                            <div class="mt-4 flex flex-wrap gap-2">
-                            ${(post.tags || []).map(tag => `
-                                <span class="flex items-center bg-gray-700/50 text-gray-300 text-xs font-medium px-2.5 py-0.5 rounded-full border border-gray-600">
-                                <i data-lucide="tag" class="w-3 h-3 mr-1"></i>
-                                ${tag}
-                                </span>
-                            `).join('')}
+                            <div class="mt-auto">
+                                <a href="#" class="view-post-link inline-flex items-center text-blue-400 hover:text-blue-300 font-medium group" data-post-id="${post.id}">
+                                Read More
+                                <i data-lucide="arrow-right" class="w-4 h-4 ml-1 transition-transform duration-200 group-hover:translate-x-1"></i>
+                                </a>
+                                <div class="mt-4 flex flex-wrap gap-2">
+                                ${(post.tags || []).map(tag => `
+                                    <span class="flex items-center text-xs font-medium px-2.5 py-0.5 rounded-full" style="background-color: var(--glass-bg); color: var(--nav-link-color); border: 1px solid var(--glass-border);">
+                                    <i data-lucide="tag" class="w-3 h-3 mr-1"></i>
+                                    ${tag}
+                                    </span>
+                                `).join('')}
+                                </div>
                             </div>
                         </div>
-                        </div>
-                    `;
-                blogFeed.appendChild(postElement);
-            });
+                        `;
+                    blogFeed.appendChild(postElement);
+                });
             }
 
             function renderCategories() {
-                categoryList.innerHTML = '<li><a href="#" class="block px-4 py-2 rounded-xl text-gray-300 hover:bg-gray-800 hover:translate-x-1 transition-all duration-200 category-link category-active" data-category="all">All Posts</a></li>';
+                categoryList.innerHTML = '<li><a href="#" class="block px-4 py-2 rounded-xl transition-all duration-200 category-link category-active" data-category="all">All Posts</a></li>';
                 mobileCategoryListCustom.innerHTML = '';
                 
                 let allLiCustom = document.createElement('li');
-                allLiCustom.innerHTML = `<a href="#" class="block px-4 py-2 text-gray-300 hover:bg-gray-800 category-link-custom" data-category="all">All Categories</a>`;
+                allLiCustom.innerHTML = `<a href="#" class="block px-4 py-2 category-link-custom" style="color: var(--nav-link-color);" data-category="all">All Categories</a>`;
                 mobileCategoryListCustom.appendChild(allLiCustom);
 
                 const categoryNames = Object.keys(allCategories).sort();
 
                 categoryNames.forEach(category => {
                     const li = document.createElement('li');
-                    li.innerHTML = `<a href="#" class="block px-4 py-2 rounded-xl text-gray-300 hover:bg-gray-800 hover:translate-x-1 transition-all duration-200 category-link" data-category="${category}">${category}</a>`;
+                    li.innerHTML = `<a href="#" class="block px-4 py-2 rounded-xl transition-all duration-200 category-link" data-category="${category}">${category}</a>`;
                     categoryList.appendChild(li);
                     
                     const liCustom = document.createElement('li');
-                    liCustom.innerHTML = `<a href="#" class="block px-4 py-2 text-gray-300 hover:bg-gray-800 category-link-custom" data-category="${category}">${category}</a>`;
+                    liCustom.innerHTML = `<a href="#" class="block px-4 py-2 category-link-custom" style="color: var(--nav-link-color);" data-category="${category}">${category}</a>`;
                     mobileCategoryListCustom.appendChild(liCustom);
                 });
             }
@@ -613,7 +778,12 @@
                     let isActive = (tag === 'all' && !activeTag) || (activeTag === tag);
                     const mobileClass = isMobile ? 'flex-shrink-0 ' : '';
 
-                    tagChip.className = `${mobileClass}tag-chip px-3 py-1 rounded-full text-sm font-medium transition-all duration-200 hover:-translate-y-0.5 ${isActive ? 'tag-active' : 'bg-gray-700/50 text-gray-300 hover:bg-gray-600 border border-gray-600'}`;
+                    tagChip.className = `${mobileClass}tag-chip px-3 py-1 rounded-full text-sm font-medium transition-all duration-200 hover:-translate-y-0.5 ${isActive ? 'tag-active' : 'border'}`;
+                    if (!isActive) {
+                        tagChip.style.backgroundColor = "var(--glass-bg)";
+                        tagChip.style.color = "var(--nav-link-color)";
+                        tagChip.style.borderColor = "var(--glass-border)";
+                    }
                     tagChip.textContent = (tag === 'all') ? 'All Tags' : tag;
                     tagChip.dataset.tag = tag;
                     return tagChip;
@@ -636,30 +806,18 @@
                 setTimeout(function(){ snackbar.className = snackbar.className.replace("show", ""); }, 4000);
             }
 
-            // *** MODIFIED: This function now populates filteredPosts, then calls renderCurrentPage ***
             function filterAndRender() {
-                // 1. Filter
                 let tempPosts = blogPosts;
-
                 if (activeCategory !== 'all') {
                     tempPosts = tempPosts.filter(post => post.category === activeCategory);
                 }
-
                 if (activeTag) {
                     tempPosts = tempPosts.filter(post => post.tags && post.tags.includes(activeTag));
                 }
-                
-                // 2. Sort
                 tempPosts.sort((a, b) => (b.id - a.id));
-                
-                // 3. Update global filteredPosts variable
                 filteredPosts = tempPosts;
-
-                // 4. Reset to page 1 and render
                 currentPage = 1; 
-                renderCurrentPage(); // <-- This now handles rendering posts and pagination
-                
-                // 5. Update UI elements
+                renderCurrentPage(); 
                 updateCategoryUI();
                 renderTags(); 
                 updateFeedTitle();
@@ -681,48 +839,36 @@
                 mobileCategoryListCustom.querySelectorAll('.category-link-custom').forEach(link => {
                 if (link.dataset.category === activeCategory) {
                     link.classList.add('category-link-custom-active');
-                    link.classList.remove('text-gray-300');
+                    link.style.color = "#c7d2fe"; // Active color
                 } else {
                     link.classList.remove('category-link-custom-active');
-                    link.classList.add('text-gray-300');
+                    link.style.color = "var(--nav-link-color)"; // Default color
                 }
             });
             }
 
             function updateFeedTitle() {
                 let title = "Recent Posts"; 
-
-                if (activeCategory !== 'all') {
-                title = `Posts in: ${activeCategory}`;
-                }
-
+                if (activeCategory !== 'all') title = `Posts in: ${activeCategory}`;
                 if (activeTag) {
-                if (activeCategory !== 'all') {
-                    title = `${title} | ${activeTag}`;
-                } else {
-                    title = `Posts tagged: ${activeTag}`;
-                }
+                    title = (activeCategory !== 'all') ? `${title} | ${activeTag}` : `Posts tagged: ${activeTag}`;
                 }
                 
-                if (typewriterInterval) {
-                clearInterval(typewriterInterval);
-                }
-
+                if (typewriterInterval) clearInterval(typewriterInterval);
                 feedTitle.textContent = '';
                 feedTitle.classList.add('typewriter'); 
                 
                 let i = 0;
                 const typingSpeed = 50;
-
                 typewriterInterval = setInterval(() => {
-                if (i < title.length) {
-                    feedTitle.textContent += title.charAt(i);
-                    i++;
-                } else {
-                    clearInterval(typewriterInterval);
-                    typewriterInterval = null;
-                }
-            }, typingSpeed);
+                    if (i < title.length) {
+                        feedTitle.textContent += title.charAt(i);
+                        i++;
+                    } else {
+                        clearInterval(typewriterInterval);
+                        typewriterInterval = null;
+                    }
+                }, typingSpeed);
             }
 
             function showPost(postId) {
@@ -731,19 +877,24 @@
 
                 document.getElementById('post-title').innerHTML = `<i data-lucide="book-open" class="w-10 h-10 -mt-2 mr-3 inline-block text-gray-500"></i> ${post.title}`;
                 document.getElementById('post-date').innerHTML = `<i data-lucide="calendar-days" class="w-4 h-4 mr-2 inline-block text-gray-500"></i> ${post.date}`;
-                
-                const postImage = document.getElementById('post-image');
-                postImage.src = post.image; 
-                postImage.alt = post.title; 
+                document.getElementById('post-image').src = post.image; 
+                document.getElementById('post-image').alt = post.title; 
                 
                 const postContent = document.getElementById('post-content');
-                postContent.className = 'max-w-none prose prose-lg prose-invert prose-headings:text-white prose-p:text-gray-300 prose-strong:text-white prose-a:text-blue-400';
+                
+                // Apply/remove prose-invert based on current theme
+                const currentTheme = localStorage.getItem('theme') || 'dark';
+                if (currentTheme === 'dark' || currentTheme === 'slate') {
+                    postContent.classList.add('prose-invert');
+                } else {
+                    postContent.classList.remove('prose-invert');
+                }
+                
                 postContent.innerHTML = post.fullContent;
                 postContent.classList.add('prose-headings:font-bold');
 
                 feedView.classList.add('hidden');
-                feedView.classList.remove('md:flex'); 
-                feedView.classList.remove('animate__fadeIn'); 
+                feedView.classList.remove('md:flex', 'animate__fadeIn'); 
                 postView.classList.remove('hidden');
                 postView.classList.add('animate__fadeIn'); 
 
@@ -755,18 +906,16 @@
                 postView.classList.add('hidden');
                 postView.classList.remove('animate__fadeIn');
                 feedView.classList.remove('hidden');
-                feedView.classList.add('md:flex'); 
-                feedView.classList.add('animate__fadeIn');
+                feedView.classList.add('md:flex', 'animate__fadeIn'); 
                 updateFeedTitle(); 
-                // We don't need to re-render, state is preserved
             }
             
             function closeMobileMenu() {
                 if (!mobileMenu.classList.contains('hidden')) {
-                mobileMenu.classList.add('hidden');
-                menuIconOpen.classList.add('hidden');
-                menuIconClosed.classList.remove('hidden');
-                mobileMenuButton.setAttribute('aria-expanded', 'false');
+                    mobileMenu.classList.add('hidden');
+                    menuIconOpen.classList.add('hidden');
+                    menuIconClosed.classList.remove('hidden');
+                    mobileMenuButton.setAttribute('aria-expanded', 'false');
                 }
             }
             
@@ -778,7 +927,7 @@
                 e.preventDefault();
                 activeCategory = link.dataset.category;
                 activeTag = null; 
-                filterAndRender(); // This will reset to page 1
+                filterAndRender();
                 showFeed();
             };
             categoryList.addEventListener('click', handleCategoryClick);
@@ -792,39 +941,33 @@
             mobileCategoryMenu.addEventListener('click', (e) => {
                 const link = e.target.closest('.category-link-custom');
                 if (link) {
-                e.preventDefault();
-                activeCategory = link.dataset.category;
-                activeTag = null;
-                mobileCategoryMenu.classList.add('hidden');
-                mobileCategoryChevron.style.transform = 'rotate(0deg)';
-                filterAndRender(); // This will reset to page 1
-                showFeed();
-            }
+                    e.preventDefault();
+                    activeCategory = link.dataset.category;
+                    activeTag = null;
+                    mobileCategoryMenu.classList.add('hidden');
+                    mobileCategoryChevron.style.transform = 'rotate(0deg)';
+                    filterAndRender();
+                    showFeed();
+                }
             });
 
             window.addEventListener('click', (e) => {
                 if (!mobileCategoryToggle.contains(e.target) && !mobileCategoryMenu.contains(e.target)) {
-                if (!mobileCategoryMenu.classList.contains('hidden')) {
-                    mobileCategoryMenu.classList.add('hidden');
-                    mobileCategoryChevron.style.transform = 'rotate(0deg)';
-                }
+                    if (!mobileCategoryMenu.classList.contains('hidden')) {
+                        mobileCategoryMenu.classList.add('hidden');
+                        mobileCategoryChevron.style.transform = 'rotate(0deg)';
+                    }
                 }
             });
 
             const handleTagClick = (e) => {
                 const tagChip = e.target.closest('.tag-chip');
                 if (tagChip) {
-                e.preventDefault();
-                const tag = tagChip.dataset.tag;
-                if (tag === 'all') {
-            activeTag = null; 
-                } else if (activeTag === tag) {
-                    activeTag = null; 
-                } else {
-                    activeTag = tag; 
+                    e.preventDefault();
+                    const tag = tagChip.dataset.tag;
+                    activeTag = (tag === 'all' || activeTag === tag) ? null : tag;
+                    filterAndRender();
                 }
-                filterAndRender(); // This will reset to page 1
-            }
             };
             tagList.addEventListener('click', handleTagClick);
             mobileTagList.addEventListener('click', handleTagClick);
@@ -832,9 +975,9 @@
             blogFeed.addEventListener('click', (e) => {
                 const link = e.target.closest('.view-post-link');
                 if (link && link.dataset.postId) {
-                e.preventDefault();
-                showPost(link.dataset.postId);
-            }
+                    e.preventDefault();
+                    showPost(link.dataset.postId);
+                }
             });
 
             backButton.addEventListener('click', (e) => {
@@ -846,13 +989,12 @@
                 e.preventDefault();
                 activeCategory = 'all';
                 activeTag = null;
-                filterAndRender(); // This will reset to page 1
+                filterAndRender();
                 showFeed();
                 window.scrollTo(0, 0); 
             };
             homeLink.addEventListener('click', goHome);
             
-
             mobileMenuButton.addEventListener('click', () => {
                 const expanded = mobileMenuButton.getAttribute('aria-expanded') === 'true' || false;
                 mobileMenuButton.setAttribute('aria-expanded', !expanded);
@@ -863,40 +1005,30 @@
 
             mobileMenu.addEventListener('click', (e) => {
                 const target = e.target.closest('a.mobile-nav-link');
-                if (!target) return; 
+                if (!target || target.id === 'mobile-theme-toggle') return; // Ignore theme toggle click
 
                 const href = target.getAttribute('href');
-                
                 if (href && href.startsWith('#')) {
-                e.preventDefault(); 
-                
-                const targetId = href.substring(1);
-                const targetElement = document.getElementById(targetId);
-
-                if (targetElement) {
-                    targetElement.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'center'
-                    });
+                    e.preventDefault(); 
+                    const targetId = href.substring(1);
+                    const targetElement = document.getElementById(targetId);
+                    if (targetElement) {
+                        targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
                 }
-                }
-                
                 closeMobileMenu();
             });
             
             window.addEventListener('scroll', () => {
                 if (window.scrollY > 400) {
-                toTopButton.classList.add('show');
+                    toTopButton.classList.add('show');
                 } else {
-                toTopButton.classList.remove('show');
+                    toTopButton.classList.remove('show');
                 }
             });
 
             toTopButton.addEventListener('click', () => {
-                window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-                });
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             });
 
             // --- INITIAL LOAD ---

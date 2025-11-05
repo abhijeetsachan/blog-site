@@ -79,7 +79,9 @@
  * USING (is_approved = true);
  *
  * CREATE POLICY "Anyone can create comments"
- * ON public.comments FOR INSERT
+ * ON public.comments
+ * FOR INSERT
+ * TO anon -- This explicitly names the public (anonymous) role
  * WITH CHECK (true);
  * * * ------------------------- END OF SQL CODE --------------------------------
  *
@@ -524,7 +526,7 @@ app.delete('/api/tags/:categoryName/:tagName', checkApiAuth, async (req, res) =>
 
     if (updateError) {
         console.error('Supabase error (updating category):', updateError.message);
-        return res.status(500).json({ message: 'Error deleting tag from category.' });
+        return res.status(5II0).json({ message: 'Error deleting tag from category.' });
     }
 
     const { data: posts, error: postFetchError } = await supabase
@@ -705,16 +707,15 @@ app.get('/api/comments/:postId', async (req, res) => {
 // POST: Submit a new comment (will be 'is_approved: false' by default)
 app.post('/api/comments', async (req, res) => {
     
-    // === THIS IS THE FIX ===
     const { post_id, name, content } = req.body;
 
-    // 1. Check if fields exist *before* trying to use them
+    // 1. Check if fields exist
     if (!post_id || !name || !content) {
         console.error('Validation failed: Missing fields.', req.body);
         return res.status(400).json({ message: 'Missing required fields (post_id, name, content).' });
     }
     
-    // 2. Now that we know they exist, parse/trim them
+    // 2. Parse/trim them
     const numeric_post_id = parseInt(post_id, 10);
     const trimmedName = name.trim();
     const trimmedContent = content.trim();
@@ -726,12 +727,13 @@ app.post('/api/comments', async (req, res) => {
     }
     
     // 4. Proceed with insert
-    const { data, error } = await supabase
+    // === THIS IS THE FIX: .select() has been removed ===
+    const { error } = await supabase
         .from('comments')
         .insert([
             { post_id: numeric_post_id, name: trimmedName, content: trimmedContent }
-        ])
-        .select();
+        ]);
+    // === END FIX ===
 
     if (error) {
         console.error('Supabase error (inserting comment):', error.message);

@@ -166,7 +166,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // --- FUNCTIONS ---
 
-            // --- START: NEW LOCALSTORAGE HELPERS ---
             function getLikedPosts() {
                 try {
                     const liked = localStorage.getItem(LIKED_POSTS_KEY);
@@ -184,7 +183,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     console.error("Could not save liked posts to localStorage", e);
                 }
             }
-            // --- END: NEW LOCALSTORAGE HELPERS ---
 
             // --- START: COMMENT LOGIC ---
             
@@ -652,16 +650,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                 likeButton.disabled = false;
                 
                 const likedPosts = getLikedPosts();
+                // Use .toString() to fix the number vs. string bug
                 if (likedPosts.includes(post.id.toString())) {
                     likeButton.classList.add('liked');
                     likeButton.disabled = true; // Already liked
                 }
 
-                // 2. Set Share URLs
-                shareX.href = `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`;
-                shareFacebook.href = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
-                shareWhatsapp.href = `https://api.whatsapp.com/send?text=${encodedTitle} ${encodedUrl}`;
-                shareTelegram.href = `https://t.me/share/url?url=${encodedUrl}&text=${encodedTitle}`;
+                // 2. Set Share URLs (Now with Facebook, WhatsApp, Telegram)
+                if(shareX) shareX.href = `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`;
+                if(shareFacebook) shareFacebook.href = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
+                if(shareWhatsapp) shareWhatsapp.href = `https://api.whatsapp.com/send?text=${encodedTitle} ${encodedUrl}`;
+                if(shareTelegram) shareTelegram.href = `https://t.me/share/url?url=${encodedUrl}&text=${encodedTitle}`;
                 // --- END: Updated Logic ---
 
                 window.scrollTo(0, 0);
@@ -836,9 +835,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 // 2. Optimistic UI update
                 const likedPosts = getLikedPosts();
-                if (likedPosts.includes(postId)) return;
+                // Use .toString() to fix number vs. string bug
+                const postIdString = postId.toString();
+                if (likedPosts.includes(postIdString)) return;
                 
-                likedPosts.push(postId);
+                likedPosts.push(postIdString);
                 saveLikedPosts(likedPosts);
                 
                 likeButton.classList.add('liked');
@@ -863,7 +864,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     likeButton.classList.remove('liked');
                     likeCount.textContent = newCount - 1; // Revert count
                     
-                    const rolledBackLikes = getLikedPosts().filter(id => id !== postId);
+                    const rolledBackLikes = getLikedPosts().filter(id => id !== postIdString);
                     saveLikedPosts(rolledBackLikes);
                 }
             }

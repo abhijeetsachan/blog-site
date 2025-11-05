@@ -149,18 +149,24 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' })); 
 app.use(express.urlencoded({ extended: true }));
 
+
+// === CSP FIX: Get Supabase Domain Once in Global Scope (Safest method) ===
+const getSupabaseDomain = (url) => {
+    try {
+        // Use a standard URL object to safely parse the domain
+        return url ? new URL(url).hostname : '';
+    } catch (e) {
+        console.error('Invalid SUPABASE_URL format for CSP. Check environment variable.');
+        return '';
+    }
+};
+
+// Define the domain as a constant, safely outside the middleware execution
+const SUPABASE_DOMAIN = getSupabaseDomain(SUPABASE_URL);
+
+
 // --- NEW: SET CONTENT SECURITY POLICY (CSP) ---
 app.use((req, res, next) => {
-  // 1. Get the Supabase Domain safely (Fix for potential SyntaxError)
-  let supabaseDomain = '';
-  try {
-    if (SUPABASE_URL) {
-      supabaseDomain = new URL(SUPABASE_URL).hostname;
-    }
-  } catch (e) {
-    console.error('Invalid SUPABASE_URL, proceeding without it in CSP.');
-  }
-
   res.setHeader(
     'Content-Security-Policy',
     "default-src 'self'; " +
@@ -168,8 +174,8 @@ app.use((req, res, next) => {
     "style-src 'self' https://fonts.googleapis.com https://cdnjs.cloudflare.com 'unsafe-inline'; " +
     "font-src 'self' https://fonts.gstatic.com; " +
     "img-src 'self' https: data:; " +
-    // 2. Correctly concatenate the domain into the existing string format (Fix for SyntaxError)
-    "connect-src 'self' https://raw.githubusercontent.com https://" + supabaseDomain + "; " +
+    // Concatenate the global constant for minimal risk of SyntaxError
+    "connect-src 'self' https://raw.githubusercontent.com https://" + SUPABASE_DOMAIN + "; " + 
     "frame-src 'self' https://cdn.tiny.cloud"
   );
   next();

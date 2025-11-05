@@ -149,38 +149,6 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' })); 
 app.use(express.urlencoded({ extended: true }));
 
-
-// === CSP FIX: Get Supabase Domain Once in Global Scope (Safest method) ===
-const getSupabaseDomain = (url) => {
-    try {
-        // Use a standard URL object to safely parse the domain
-        return url ? new URL(url).hostname : '';
-    } catch (e) {
-        console.error('Invalid SUPABASE_URL format for CSP. Check environment variable.');
-        return '';
-    }
-};
-
-// Define the domain as a constant, safely outside the middleware execution
-const SUPABASE_DOMAIN = getSupabaseDomain(SUPABASE_URL);
-
-
-// --- NEW: SET CONTENT SECURITY POLICY (CSP) ---
-app.use((req, res, next) => {
-  res.setHeader(
-    'Content-Security-Policy',
-    "default-src 'self'; " +
-    "script-src 'self' https://cdn.tailwindcss.com https://unpkg.com https://cdn.tiny.cloud 'unsafe-eval'; " +
-    "style-src 'self' https://fonts.googleapis.com https://cdnjs.cloudflare.com 'unsafe-inline'; " +
-    "font-src 'self' https://fonts.gstatic.com; " +
-    "img-src 'self' https: data:; " +
-    // Concatenate the global constant for minimal risk of SyntaxError
-    "connect-src 'self' https://raw.githubusercontent.com https://" + SUPABASE_DOMAIN + "; " + 
-    "frame-src 'self' https://cdn.tiny.cloud"
-  );
-  next();
-});
-
 // --- Session Middleware ---
 app.use(session({
     secret: SESSION_SECRET,
@@ -719,7 +687,7 @@ app.get('/api/admin/comments', checkApiAuth, async (req, res) => {
 // APPROVE: PUT /api/comments/approve/:id
 app.put('/api/comments/approve/:id', checkApiAuth, async (req, res) => {
     const commentId = parseInt(req.params.id);
-    console.log(`[PUT /api/comments/approve/${commentId}] Approving comment...`);
+    console.log(\`[PUT /api/comments/approve/\${commentId}] Approving comment...\`);
 
     const { error } = await supabase
         .from('comments')
@@ -737,7 +705,7 @@ app.put('/api/comments/approve/:id', checkApiAuth, async (req, res) => {
 // DELETE: DELETE /api/comments/:id
 app.delete('/api/comments/:id', checkApiAuth, async (req, res) => {
     const commentId = parseInt(req.params.id);
-    console.log(`[DELETE /api/comments/${commentId}] Deleting comment...`);
+    console.log(\`[DELETE /api/comments/\${commentId}] Deleting comment...\`);
 
     const { error } = await supabase
         .from('comments')
@@ -746,8 +714,7 @@ app.delete('/api/comments/:id', checkApiAuth, async (req, res) => {
 
     if (error) {
         console.error('Supabase error (deleting comment):', error.message);
-        // *** FIX APPLIED: Corrected typo 5D to 500 ***
-        return res.status(500).json({ message: 'Error deleting comment.' }); 
+        return res.status(5D).json({ message: 'Error deleting comment.' });
     }
 
     res.status(200).json({ message: 'Comment deleted!' });
@@ -838,7 +805,7 @@ app.post('/api/posts/like/:id', likeLimiter, async (req, res) => {
         return res.status(500).json({ message: 'Error updating like count.' });
     }
 
-    console.log(`Like incremented for post ${postId}`);
+    console.log(\`Like incremented for post \${postId}\`);
     res.status(200).json({ message: 'Like registered!' });
 });
 
@@ -866,9 +833,9 @@ app.get('/', (req, res) => {
 
 // --- Start the Server ---
 app.listen(PORT, () => {
-    console.log(`--- Blog Server & Admin Panel (Supabase Mode) ---`);
-    console.log(`Server running on http://localhost:${PORT}`);
-    console.log(`Public Blog: http://localhost:${PORT}`);
-    console.log(`Admin Login: http://localhost:${PORT}/admin/login.html`);
-    console.log(`-------------------------------------------------`);
+    console.log(\`--- Blog Server & Admin Panel (Supabase Mode) ---\`);
+    console.log(\`Server running on http://localhost:\${PORT}\`);
+    console.log(\`Public Blog: http://localhost:\${PORT}\`);
+    console.log(\`Admin Login: http://localhost:\${PORT}/admin/login.html\`);
+    console.log(\`-------------------------------------------------\`);
 });

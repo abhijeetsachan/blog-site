@@ -289,6 +289,31 @@ html { scroll-behavior: smooth; }
         }
         /* === End Modified Styles === */
 
+        /* === NEW: Post Actions (Likes & Share) === */
+        #like-button:hover:not(.liked) {
+            border-color: rgba(236, 72, 153, 0.5); /* Pink */
+            color: #f472b6; /* Pink-400 */
+        }
+        #like-button.liked {
+            background: rgba(236, 72, 153, 0.1); /* Pink bg */
+            border-color: rgba(236, 72, 153, 0.3); /* Pink border */
+            color: #f472b6; /* Pink-400 */
+        }
+        #like-button.liked .lucide-heart {
+            fill: #f472b6; /* Filled heart */
+        }
+        #like-button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        #post-actions a:hover {
+            border-color: var(--glass-border);
+            background-color: var(--mobile-menu-hover);
+            color: var(--nav-link-hover);
+        }
+        /* === END: New Styles === */
+
         .floating-element { animation: float 6s ease-in-out infinite; }
         @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
         .scrollbar-thin { scrollbar-width: thin; scrollbar-color: rgba(99, 102, 241, 0.5) rgba(30, 30, 46, 0.5); }
@@ -351,3 +376,5 @@ html { scroll-behavior: smooth; }
             opacity: 0.4;
             cursor: not-allowed;
         }
+
+}

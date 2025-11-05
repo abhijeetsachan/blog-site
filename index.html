@@ -39,7 +39,7 @@
             transition: background-color 0.3s ease, color 0.3s ease;
         }
 
-        /* === 1. DARK THEME (Original) === */
+        /* === 1. DARK THEME (Good Contrast) === */
         html[data-theme="dark"] {
             --primary-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
             --secondary-gradient: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
@@ -57,7 +57,7 @@
             --category-hover-bg: #1f2937; /* gray-800 */
         }
 
-        /* === 2. LIGHT THEME (Refined) === */
+        /* === 2. LIGHT THEME (Good Contrast) === */
         html[data-theme="light"] {
             --primary-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
             --secondary-gradient: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
@@ -74,23 +74,23 @@
             --category-hover-bg: #f1f5f9;
         }
         
-        /* === 3. SEPIA THEME (Refined) === */
+        /* === 3. SEPIA THEME (Visibility Perfected) === */
         html[data-theme="sepia"] {
             --primary-gradient: linear-gradient(135deg, #8d6e63 0%, #a1887f 100%); /* Muted brown */
             --secondary-gradient: linear-gradient(135deg, #d2691e 0%, #cd853f 100%); /* Chocolate/Peru */
             --glass-bg: rgba(245, 241, 233, 0.7); /* Warm glass */
             --glass-border: rgba(120, 89, 70, 0.2);
             --body-bg: #fbfaf5; /* Warm off-white */
-            --body-color: #5d4037; /* Dark Brown */
+            --body-color: #4e342e; /* Darker Brown (AAA Contrast) */
             --body-gradient: radial-gradient(circle at 10% 20%, rgba(120, 89, 70, 0.05) 0%, transparent 20%);
-            --nav-link-color: #785946; /* Medium brown */
+            --nav-link-color: #5d4037; /* Dark Brown (AA Contrast) */
             --nav-link-hover: #3e2723; /* Darkest brown */
             --mobile-menu-hover: #f5f1e9;
-            --category-link-color: #785946;
+            --category-link-color: #5d4037;
             --category-hover-bg: #f5f1e9;
         }
         
-        /* === 4. SLATE THEME (Blue-Dark) === */
+        /* === 4. SLATE THEME (Good Contrast) === */
         html[data-theme="slate"] {
             --primary-gradient: linear-gradient(135deg, #475569 0%, #64748b 50%, #94a3b8 100%); /* Slate */
             --secondary-gradient: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
@@ -107,19 +107,19 @@
             --category-hover-bg: #334155;
         }
 
-        /* === 5. MATCHA THEME (Refined) === */
+        /* === 5. MATCHA THEME (Visibility Perfected) === */
         html[data-theme="matcha"] {
             --primary-gradient: linear-gradient(135deg, #10b981 0%, #22c55e 100%); /* Green */
             --secondary-gradient: linear-gradient(135deg, #84cc16 0%, #a3e635 100%); /* Lime */
             --glass-bg: rgba(236, 253, 245, 0.7); /* green-50 alpha */
             --glass-border: rgba(17, 94, 89, 0.2); /* green-800 alpha */
             --body-bg: #fafff5; /* Very light mint */
-            --body-color: #1a3a3a; /* Dark Teal */
+            --body-color: #1a3a3a; /* Dark Teal (AAA Contrast) */
             --body-gradient: radial-gradient(circle at 10% 20%, rgba(16, 185, 129, 0.05) 0%, transparent 20%);
-            --nav-link-color: #047857; /* Green-600 */
+            --nav-link-color: #065f46; /* Green-800 (AA Contrast) */
             --nav-link-hover: #064e3b; /* Green-900 */
             --mobile-menu-hover: #ecfdf5; /* Green-100 */
-            --category-link-color: #047857;
+            --category-link-color: #065f46;
             --category-hover-bg: #ecfdf5;
         }
         
@@ -157,26 +157,66 @@
         .category-link { color: var(--category-link-color); }
         .category-link:hover { background-color: var(--category-hover-bg); }
 
-        /* === NEW: Styles for "More Blogs" list === */
+        /* === MODIFIED: Styles for "More Blogs" list === */
         .more-blog-link {
             display: block;
-            font-weight: 500;
-            color: var(--nav-link-color);
             transition: all 0.2s ease;
-            padding: 0.5rem 0.75rem;
+            padding: 0.75rem;
             border-radius: 0.5rem;
             line-height: 1.4;
         }
         .more-blog-link:hover {
             background-color: var(--mobile-menu-hover);
-            color: var(--nav-link-hover);
         }
         .more-blog-active {
             background-color: var(--mobile-menu-hover);
-            color: var(--nav-link-hover);
-            font-weight: 600;
         }
-        /* === End New Styles === */
+        .more-blog-link-title {
+            display: block; /* Ensures it's on its own line */
+            font-weight: 600;
+            color: var(--body-color);
+            margin-bottom: 0.25rem; /* Space between title and meta */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .more-blog-active .more-blog-link-title {
+             color: var(--nav-link-hover);
+        }
+        .more-blog-meta {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.375rem; /* 6px gap */
+            font-size: 0.75rem; /* 12px */
+            opacity: 0.9;
+        }
+        .more-blog-active .more-blog-meta {
+            opacity: 1;
+        }
+        .more-blog-category {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.125rem 0.5rem; /* py-0.5 px-2 */
+            border-radius: 9999px; /* rounded-full */
+            font-weight: 500;
+            background-color: rgba(99, 102, 241, 0.2); /* Theme-agnostic purple */
+            color: #6366f1;
+        }
+        .more-blog-tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.125rem 0.5rem; /* py-0.5 px-2 */
+            border-radius: 9999px; /* rounded-full */
+            font-weight: 500;
+            background-color: rgba(120, 120, 120, 0.2);
+            color: var(--nav-link-color);
+        }
+        .more-blog-active .more-blog-tag {
+            color: var(--nav-link-hover);
+        }
+        /* === End Modified Styles === */
+
 
         .floating-element { animation: float 6s ease-in-out infinite; }
         @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
@@ -354,7 +394,10 @@
                     </div>
                 </div>
             </aside>
-            </div>
+
+        </div>
+
+
         <div id="feed-view" class="md:flex md:space-x-4 lg:space-x-8 animate__animated animate__fadeIn">
 
             <div class="block lg:hidden mb-8">
@@ -594,7 +637,7 @@
             const postView = document.getElementById('post-view');
             const backButton = document.getElementById('back-button');
             const homeLink = document.getElementById('home-link');
-            const moreBlogsList = document.getElementById('more-blogs-list'); // <-- NEW ELEMENT
+            const moreBlogsList = document.getElementById('more-blogs-list');
             
             const mobileMenuButton = document.getElementById('mobile-menu-button');
             const mobileMenu = document.getElementById('mobile-menu');
@@ -617,7 +660,7 @@
                     allCategories = data.categories || {};
                     
                     renderCategories();
-                    renderMoreBlogsList(); // <-- NEW FUNCTION CALL
+                    renderMoreBlogsList();
                     filterAndRender(); 
                     lucide.createIcons();
                 
@@ -635,7 +678,7 @@
 
             // --- FUNCTIONS ---
 
-            // === NEW FUNCTION to populate the "More Blogs" list ===
+            // === MODIFIED: "More Blogs" list function ===
             function renderMoreBlogsList() {
                 if (!moreBlogsList) return; 
                 moreBlogsList.innerHTML = '';
@@ -643,21 +686,36 @@
                 const sortedPosts = [...blogPosts].sort((a, b) => b.id - a.id);
                 
                 if (sortedPosts.length === 0) {
-                     moreBlogsList.innerHTML = `<p class="more-blog-link">No other posts found.</p>`;
+                     moreBlogsList.innerHTML = `<p class="p-2" style="color: var(--nav-link-color);">No other posts found.</p>`;
                      return;
                 }
 
                 sortedPosts.forEach(post => {
                     const link = document.createElement('a');
                     link.href = '#';
-                    link.className = 'more-blog-link truncate';
+                    link.className = 'more-blog-link';
                     link.dataset.postId = post.id;
-                    link.textContent = post.title;
                     link.title = post.title;
+
+                    // Create Tags HTML
+                    let tagsHTML = '';
+                    if (post.tags && post.tags.length > 0) {
+                        tagsHTML = post.tags.map(tag => `<span class="more-blog-tag">${tag}</span>`).join(' ');
+                    }
+
+                    // Set combined HTML
+                    link.innerHTML = `
+                        <span class="more-blog-link-title truncate">${post.title}</span>
+                        <div class="more-blog-meta">
+                            ${post.category ? `<span class="more-blog-category">${post.category}</span>` : ''}
+                            ${tagsHTML}
+                        </div>
+                    `;
                     moreBlogsList.appendChild(link);
                 });
             }
-            // === END NEW FUNCTION ===
+            // === END MODIFICATION ===
+
 
             function renderCurrentPage() {
                 const startIndex = (currentPage - 1) * postsPerPage;
@@ -921,7 +979,6 @@
                 }, typingSpeed);
             }
 
-            // === MODIFIED: showPost() function ===
             function showPost(postId) {
                 const post = blogPosts.find(p => p.id == postId);
                 if (!post) return;
@@ -933,7 +990,6 @@
                 
                 const postContent = document.getElementById('post-content');
                 
-                // Apply/remove prose-invert based on current theme
                 const currentTheme = localStorage.getItem('theme') || 'dark';
                 if (currentTheme === 'dark' || currentTheme === 'slate') {
                     postContent.classList.add('prose-invert');
@@ -944,43 +1000,34 @@
                 postContent.innerHTML = post.fullContent;
                 postContent.classList.add('prose-headings:font-bold');
 
-                // --- NEW: Highlight active post in "More Blogs" list ---
                 if (moreBlogsList) {
                     moreBlogsList.querySelectorAll('.more-blog-link').forEach(link => {
                         if (link.dataset.postId == postId) {
                             link.classList.add('more-blog-active');
-                            // Scroll it into view in the panel
                             link.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                         } else {
                             link.classList.remove('more-blog-active');
                         }
                     });
                 }
-                // --- END NEW ---
 
-                // --- MODIFIED: Toggle view classes ---
                 feedView.classList.add('hidden');
                 feedView.classList.remove('md:flex'); 
                 postView.classList.remove('hidden');
-                // Add flex classes for desktop two-column layout
                 postView.classList.add('md:flex', 'md:space-x-4', 'lg:space-x-8', 'animate__fadeIn'); 
-                // --- END MODIFICATION ---
 
                 window.scrollTo(0, 0);
                 lucide.createIcons();
             }
 
-            // === MODIFIED: showFeed() function ===
             function showFeed() {
                 postView.classList.add('hidden');
-                // Remove flex classes to hide the two-column layout
                 postView.classList.remove('md:flex', 'md:space-x-4', 'lg:space-x-8', 'animate__fadeIn');
                 feedView.classList.remove('hidden');
                 feedView.classList.add('md:flex'); 
                 feedView.classList.add('animate__fadeIn');
                 updateFeedTitle(); 
             }
-            // === END MODIFICATION ===
             
             function closeMobileMenu() {
                 if (!mobileMenu.classList.contains('hidden')) {
@@ -1052,7 +1099,6 @@
                 }
             });
 
-            // --- NEW: Event listener for "More Blogs" list ---
             if (moreBlogsList) {
                 moreBlogsList.addEventListener('click', (e) => {
                     const link = e.target.closest('.more-blog-link');
@@ -1062,7 +1108,6 @@
                     }
                 });
             }
-            // --- END NEW ---
 
             backButton.addEventListener('click', (e) => {
                 e.preventDefault();

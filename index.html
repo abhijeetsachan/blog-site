@@ -220,7 +220,7 @@
             color: var(--nav-link-hover);
         }
 
-        /* Styles for Comment Section */
+        /* === MODIFIED: Styles for Comment Section === */
         .comment-form-container {
             border-top: 1px solid var(--glass-border);
             padding-top: 1.5rem;
@@ -272,34 +272,57 @@
         
         #comments-list {
             margin-top: 2rem;
-            space-y: 1rem;
+            display: flex; /* NEW */
+            flex-direction: column; /* NEW */
+            gap: 1rem; /* NEW */
         }
         .comment-card {
             background-color: var(--mobile-menu-hover);
             border: 1px solid var(--glass-border);
             border-radius: 0.75rem;
             padding: 1rem 1.25rem;
+            display: flex; /* NEW: Use flexbox */
+            gap: 0.75rem; /* NEW: Space between avatar and content */
+            align-items: flex-start; /* NEW: Align avatar to top */
+        }
+        /* NEW: Avatar styles */
+        .comment-avatar img {
+            width: 40px;
+            height: 40px;
+            border-radius: 9999px;
+            flex-shrink: 0; /* Don't let avatar shrink */
+        }
+        /* NEW: Wrapper for name/date/body */
+        .comment-content-wrapper {
+            flex: 1; /* Take up remaining space */
+            min-width: 0; /* Fix flexbox overflow issue */
         }
         .comment-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.25rem; /* Reduced margin */
         }
         .comment-name {
             font-weight: 600;
             color: var(--body-color);
+            font-size: 0.95rem; 
         }
         .comment-date {
             font-size: 0.75rem; /* 12px */
             color: var(--nav-link-color);
             opacity: 0.8;
+            flex-shrink: 0; /* Don't let date wrap */
+            padding-left: 0.5rem;
         }
         .comment-body {
-            color: var(--body-color);
+            color: var(--nav-link-color); /* CHANGED: Better hierarchy */
             line-height: 1.6;
-            white-space: pre-wrap; /* Preserves line breaks */
+            white-space: pre-wrap;
+            font-size: 0.9rem;
+            word-wrap: break-word; /* Ensure long words break */
         }
+        /* === End Modified Styles === */
 
         .floating-element { animation: float 6s ease-in-out infinite; }
         @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
@@ -839,13 +862,27 @@
                         minute: '2-digit'
                     });
 
+                    // === MODIFIED: Create avatar URL ===
+                    const avatarName = encodeURIComponent(comment.name);
+                    // Generate a colorful, rounded avatar from the user's name
+                    const avatarURL = `https://ui-avatars.com/api/?name=${avatarName}&background=6366f1&color=fff&size=40&rounded=true&font-size=0.33`;
+                    // === END MODIFICATION ===
+
+                    // === MODIFIED: New HTML structure with avatar ===
                     commentEl.innerHTML = `
-                        <div class="comment-header">
-                            <span class="comment-name">${escapeHTML(comment.name)}</span>
-                            <span class="comment-date">${date}</span>
+                        <div class="comment-avatar">
+                            <img src="${avatarURL}" alt="${escapeHTML(comment.name)}" />
                         </div>
-                        <p class="comment-body">${escapeHTML(comment.content)}</p>
+                        <div class="comment-content-wrapper">
+                            <div class="comment-header">
+                                <span class="comment-name">${escapeHTML(comment.name)}</span>
+                                <span class="comment-date">${date}</span>
+                            </div>
+                            <p class="comment-body">${escapeHTML(comment.content)}</p>
+                        </div>
                     `;
+                    // === END MODIFICATION ===
+
                     commentsList.appendChild(commentEl);
                 });
             }

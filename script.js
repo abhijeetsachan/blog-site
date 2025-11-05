@@ -76,6 +76,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             let activeCategory = 'all';
             let activeTag = null; 
             let typewriterInterval = null; 
+            const LIKED_POSTS_KEY = 'likedPosts'; // --- NEW: localStorage key
 
             // --- PAGINATION STATE ---
             let filteredPosts = []; // Holds ALL filtered posts
@@ -118,6 +119,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             const commentContentInput = document.getElementById('comment-content');
             const commentSubmitBtn = document.getElementById('comment-submit-btn');
             
+            // --- NEW: LIKE & SHARE REFERENCES ---
+            const likeButton = document.getElementById('like-button');
+            const likeCount = document.getElementById('like-count');
+            const shareX = document.getElementById('share-x');
+            const shareLinkedin = document.getElementById('share-linkedin');
+            const shareReddit = document.getElementById('share-reddit');
+
             // --- Shared Category Colors Map ---
             const categoryColors = {
                 "Aphorism": "bg-purple-500/20 text-purple-300 border-purple-500/30",
@@ -135,7 +143,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }
                     const data = await response.json();
                     
-                    blogPosts = data.posts || [];
+                    blogPosts = data.posts || []; // This now includes 'likes'
                     allCategories = data.categories || {};
                     
                     renderCategories();
@@ -156,6 +164,26 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             // --- FUNCTIONS ---
+
+            // --- START: NEW LOCALSTORAGE HELPERS ---
+            function getLikedPosts() {
+                try {
+                    const liked = localStorage.getItem(LIKED_POSTS_KEY);
+                    return liked ? JSON.parse(liked) : [];
+                } catch (e) {
+                    console.error("Could not parse liked posts from localStorage", e);
+                    return [];
+                }
+            }
+
+            function saveLikedPosts(likedPostsArray) {
+                try {
+                    localStorage.setItem(LIKED_POSTS_KEY, JSON.stringify(likedPostsArray));
+                } catch (e) {
+                    console.error("Could not save liked posts to localStorage", e);
+                }
+            }
+            // --- END: NEW LOCALSTORAGE HELPERS ---
 
             // --- START: COMMENT LOGIC ---
             
@@ -388,6 +416,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                     postElement.className = 'post-card rounded-2xl overflow-hidden';
                     const color = categoryColors[post.category] || "bg-gray-500/20 text-gray-300 border-gray-500/30";
 
+                    // --- MODIFIED: Added Likes to Post Card ---
+                    // (Note: The HTML file provided didn't add this, but it's logical)
+                    // We will add it next to the "Read More" link
+                    const postLikes = post.likes || 0;
+                    
                     postElement.innerHTML = `
                         <img class="w-full h-64 object-cover post-image" src="${post.image}" alt="${post.title}" onerror="this.src='https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80'">
                         <div class="p-6 flex flex-col flex-grow">
@@ -403,10 +436,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 <p class="leading-relaxed mb-4" style="color: var(--nav-link-color);">${post.excerpt}</p>
                             </div>
                             <div class="mt-auto">
-                                <a href="#" class="view-post-link inline-flex items-center text-blue-400 hover:text-blue-300 font-medium group" data-post-id="${post.id}">
-                                Read More
-                                <i data-lucide="arrow-right" class="w-4 h-4 ml-1 transition-transform duration-200 group-hover:translate-x-1"></i>
-                                </a>
+                                <div class="flex justify-between items-center">
+                                    <a href="#" class="view-post-link inline-flex items-center text-blue-400 hover:text-blue-300 font-medium group" data-post-id="${post.id}">
+                                    Read More
+                                    <i data-lucide="arrow-right" class="w-4 h-4 ml-1 transition-transform duration-200 group-hover:translate-x-1"></i>
+                                    </a>
+                                    <div class="flex items-center gap-1 text-sm" style="color: var(--nav-link-color);">
+                                        <i data-lucide="heart" class="w-4 h-4 ${postLikes > 0 ? 'text-pink-500 fill-pink-500' : ''}"></i>
+                                        <span>${postLikes}</span>
+                                    </div>
+                                </div>
                                 <div class="mt-4 flex flex-wrap gap-2">
                                 ${(post.tags || []).map(tag => `
                                     <span class="flex items-center text-xs font-medium px-2.5 py-0.5 rounded-full" style="background-color: var(--glass-bg); color: var(--nav-link-color); border: 1px solid var(--glass-border);">
@@ -561,30 +600,32 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }, typingSpeed);
             }
 
+            // --- MODIFIED: showPost() ---
             function showPost(postId) {
                 const post = blogPosts.find(p => p.id == postId);
                 if (!post) return;
 
-                // --- NEW: Set URL Hash ---
+                // --- Hash Routing ---
                 window.location.hash = '#post/' + postId;
 
+                // --- Basic Post Info ---
                 document.getElementById('post-title').innerHTML = `<i data-lucide="book-open" class="w-10 h-10 -mt-2 mr-3 inline-block text-gray-500"></i> ${post.title}`;
                 document.getElementById('post-date').innerHTML = `<i data-lucide="calendar-days" class="w-4 h-4 mr-2 inline-block text-gray-500"></i> ${post.date}`;
                 document.getElementById('post-image').src = post.image; 
                 document.getElementById('post-image').alt = post.title; 
                 
+                // --- Post Content & Theme ---
                 const postContent = document.getElementById('post-content');
-                
                 const currentTheme = localStorage.getItem('theme') || 'dark';
                 if (currentTheme === 'dark' || currentTheme === 'slate') {
                     postContent.classList.add('prose-invert');
                 } else {
                     postContent.classList.remove('prose-invert');
                 }
-                
                 postContent.innerHTML = post.fullContent;
                 postContent.classList.add('prose-headings:font-bold');
 
+                // --- More Blogs List ---
                 if (moreBlogsList) {
                     moreBlogsList.querySelectorAll('.more-blog-link').forEach(link => {
                         if (link.dataset.postId == postId) {
@@ -596,19 +637,38 @@ document.addEventListener('DOMContentLoaded', async () => {
                     });
                 }
 
+                // --- View Switching ---
                 feedView.classList.add('hidden');
                 feedView.classList.remove('md:flex'); 
                 postView.classList.remove('hidden');
                 postView.classList.add('md:flex', 'md:space-x-4', 'lg:space-x-8', 'animate__fadeIn'); 
 
-                // === THIS IS THE FIX ===
-                // 1. Reset the form first (clears all fields)
+                // --- Comment Form Reset ---
                 if (commentForm) commentForm.reset();
-                // 2. THEN set the hidden post ID
                 if (commentPostIdInput) commentPostIdInput.value = post.id;
-                // 3. Load the comments for this post
                 loadComments(post.id);
-                // === END FIX ===
+
+                // --- NEW: Likes & Share Logic ---
+                const postUrl = `${window.location.origin}${window.location.pathname}#post/${post.id}`;
+                const postTitle = post.title;
+
+                // 1. Set Like Button State
+                const currentLikes = post.likes || 0;
+                likeCount.textContent = currentLikes;
+                likeButton.classList.remove('liked');
+                likeButton.disabled = false;
+                
+                const likedPosts = getLikedPosts();
+                if (likedPosts.includes(post.id)) {
+                    likeButton.classList.add('liked');
+                    likeButton.disabled = true; // Already liked
+                }
+
+                // 2. Set Share URLs
+                shareX.href = `https://twitter.com/intent/tweet?url=${encodeURIComponent(postUrl)}&text=${encodeURIComponent(postTitle)}`;
+                shareLinkedin.href = `https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(postUrl)}&title=${encodeURIComponent(postTitle)}`;
+                shareReddit.href = `https://www.reddit.com/submit?url=${encodeURIComponent(postUrl)}&title=${encodeURIComponent(postTitle)}`;
+                // --- END: New Logic ---
 
                 window.scrollTo(0, 0);
                 lucide.createIcons();
@@ -621,9 +681,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 feedView.classList.add('md:flex'); 
                 feedView.classList.add('animate__fadeIn');
                 
-                // --- NEW: Render the feed and clear the hash ---
-                filterAndRender(); // <-- ADDED
-                window.location.hash = ''; // <-- ADDED
+                // --- MODIFIED: Render the feed and clear the hash ---
+                filterAndRender(); 
+                window.location.hash = ''; 
             }
             
             // --- NEW: Router function ---
@@ -775,6 +835,58 @@ document.addEventListener('DOMContentLoaded', async () => {
             toTopButton.addEventListener('click', () => {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             });
+
+            // --- NEW: Like Button Click Handler ---
+            async function handleLikePost(postId) {
+                // 1. Prevent double-clicks
+                likeButton.disabled = true;
+
+                // 2. Optimistic UI update
+                const likedPosts = getLikedPosts();
+                if (likedPosts.includes(postId)) return; // Already liked, shouldn't happen
+                
+                likedPosts.push(postId);
+                saveLikedPosts(likedPosts);
+                
+                likeButton.classList.add('liked');
+                const newCount = parseInt(likeCount.textContent) + 1;
+                likeCount.textContent = newCount;
+
+                // 3. Send request to backend
+                try {
+                    const response = await fetch(`/api/posts/like/${postId}`, { method: 'POST' });
+                    
+                    if (!response.ok) {
+                        // Failed, so roll back the UI
+                        throw new Error('Like request failed');
+                    }
+                    
+                    // Success! UI is already updated.
+                    console.log('Post liked successfully');
+                    
+                } catch (error) {
+                    // Rollback on error
+                    console.error(error);
+                    showSnackbar('Like failed. Please try again.');
+                    likeButton.disabled = false;
+                    likeButton.classList.remove('liked');
+                    likeCount.textContent = newCount - 1; // Revert count
+                    
+                    const rolledBackLikes = getLikedPosts().filter(id => id !== postId);
+                    saveLikedPosts(rolledBackLikes);
+                }
+            }
+
+            if (likeButton) {
+                likeButton.addEventListener('click', () => {
+                    const postId = commentPostIdInput.value; // Get current post ID
+                    if (postId && !likeButton.disabled) {
+                        handleLikePost(postId);
+                    }
+                });
+            }
+            // --- END: Like Button Logic ---
+
 
             // --- INITIAL LOAD ---
             loadBlogData(); 

@@ -55,6 +55,7 @@
             --mobile-menu-hover: #1f2937; /* gray-800 */
             --category-link-color: #d1d5db; /* gray-300 */
             --category-hover-bg: #1f2937; /* gray-800 */
+            --more-blogs-active-bg: rgba(255, 255, 255, 0.1); /* NEW */
         }
 
         /* === 2. LIGHT THEME (Good Contrast) === */
@@ -72,6 +73,7 @@
             --mobile-menu-hover: #f1f5f9; /* Slate-100 */
             --category-link-color: #475569;
             --category-hover-bg: #f1f5f9;
+            --more-blogs-active-bg: var(--mobile-menu-hover); /* NEW */
         }
         
         /* === 3. SEPIA THEME (Visibility Perfected) === */
@@ -88,6 +90,7 @@
             --mobile-menu-hover: #f5f1e9;
             --category-link-color: #5d4037;
             --category-hover-bg: #f5f1e9;
+            --more-blogs-active-bg: var(--mobile-menu-hover); /* NEW */
         }
         
         /* === 4. SLATE THEME (Good Contrast) === */
@@ -105,6 +108,7 @@
             --mobile-menu-hover: #334155; /* slate-800 */
             --category-link-color: #cbd5e1;
             --category-hover-bg: #334155;
+            --more-blogs-active-bg: rgba(255, 255, 255, 0.1); /* NEW */
         }
 
         /* === 5. MATCHA THEME (Visibility Perfected) === */
@@ -121,6 +125,7 @@
             --mobile-menu-hover: #ecfdf5; /* Green-100 */
             --category-link-color: #065f46;
             --category-hover-bg: #ecfdf5;
+            --more-blogs-active-bg: var(--mobile-menu-hover); /* NEW */
         }
         
         /* Apply the variables */
@@ -166,16 +171,16 @@
             line-height: 1.4;
         }
         .more-blog-link:hover {
-            background-color: var(--mobile-menu-hover);
+            background-color: var(--more-blogs-active-bg); /* Use active bg for hover */
         }
         .more-blog-active {
-            background-color: var(--mobile-menu-hover);
+            background-color: var(--more-blogs-active-bg); /* Use new variable */
         }
         .more-blog-link-title {
-            display: block; /* Ensures it's on its own line */
+            display: block;
             font-weight: 600;
             color: var(--body-color);
-            margin-bottom: 0.25rem; /* Space between title and meta */
+            margin-bottom: 0.25rem;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -194,20 +199,20 @@
         .more-blog-active .more-blog-meta {
             opacity: 1;
         }
-        .more-blog-category {
+        /* NEW Pill class (replaces .more-blog-category) */
+        .more-blog-category-pill {
             display: inline-flex;
             align-items: center;
-            padding: 0.125rem 0.5rem; /* py-0.5 px-2 */
-            border-radius: 9999px; /* rounded-full */
+            padding: 0.125rem 0.5rem;
+            border-radius: 9999px;
             font-weight: 500;
-            background-color: rgba(99, 102, 241, 0.2); /* Theme-agnostic purple */
-            color: #6366f1;
+            border: 1px solid transparent;
         }
         .more-blog-tag {
             display: inline-flex;
             align-items: center;
-            padding: 0.125rem 0.5rem; /* py-0.5 px-2 */
-            border-radius: 9999px; /* rounded-full */
+            padding: 0.125rem 0.5rem;
+            border-radius: 9999px;
             font-weight: 500;
             background-color: rgba(120, 120, 120, 0.2);
             color: var(--nav-link-color);
@@ -390,7 +395,7 @@
                         More Blogs
                     </h3>
                     <div id="more-blogs-list" class="space-y-2 max-h-[70vh] overflow-y-auto scrollbar-thin pr-2">
-                        <p class="more-blog-link">Loading...</p>
+                        <p class="p-2" style="color: var(--nav-link-color);">Loading...</p>
                     </div>
                 </div>
             </aside>
@@ -647,6 +652,15 @@
             const snackbarMessage = document.getElementById('snackbar-message');
             const toTopButton = document.getElementById('to-top-button');
             
+            // === NEW: Shared Category Colors Map ===
+            const categoryColors = {
+                "Aphorism": "bg-purple-500/20 text-purple-300 border-purple-500/30",
+                "Essay": "bg-blue-500/20 text-blue-300 border-blue-500/30",
+                "Story writing": "bg-green-500/20 text-green-300 border-green-500/30",
+                "Poetry": "bg-pink-500/20 text-pink-300 border-pink-500/30"
+            };
+            // === END NEW ===
+
             // --- FETCH LOGIC ---
             async function loadBlogData() {
                 try {
@@ -697,17 +711,21 @@
                     link.dataset.postId = post.id;
                     link.title = post.title;
 
+                    // Get the correct category color class
+                    const colorClass = categoryColors[post.category] || "bg-gray-500/20 text-gray-300 border-gray-500/30";
+
                     // Create Tags HTML
                     let tagsHTML = '';
                     if (post.tags && post.tags.length > 0) {
-                        tagsHTML = post.tags.map(tag => `<span class="more-blog-tag">${tag}</span>`).join(' ');
+                        // Limit tags to 2 for space
+                        tagsHTML = post.tags.slice(0, 2).map(tag => `<span class="more-blog-tag">${tag}</span>`).join(' ');
                     }
 
                     // Set combined HTML
                     link.innerHTML = `
                         <span class="more-blog-link-title truncate">${post.title}</span>
                         <div class="more-blog-meta">
-                            ${post.category ? `<span class="more-blog-category">${post.category}</span>` : ''}
+                            ${post.category ? `<span class="more-blog-category-pill ${colorClass}">${post.category}</span>` : ''}
                             ${tagsHTML}
                         </div>
                     `;
@@ -794,12 +812,7 @@
                     return; 
                 }
 
-                const categoryColors = {
-                    "Aphorism": "bg-purple-500/20 text-purple-300 border-purple-500/30",
-                    "Essay": "bg-blue-500/20 text-blue-300 border-blue-500/30",
-                    "Story writing": "bg-green-500/20 text-green-300 border-green-500/30",
-                    "Poetry": "bg-pink-500/20 text-pink-300 border-pink-500/30"
-                };
+                // categoryColors map is now in global scope
 
                 postsToRender.forEach(post => {
                     const postElement = document.createElement('article');

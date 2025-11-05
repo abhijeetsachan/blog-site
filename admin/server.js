@@ -558,7 +558,7 @@ app.put('/api/tags/:categoryName/:tagName', checkApiAuth, async (req, res) => {
     const { newTagName } = req.body;
     console.log(`[PUT /api/tags] Request to rename tag '${oldTagName}' to '${newTagName}' in '${categoryName}'`);
 
-    if (!newTagName || newTagName.trim() === '') {
+    if (!newTagName || newName.trim() === '') {
         return res.status(400).json({ message: 'New tag name is required.' });
     }
 
@@ -706,37 +706,43 @@ app.get('/api/comments/:postId', async (req, res) => {
 app.post('/api/comments', async (req, res) => {
     
     // === THIS IS THE FIX ===
-    // We parse the post_id to a number, as it comes from the client as a string
-    const { name, content } = req.body;
-    const post_id = parseInt(req.body.post_id, 10);
-    // === END FIX ===
+    const { post_id, name, content } = req.body;
 
-    // Trim content to prevent empty strings
+    // 1. Check if fields exist *before* trying to use them
+    if (!post_id || !name || !content) {
+        console.error('Validation failed: Missing fields.', req.body);
+        return res.status(400).json({ message: 'Missing required fields (post_id, name, content).' });
+    }
+    
+    // 2. Now that we know they exist, parse/trim them
+    const numeric_post_id = parseInt(post_id, 10);
     const trimmedName = name.trim();
     const trimmedContent = content.trim();
 
-    if (!post_id || !trimmedName || !trimmedContent) {
-        return res.status(400).json({ message: 'Missing required fields.' });
+    // 3. Check if they are empty *after* trimming
+    if (!numeric_post_id || !trimmedName || !trimmedContent) {
+        console.error('Validation failed: Fields are empty after trimming.');
+        return res.status(400).json({ message: 'All fields must have a value.' });
     }
     
+    // 4. Proceed with insert
     const { data, error } = await supabase
         .from('comments')
         .insert([
-            // Use the parsed/trimmed values
-            { post_id: post_id, name: trimmedName, content: trimmedContent }
+            { post_id: numeric_post_id, name: trimmedName, content: trimmedContent }
         ])
         .select();
 
     if (error) {
         console.error('Supabase error (inserting comment):', error.message);
+        console.error('Data sent to Supabase:', { post_id: numeric_post_id, name: trimmedName, content: trimmedContent });
         return res.status(500).json({ message: 'Error posting comment.' });
     }
 
     console.log('New comment posted, awaiting moderation.');
-    // Return a success message instead of the comment data
     res.status(201).json({ message: 'Comment submitted for moderation!' });
 });
-// === END OF NEW ROUTES ===
+// === END OF COMMENT ROUTES ===
 
 
 // --- STATIC FILE SERVER (NOW LAST) ---

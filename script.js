@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 { name: 'sepia', icon: 'book-open', label: 'Sepia Theme' },
                 { name: 'slate', icon: 'layers', label: 'Slate Theme' },
                 { name: 'matcha', icon: 'leaf', label: 'Matcha Theme' },
-                        { name: 'academic', icon: 'book-heart', label: 'Academic Theme' },
+                { name: 'academic', icon: 'book-heart', label: 'Academic Theme' },
             ];
             
             const themeToggleButton = document.getElementById('theme-toggle-btn');
@@ -18,16 +18,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             const mobileThemeLabel = document.getElementById('mobile-theme-label');
             const postContent = document.getElementById('post-content');
             
-            // --- FIX: Select icons *every time* the function runs ---
-                const desktopIcons = document.querySelectorAll('[data-theme-icon]');
-                const mobileIcons = document.querySelectorAll('[data-theme-icon-mobile]');
+            // --- FIX 1: Icon selectors are MOVED from here ---
 
             function applyTheme(themeName) {
+                // --- FIX 1: Icon selectors are MOVED *INSIDE* here ---
+                const desktopIcons = document.querySelectorAll('[data-theme-icon]');
+                const mobileIcons = document.querySelectorAll('[data-theme-icon-mobile]');
+                // --- END FIX 1 ---
+
                 const theme = THEMES.find(t => t.name === themeName) || THEMES[0];
                 document.documentElement.setAttribute('data-theme', theme.name);
                 localStorage.setItem('theme', theme.name);
                 
-                if (theme.name === 'dark' || theme.name === 'slate') {
+                if (theme.name === 'dark' || theme.name === 'slate' || theme.name === 'academic') {
                     if (postContent) postContent.classList.add('prose-invert');
                 } else {
                     if (postContent) postContent.classList.remove('prose-invert');
@@ -45,7 +48,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     mobileThemeLabel.textContent = theme.label;
                 }
             }
-
+            
+            // --- FIX 2: This function is now *OUTSIDE* (separate from) applyTheme ---
             function cycleTheme(e) {
                 e.preventDefault(); 
                 const currentThemeName = localStorage.getItem('theme') || 'dark';
@@ -55,7 +59,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 
                 // The 'if' block that called closeMobileMenu() has been removed.
             }
-            }
+            // --- END FIX 2 ---
 
             themeToggleButton.addEventListener('click', cycleTheme);
             mobileThemeToggle.addEventListener('click', cycleTheme);
@@ -608,7 +612,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // --- Post Content & Theme ---
                 const postContent = document.getElementById('post-content');
                 const currentTheme = localStorage.getItem('theme') || 'dark';
-                if (currentTheme === 'dark' || currentTheme === 'slate') {
+                if (currentTheme === 'dark' || currentTheme === 'slate' || currentTheme === 'academic') {
                     postContent.classList.add('prose-invert');
                 } else {
                     postContent.classList.remove('prose-invert');
@@ -649,7 +653,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 console.log("Running showPost function for post:", post.title);
                 console.log("Found like button:", likeButton);
                 console.log("Found like count span:", likeCount);
-                // console.log("Found share-x link:", shareInstagram); // <-- FIX 1: This line caused a crash
+                // console.log("Found share-x link:", shareInstagram); // <-- This line was broken
                 // --- END DIAGNOSTIC TEST ---
 
 
@@ -890,7 +894,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }
                     
                     console.log('Post liked successfully');
-                    // --- FIX 2: Changed to a string-based comparison ---
                     const postInList = blogPosts.find(p => p.id.toString() === postId);
                     if (postInList) postInList.likes = newCount;
                     

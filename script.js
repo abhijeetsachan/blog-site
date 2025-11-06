@@ -124,7 +124,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             // --- UPDATED: LIKE & SHARE REFERENCES ---
             const likeButton = document.getElementById('like-button');
             const likeCount = document.getElementById('like-count');
-            const shareInstagram = document.getElementById('share-instagram');
+            // const shareInstagram = document.getElementById('share-instagram');
             const shareFacebook = document.getElementById('share-facebook');
             const shareWhatsapp = document.getElementById('share-whatsapp');
             const shareTelegram = document.getElementById('share-telegram');
@@ -666,7 +666,8 @@ console.log("Found share-x link:", shareInstagram);
                 }
 
                 // 2. Set Share URLs (Now with Facebook, WhatsApp, Telegram)
-                if(shareInstagram) {
+                /*
+                        if(shareInstagram) {
                     shareInstagram.href = `#`; // No direct share URL
                     shareInstagram.title = "Share on Instagram";
                     shareInstagram.onclick = (e) => {
@@ -674,6 +675,7 @@ console.log("Found share-x link:", shareInstagram);
                         showSnackbar('Instagram does not support direct web sharing.');
                     };
                 }
+                        */
                 if(shareFacebook) shareFacebook.href = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
                 if(shareWhatsapp) shareWhatsapp.href = `https://api.whatsapp.com/send?text=${encodedTitle} ${encodedUrl}`;
                 if(shareTelegram) shareTelegram.href = `https://t.me/share/url?url=${encodedUrl}&text=${encodedTitle}`;

@@ -645,11 +645,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const encodedTitle = encodeURIComponent(postTitle);
 
                         // --- START DIAGNOSTIC TEST ---
-console.log("Running showPost function for post:", post.title);
-console.log("Found like button:", likeButton);
-console.log("Found like count span:", likeCount);
-console.log("Found share-x link:", shareInstagram);
-// --- END DIAGNOSTIC TEST ---
+                console.log("Running showPost function for post:", post.title);
+                console.log("Found like button:", likeButton);
+                console.log("Found like count span:", likeCount);
+                // console.log("Found share-x link:", shareInstagram); // <-- FIX 1: This line caused a crash
+                // --- END DIAGNOSTIC TEST ---
 
 
                 // 1. Set Like Button State
@@ -877,7 +877,8 @@ console.log("Found share-x link:", shareInstagram);
                     }
                     
                     console.log('Post liked successfully');
-                            const postInList = blogPosts.find(p => p.id === parseInt(postId, 10)); // <-- FIX
+                    // --- FIX 2: Changed to a string-based comparison ---
+                    const postInList = blogPosts.find(p => p.id.toString() === postId);
                     if (postInList) postInList.likes = newCount;
                     
                 } catch (error) {

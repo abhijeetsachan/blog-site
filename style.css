@@ -263,23 +263,31 @@ html { scroll-behavior: smooth; }
             min-width: 0; /* Fix flexbox overflow issue */
         }
         .comment-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.25rem; /* Reduced margin */
-        }
-        .comment-name {
-            font-weight: 600;
-            color: var(--body-color);
-            font-size: 0.95rem; 
-        }
-        .comment-date {
-            font-size: 0.75rem; /* 12px */
-            color: var(--nav-link-color);
-            opacity: 0.8;
-            flex-shrink: 0; /* Don't let date wrap */
-            padding-left: 0.5rem;
-        }
+    display: flex;
+    /* justify-content: space-between; */ /* REMOVED */
+    align-items: flex-start; /* Changed to start */
+    flex-wrap: wrap; /* NEW: Allow wrapping */
+    gap: 0.25rem 1rem; /* NEW: row and col gap */
+    margin-bottom: 0.25rem;
+}
+.comment-name {
+    font-weight: 600;
+    color: var(--body-color);
+    font-size: 0.95rem; 
+    flex-grow: 1; /* NEW: Let name grow and push date */
+    
+    /* Add break-words for very long names without spaces */
+    overflow-wrap: break-word;
+    word-break: break-all;
+    min-width: 0; /* for flex context */
+}
+.comment-date {
+    font-size: 0.75rem; /* 12px */
+    color: var(--nav-link-color);
+    opacity: 0.8;
+    flex-shrink: 0; /* Keep date from shrinking */
+    /* padding-left: 0.5rem; */ /* REMOVED: Handled by gap */
+}
         .comment-body {
             color: var(--nav-link-color); /* CHANGED: Better hierarchy */
             line-height: 1.6;

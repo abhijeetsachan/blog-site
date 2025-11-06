@@ -2,13 +2,6 @@ console.log("--- SCRIPT.JS FILE HAS LOADED (Test 1) ---");
 
 document.addEventListener('DOMContentLoaded', async () => {
 
-    console.log("--- DOMCONTENTLOADED EVENT FIRED (Test 2) ---");
-    
-    // --- START: MULTI-THEME TOGGLE LOGIC ---
-    // ... (rest of your code)
-
-document.addEventListener('DOMContentLoaded', async () => {
-
             // --- START: MULTI-THEME TOGGLE LOGIC ---
             
             const THEMES = [

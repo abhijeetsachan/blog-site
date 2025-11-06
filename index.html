@@ -76,6 +76,14 @@
                 </div>
 
                 <div class="lg:hidden flex items-center">
+                    <button id="mobile-theme-toggle" class="p-2 rounded-full transition-all" style="color: var(--nav-link-color); background-color: var(--mobile-menu-hover);">
+                        <i data-theme-icon-mobile="dark" data-lucide="moon" class="w-5 h-5 hidden"></i>
+                        <i data-theme-icon-mobile="light" data-lucide="sun" class="w-5 h-5 hidden"></i>
+                        <i data-theme-icon-mobile="sepia" data-lucide="book-open" class="w-5 h-5 hidden"></i>
+                        <i data-theme-icon-mobile="slate" data-lucide="layers" class="w-5 h-5 hidden"></i>
+                        <i data-theme-icon-mobile="matcha" data-lucide="leaf" class="w-5 h-5 hidden"></i>
+                    </button>
+
                     <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md" style="color: var(--nav-link-color);" aria-expanded="false">
                         <span class="sr-only">Open main menu</span>
                         <svg id="menu-icon-closed" class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -98,18 +106,7 @@
                     <i data-lucide="mail" class="w-5 h-5 mr-2"></i> Contact
                 </a>
                 
-                <a href="#" id="mobile-theme-toggle" class="mobile-nav-link flex items-center block px-3 py-2 rounded-md text-base font-medium">
-                    <span class="w-5 h-5 mr-2">
-                        <i data-theme-icon-mobile="dark" data-lucide="moon" class="w-5 h-5 hidden"></i>
-                        <i data-theme-icon-mobile="light" data-lucide="sun" class="w-5 h-5 hidden"></i>
-                        <i data-theme-icon-mobile="sepia" data-lucide="book-open" class="w-5 h-5 hidden"></i>
-                        <i data-theme-icon-mobile="slate" data-lucide="layers" class="w-5 h-5 hidden"></i>
-                        <i data-theme-icon-mobile="matcha" data-lucide="leaf" class="w-5 h-5 hidden"></i>
-                        <i data-theme-icon-mobile="academic" data-lucide="book-heart" class="w-5 h-5 hidden"></i>
-                    </span>
-                    <span id="mobile-theme-label">Change Theme</span>
-                </a>
-            </div>
+                </div>
         </div>
     </header>
 
@@ -342,6 +339,7 @@
 </body>
 
 </html>
+
 
 
 

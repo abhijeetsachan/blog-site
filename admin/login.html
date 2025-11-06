@@ -48,6 +48,21 @@
             box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.3);
             outline: none;
         }
+
+        /* === NEW: Override Browser Autofill Styles === */
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover, 
+        input:-webkit-autofill:focus, 
+        input:-webkit-autofill:active {
+            /* 1. Set the text color to light */
+            -webkit-text-fill-color: #e2e8f0 !important; /* Matches .form-input color */
+            
+            /* 2. Force the background to stay dark (using a box-shadow trick) */
+            -webkit-box-shadow: 0 0 0 30px rgba(15, 15, 35, 0.8) inset !important; /* Matches .form-input bg */
+            
+            /* 3. (Optional but good) Force the caret color */
+            caret-color: #e2e8f0 !important;
+        }
         
         /* === NEW: Styles for Input Icons === */
         .input-icon {

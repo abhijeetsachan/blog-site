@@ -124,7 +124,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             // --- UPDATED: LIKE & SHARE REFERENCES ---
             const likeButton = document.getElementById('like-button');
             const likeCount = document.getElementById('like-count');
-            const shareX = document.getElementById('share-x');
+            const shareInstagram = document.getElementById('share-instagram');
             const shareFacebook = document.getElementById('share-facebook');
             const shareWhatsapp = document.getElementById('share-whatsapp');
             const shareTelegram = document.getElementById('share-telegram');
@@ -648,7 +648,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 console.log("Running showPost function for post:", post.title);
 console.log("Found like button:", likeButton);
 console.log("Found like count span:", likeCount);
-console.log("Found share-x link:", shareX);
+console.log("Found share-x link:", shareInstagram);
 // --- END DIAGNOSTIC TEST ---
 
 
@@ -666,7 +666,14 @@ console.log("Found share-x link:", shareX);
                 }
 
                 // 2. Set Share URLs (Now with Facebook, WhatsApp, Telegram)
-                if(shareX) shareX.href = `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`;
+                if(shareInstagram) {
+                    shareInstagram.href = `#`; // No direct share URL
+                    shareInstagram.title = "Share on Instagram";
+                    shareInstagram.onclick = (e) => {
+                        e.preventDefault();
+                        showSnackbar('Instagram does not support direct web sharing.');
+                    };
+                }
                 if(shareFacebook) shareFacebook.href = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
                 if(shareWhatsapp) shareWhatsapp.href = `https://api.whatsapp.com/send?text=${encodedTitle} ${encodedUrl}`;
                 if(shareTelegram) shareTelegram.href = `https://t.me/share/url?url=${encodedUrl}&text=${encodedTitle}`;

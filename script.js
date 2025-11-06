@@ -53,9 +53,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const nextIndex = (currentIndex + 1) % THEMES.length;
                 applyTheme(THEMES[nextIndex].name);
                 
-                if (e.currentTarget.id === 'mobile-theme-toggle') {
-                    closeMobileMenu();
-                }
+                // The 'if' block that called closeMobileMenu() has been removed.
+            }
             }
 
             themeToggleButton.addEventListener('click', cycleTheme);

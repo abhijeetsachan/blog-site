@@ -96,7 +96,7 @@ html { scroll-behavior: smooth; }
 /* === 6. NEW: ACADEMIC DARK (Best for Reading) === */
         html[data-theme="academic"] {
             --primary-gradient: linear-gradient(135deg, #475569 0%, #38b2ac 100%); /* Slate to Teal */
-            --secondary-gradient: linear-gradient(135deg, #276749 0%, #2f855a 100%); /* NEW: Deep Forest Green */
+            --secondary-gradient: linear-gradient(135deg, #c05621 0%, #dd6b20 100%); /* NEW: Burnt Copper */
             --glass-bg: rgba(45, 55, 72, 0.7); /* Dark Slate Alpha */
             --glass-border: rgba(255, 255, 255, 0.15);
             --body-bg: #1a202c; /* Very Dark Desaturated Blue */

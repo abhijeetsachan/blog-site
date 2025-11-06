@@ -676,9 +676,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                     };
                 }
                         */
-                if(shareFacebook) shareFacebook.href = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
-                if(shareWhatsapp) shareWhatsapp.href = `https://api.whatsapp.com/send?text=${encodedTitle} ${encodedUrl}`;
-                if(shareTelegram) shareTelegram.href = `https://t.me/share/url?url=${encodedUrl}&text=${encodedTitle}`;
+                // --- NEW: Define custom share text ---
+                const shareTextLine1 = "Hey! Check out my blog post:";
+                const shareTextLine3 = "You can read it here:";
+
+                // For services that support line breaks (WhatsApp, Telegram)
+                // %0A is a line break
+                const shareTextForApps = `${encodeURIComponent(shareTextLine1)}%0A${encodedTitle}%0A%0A${encodeURIComponent(shareTextLine3)} ${encodedUrl}`;
+
+                // For Facebook (quote param doesn't handle line breaks well)
+                const shareTextForFacebook = `${shareTextLine1} ${encodedTitle}`;
+                
+                // --- Apply to all buttons ---
+                if(shareFacebook) shareFacebook.href = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}&quote=${shareTextForFacebook}`;
+                if(shareWhatsapp) shareWhatsapp.href = `https://api.whatsapp.com/send?text=${shareTextForApps}`;
+                if(shareTelegram) shareTelegram.href = `https://t.me/share/url?url=${encodedUrl}&text=${shareTextForApps}`;
                 // --- END: Updated Logic ---
 
                 window.scrollTo(0, 0);

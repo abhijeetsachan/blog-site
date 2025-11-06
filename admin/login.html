@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Login</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
     <style>
         :root {
             --primary-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
@@ -38,44 +41,135 @@
             border-radius: 0.5rem;
             padding: 0.75rem 1rem;
             width: 100%;
+            transition: all 0.2s ease;
         }
         .form-input:focus {
             border-color: #8b5cf6;
             box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.3);
             outline: none;
         }
+        
+        /* === NEW: Styles for Input Icons === */
+        .input-icon {
+            position: absolute;
+            left: 0.875rem; /* 14px */
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af; /* gray-400 */
+            pointer-events: none;
+        }
+        .form-input-with-icon {
+            padding-left: 2.75rem; /* 44px */
+        }
+        
+        /* === NEW: Styles for Password Toggle === */
+        .password-toggle {
+            position: absolute;
+            right: 0.875rem; /* 14px */
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af; /* gray-400 */
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+        .password-toggle:hover {
+            color: #e2e8f0;
+        }
+
+        /* === NEW: Styles for Error Box === */
+        .error-box {
+            background-color: rgba(239, 68, 68, 0.1); /* red-500/10 */
+            border: 1px solid rgba(239, 68, 68, 0.3); /* red-500/30 */
+            color: #f87171; /* red-400 */
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
 
     <div class="w-full max-w-md">
-        <form action="/admin/login" method="POST" class="glass rounded-2xl shadow-xl p-8 md:p-10 space-y-6">
-            <h1 class="text-3xl font-bold gradient-text text-center">Admin Login</h1>
+        <!-- Added animation class -->
+        <form action="/admin/login" method="POST" class="glass rounded-2xl shadow-xl p-8 md:p-10 space-y-6 animate__animated animate__fadeInDown">
             
-            <div id="error-message" class="text-center text-red-400 text-sm"></div>
+            <!-- Added Branding -->
+            <div class="text-center">
+                <h1 class="text-3xl font-bold gradient-text">Ridhi's Blog</h1>
+                <h2 class="text-xl font-medium text-gray-300">Admin Panel Login</h2>
+            </div>
+            
+            <!-- Upgraded Error Message Box -->
+            <div id="error-message-box" class="error-box hidden">
+                <i data-lucide="alert-triangle" class="w-5 h-5 flex-shrink-0"></i>
+                <span id="error-message-text"></span>
+            </div>
 
-            <div>
+            <!-- Username with Icon -->
+            <div> <!-- DIV was class="relative" -->
                 <label for="username" class="block text-sm font-medium mb-2">Username</label>
-                <input type="text" id="username" name="username" class="form-input" required>
+                <div class="relative"> <!-- NEW relative container for icon + input -->
+                    <i data-lucide="user" class="input-icon w-5 h-5"></i>
+                    <input type="text" id="username" name="username" class="form-input form-input-with-icon" required>
+                </div>
             </div>
             
-            <div>
+            <!-- Password with Icon and Toggle -->
+            <div> <!-- DIV was class="relative" -->
                 <label for="password" class="block text-sm font-medium mb-2">Password</label>
-                <input type="password" id="password" name="password" class="form-input" required>
+                <div class="relative"> <!-- NEW relative container for icon + input -->
+                    <i data-lucide="lock" class="input-icon w-5 h-5"></i>
+                    <input type="password" id="password" name="password" class="form-input form-input-with-icon pr-12" required>
+                    <i id="password-toggle-icon" data-lucide="eye" class="password-toggle w-5 h-5"></i>
+                </div>
             </div>
             
-            <button type="submit" class="w-full gradient-bg text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-transform hover:scale-105">
-                Login
+            <!-- Button with Icon -->
+            <button type="submit" class="w-full gradient-bg text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-transform hover:scale-105 flex items-center justify-center gap-2">
+                <i data-lucide="log-in" class="w-5 h-5"></i>
+                <span>Login</span>
             </button>
         </form>
+
+        <!-- Back to Site Link -->
+        <div class="text-center mt-6">
+            <a href="../index.html" class="text-sm text-indigo-400 hover:text-indigo-300 transition-colors flex items-center justify-center gap-1.5">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                Back to Public Site
+            </a>
+        </div>
     </div>
 
     <script>
         // Show an error message if the URL has ?error=1
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.has('error')) {
-            document.getElementById('error-message').textContent = 'Invalid username or password.';
+            document.getElementById('error-message-text').textContent = 'Invalid username or password.';
+            document.getElementById('error-message-box').classList.remove('hidden');
         }
+
+        // --- NEW: Password Toggle Script ---
+        const passwordInput = document.getElementById('password');
+        const toggleIcon = document.getElementById('password-toggle-icon');
+
+        toggleIcon.addEventListener('click', () => {
+            const isPassword = passwordInput.type === 'password';
+            
+            if (isPassword) {
+                passwordInput.type = 'text';
+                toggleIcon.setAttribute('data-lucide', 'eye-off');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.setAttribute('data-lucide', 'eye');
+            }
+            // Re-render the icon
+            lucide.createIcons();
+        });
+        
+        // Initial icon render
+        lucide.createIcons();
     </script>
 
 </body>

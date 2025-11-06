@@ -665,7 +665,7 @@ app.get('/api/admin/comments', checkApiAuth, async (req, res) => {
     // Join with posts to get post title, which is helpful for context
     const { data: comments, error } = await supabase
         .from('comments')
-        .select(\`
+        .select(`
             id,
             created_at,
             name,
@@ -673,7 +673,7 @@ app.get('/api/admin/comments', checkApiAuth, async (req, res) => {
             is_approved,
             post_id,
             post:posts ( title )
-        \`)
+        `)
         .order('created_at', { ascending: false }); // Show newest first for admin
 
     if (error) {
@@ -687,7 +687,7 @@ app.get('/api/admin/comments', checkApiAuth, async (req, res) => {
 // APPROVE: PUT /api/comments/approve/:id
 app.put('/api/comments/approve/:id', checkApiAuth, async (req, res) => {
     const commentId = parseInt(req.params.id);
-    console.log(\`[PUT /api/comments/approve/\${commentId}] Approving comment...\`);
+    console.log(`[PUT /api/comments/approve/${commentId}] Approving comment...`);
 
     const { error } = await supabase
         .from('comments')
@@ -705,7 +705,7 @@ app.put('/api/comments/approve/:id', checkApiAuth, async (req, res) => {
 // DELETE: DELETE /api/comments/:id
 app.delete('/api/comments/:id', checkApiAuth, async (req, res) => {
     const commentId = parseInt(req.params.id);
-    console.log(\`[DELETE /api/comments/\${commentId}] Deleting comment...\`);
+    console.log(`[DELETE /api/comments/${commentId}] Deleting comment...`);
 
     const { error } = await supabase
         .from('comments')
@@ -714,7 +714,7 @@ app.delete('/api/comments/:id', checkApiAuth, async (req, res) => {
 
     if (error) {
         console.error('Supabase error (deleting comment):', error.message);
-        return res.status(5D).json({ message: 'Error deleting comment.' });
+        return res.status(500).json({ message: 'Error deleting comment.' });
     }
 
     res.status(200).json({ message: 'Comment deleted!' });
@@ -805,7 +805,7 @@ app.post('/api/posts/like/:id', likeLimiter, async (req, res) => {
         return res.status(500).json({ message: 'Error updating like count.' });
     }
 
-    console.log(\`Like incremented for post \${postId}\`);
+    console.log(`Like incremented for post ${postId}`);
     res.status(200).json({ message: 'Like registered!' });
 });
 
@@ -833,9 +833,9 @@ app.get('/', (req, res) => {
 
 // --- Start the Server ---
 app.listen(PORT, () => {
-    console.log(\`--- Blog Server & Admin Panel (Supabase Mode) ---\`);
-    console.log(\`Server running on http://localhost:\${PORT}\`);
-    console.log(\`Public Blog: http://localhost:\${PORT}\`);
-    console.log(\`Admin Login: http://localhost:\${PORT}/admin/login.html\`);
-    console.log(\`-------------------------------------------------\`);
+    console.log(`--- Blog Server & Admin Panel (Supabase Mode) ---`);
+    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`Public Blog: http://localhost:${PORT}`);
+    console.log(`Admin Login: http://localhost:${PORT}/admin/login.html`);
+    console.log(`-------------------------------------------------`);
 });

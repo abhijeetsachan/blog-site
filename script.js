@@ -877,7 +877,7 @@ console.log("Found share-x link:", shareInstagram);
                     }
                     
                     console.log('Post liked successfully');
-                            const postInList = blogPosts.find(p => p.id == postId);
+                            const postInList = blogPosts.find(p => p.id === parseInt(postId, 10)); // <-- FIX
                     if (postInList) postInList.likes = newCount;
                     
                 } catch (error) {

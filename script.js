@@ -18,8 +18,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             const mobileThemeLabel = document.getElementById('mobile-theme-label');
             const postContent = document.getElementById('post-content');
             
-            const desktopIcons = document.querySelectorAll('[data-theme-icon]');
-            const mobileIcons = document.querySelectorAll('[data-theme-icon-mobile]');
+            // --- FIX: Select icons *every time* the function runs ---
+                const desktopIcons = document.querySelectorAll('[data-theme-icon]');
+                const mobileIcons = document.querySelectorAll('[data-theme-icon-mobile]');
 
             function applyTheme(themeName) {
                 const theme = THEMES.find(t => t.name === themeName) || THEMES[0];

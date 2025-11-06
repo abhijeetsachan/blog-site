@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 { name: 'sepia', icon: 'book-open', label: 'Sepia Theme' },
                 { name: 'slate', icon: 'layers', label: 'Slate Theme' },
                 { name: 'matcha', icon: 'leaf', label: 'Matcha Theme' },
+                        { name: 'academic', icon: 'book-heart', label: 'Academic Theme' },
             ];
             
             const themeToggleButton = document.getElementById('theme-toggle-btn');

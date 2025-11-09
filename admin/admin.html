@@ -491,7 +491,7 @@
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <div>
+                        <div class="relative z-10">
                             <label for="post-category-select" class="block text-sm font-medium mb-2">Category</label>
                             <div id="post-category-select-wrapper">
                                 <select id="post-category-select" class="form-input" required>
@@ -1257,7 +1257,7 @@
                     <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400 transition-transform duration-200"></i>
                 `;
 
-                const zIndex = wrapper.closest('#post-editor-modal') ? 'z-60' : 'z-20';
+                const zIndex = wrapper.closest('#post-editor-modal') ? 'z-70' : 'z-20';
                 const menu = document.createElement('div');
                 menu.className = `hidden custom-dropdown-menu absolute ${zIndex} mt-1 w-full glass rounded-xl shadow-lg max-h-60 overflow-y-auto scrollbar-thin border border-gray-700 bg-slate-900/95`;
                 

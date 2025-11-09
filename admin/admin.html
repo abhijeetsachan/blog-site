@@ -130,7 +130,7 @@
             transform: scale(1);
         }
         
-        /* --- NEW: Custom Tag Input Styles --- */
+        /* --- UPDATED: Custom Tag Input Styles --- */
         .tag-input-container {
             /* Mimic .form-input */
             background-color: rgba(15, 15, 35, 0.8);
@@ -143,6 +143,7 @@
             flex-wrap: wrap;
             align-items: center;
             gap: 0.375rem; /* 6px */
+            min-height: 46px; /* Match form-input height */
         }
         .tag-input-container:focus-within {
             border-color: #8b5cf6;
@@ -178,6 +179,8 @@
         .tag-pill-remove:hover {
             background-color: rgba(255, 255, 255, 0.4);
         }
+        
+        /* This is now the dropdown button */
         .tag-input-field {
             background-color: transparent;
             border: none;
@@ -186,15 +189,14 @@
             padding: 0.25rem;
             flex-grow: 1;
             min-width: 120px;
+            cursor: pointer;
         }
-        .tag-input-field::placeholder {
-            color: #9ca3af;
-        }
+        /* --- End of Custom Tag Input Styles --- */
         
         /* NEW: Tag Suggestions Dropdown */
         .tag-suggestions-list {
             position: absolute;
-            z-index: 60; /* Above modal content */
+            z-index: 60; /* Above modal content (BELOW category dropdown) */
             margin-top: 0.25rem;
             width: 100%;
             background: var(--glass-bg); 
@@ -391,7 +393,8 @@
                                 </tr>
                             </thead>
                             <tbody id="posts-list-table">
-                                </tbody>
+                                <!-- Populated by JS -->
+                            </tbody>
                         </table>
                     </div>
                 </div>
@@ -412,7 +415,8 @@
                                 </tr>
                             </thead>
                             <tbody id="comments-list-table">
-                                </tbody>
+                                <!-- Populated by JS -->
+                            </tbody>
                         </table>
                     </div>
                 </div>
@@ -433,7 +437,8 @@
 
                     <h3 class="text-lg font-medium text-gray-200 mb-3">Existing Categories</h3>
                     <div id="category-list-ui" class="space-y-2 max-h-96 overflow-y-auto scrollbar-thin pr-2">
-                        </div>
+                        <!-- Populated by JS -->
+                    </div>
                 </div>
             </div>
             
@@ -449,6 +454,7 @@
                         <div id="tag-category-select-wrapper">
                             <select id="tag-category-select" class="form-input">
                                 <option value="">-- Select a Category --</option>
+                                <!-- Populated by JS -->
                                 </select>
                         </div>
                     </div>
@@ -470,6 +476,11 @@
         </div>
     </div>
 
+    <!-- 
+      =============================================================
+      MODAL DIALOG
+      =============================================================
+    -->
     <div id="post-editor-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
         <div id="modal-backdrop" class="fixed inset-0 bg-black/70 backdrop-blur-sm"></div>
         
@@ -491,28 +502,40 @@
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        
+                        <!-- === FIX #1: Added relative z-10 === -->
                         <div class="relative z-10">
                             <label for="post-category-select" class="block text-sm font-medium mb-2">Category</label>
                             <div id="post-category-select-wrapper">
                                 <select id="post-category-select" class="form-input" required>
                                     <option value="">-- Select a Category --</option>
-                                    </select>
+                                    <!-- Populated by JS -->
+                                </select>
                             </div>
                         </div>
                         
+                        <!-- === FIX #3: Updated Tag Input HTML === -->
                         <div class="relative">
-                            <label for="tag-input-field" class="block text-sm font-medium mb-2">Tags</label>
+                            <label for="tag-dropdown-button" class="block text-sm font-medium mb-2">Tags</label>
                             
+                            <!-- This container will now hold the pills AND the button -->
                             <div id="tag-input-container" class="tag-input-container">
-                                <input type="text" id="tag-input-field" class="tag-input-field" placeholder="Type and press Enter...">
+                                <!-- This button REPLACES the text input field -->
+                                <button type="button" id="tag-dropdown-button" class="tag-input-field text-left text-gray-400">
+                                    Select a tag...
+                                </button>
                             </div>
                             
+                            <!-- This dropdown list will be toggled by the button -->
                             <div id="tag-suggestions-list" class="tag-suggestions-list hidden">
-                                </div>
+                                <!-- Items will be populated by JS -->
+                            </div>
             
                             <input type="text" id="tags" name="tags" class="hidden">
                         </div>
-                        </div>
+                        <!-- === End of FIX #3 === -->
+
+                    </div>
                     
                     <div>
                         <label for="image" class="block text-sm font-medium mb-2">Image URL</label>
@@ -891,8 +914,13 @@
 
             // --- Post Form Handlers ---
             postCategorySelect.addEventListener('change', (e) => {
-                const tagInputField = document.getElementById('tag-input-field');
-                if (tagInputField) tagInputField.value = '';
+                // When category changes, reset tags and update dropdown
+                currentPostTags = [];
+                renderTagPills();
+                updateHiddenTagInput();
+                // Close and re-open suggestions to refresh the list
+                showSuggestions(true);
+                hideSuggestions();
             });
 
             postForm.addEventListener('submit', async (e) => {
@@ -1257,6 +1285,7 @@
                     <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400 transition-transform duration-200"></i>
                 `;
 
+                // === FIX #2: Changed z-60 to z-70 ===
                 const zIndex = wrapper.closest('#post-editor-modal') ? 'z-70' : 'z-20';
                 const menu = document.createElement('div');
                 menu.className = `hidden custom-dropdown-menu absolute ${zIndex} mt-1 w-full glass rounded-xl shadow-lg max-h-60 overflow-y-auto scrollbar-thin border border-gray-700 bg-slate-900/95`;
@@ -1308,6 +1337,7 @@
                     const isHidden = menu.classList.toggle('hidden');
                     trigger.querySelector('i').style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
                     
+                    // Close other custom dropdowns
                     document.querySelectorAll('.custom-dropdown-menu').forEach(m => {
                         if (m !== menu) {
                             m.classList.add('hidden');
@@ -1315,10 +1345,13 @@
                             if (otherTrigger) otherTrigger.style.transform = 'rotate(0deg)';
                         }
                     });
+                    // Close tag dropdown
+                    hideSuggestions();
                 });
             }
 
             window.addEventListener('click', () => {
+                // Close all custom dropdowns
                 document.querySelectorAll('.custom-dropdown-menu').forEach(menu => {
                     if (!menu.classList.contains('hidden')) {
                         menu.classList.add('hidden');
@@ -1326,6 +1359,8 @@
                         if (triggerIcon) triggerIcon.style.transform = 'rotate(0deg)';
                     }
                 });
+                // Close all tag dropdowns
+                hideSuggestions();
             });
 
             function showGlobalStatus(message, type = 'loading') {
@@ -1348,90 +1383,69 @@
                 }
             }
 
-            // --- *** CUSTOM TAG INPUT LOGIC *** ---
+            
+            // --- *** UPDATED: CUSTOM TAG INPUT LOGIC (Dropdown Style) *** ---
             function initTagInput() {
                 currentPostTags = [];
-                suggestionIndex = -1;
                 const hiddenInput = document.getElementById('tags');
                 const container = document.getElementById('tag-input-container');
-                const inputField = document.getElementById('tag-input-field');
-                const suggestionsList = document.getElementById('tag-suggestions-list');
+                const dropdownButton = document.getElementById('tag-dropdown-button');
 
+                // 1. Load initial tags from hidden input
                 const initialTags = hiddenInput.value.split(',').map(t => t.trim()).filter(Boolean);
                 initialTags.forEach(tag => {
                     if (!currentPostTags.includes(tag)) {
                         currentPostTags.push(tag);
                     }
                 });
-                renderTagPills();
+                renderTagPills(); // Renders the pills
 
-                inputField.onkeydown = null;
-                inputField.oninput = null;
-                inputField.onblur = null;
-                container.onclick = null;
-
-                container.onclick = () => {
-                    inputField.focus();
-                };
+                // 2. Remove old listeners if any
+                dropdownButton.onclick = null;
                 
-                inputField.onblur = () => {
-                    setTimeout(() => hideSuggestions(), 150);
-                };
+                // 3. Handle button click to toggle dropdown
+                dropdownButton.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
 
-                inputField.oninput = () => {
-                    const query = inputField.value.trim();
-                    if (query) {
-                        showSuggestions(query);
+                    // Close category dropdown if it's open
+                    document.querySelectorAll('.custom-dropdown-menu').forEach(menu => {
+                        if (!menu.classList.contains('hidden')) {
+                            menu.classList.add('hidden');
+                            const triggerIcon = menu.previousElementSibling.querySelector('i');
+                            if (triggerIcon) triggerIcon.style.transform = 'rotate(0deg)';
+                        }
+                    });
+                    
+                    const suggestionsList = document.getElementById('tag-suggestions-list');
+                    if (suggestionsList.classList.contains('hidden')) {
+                        // Pass 'true' to show all tags
+                        showSuggestions(true); 
                     } else {
                         hideSuggestions();
                     }
                 };
 
-                inputField.onkeydown = (e) => {
-                    const key = e.key;
-                    const value = inputField.value.trim();
-                    
-                    if (key === 'Enter' || key === ',') {
-                        e.preventDefault();
-                        if (suggestionIndex > -1) {
-                            const activeSuggestion = suggestionsList.querySelector('.active');
-                            if (activeSuggestion) {
-                                addTag(activeSuggestion.textContent);
-                            }
-                        } else if (value) {
-                            addTag(value);
-                        }
-                        inputField.value = '';
-                        return;
-                    }
-                    
-                    if (key === 'Backspace' && value === '' && currentPostTags.length > 0) {
-                        removeTag(currentPostTags[currentPostTags.length - 1]);
-                        return;
-                    }
-                    if (key === 'ArrowDown') {
-                        e.preventDefault();
-                        navigateSuggestions(1);
-                        return;
-                    }
-                    if (key === 'ArrowUp') {
-                        e.preventDefault();
-                        navigateSuggestions(-1);
-                        return;
-                    }
-                    if (key === 'Escape') {
-                        hideSuggestions();
-                        return;
+                // 4. Clicking on the container (outside pills) should also open the dropdown
+                container.onclick = (e) => {
+                    // Only trigger if the click is on the container itself or the button
+                    if (e.target === container || e.target === dropdownButton) {
+                        dropdownButton.click();
                     }
                 };
+                
+                // 5. Close dropdown when clicking elsewhere
+                // (Handled by the global window click listener already present)
             }
 
             function renderTagPills() {
                 const container = document.getElementById('tag-input-container');
-                const inputField = document.getElementById('tag-input-field');
+                const dropdownButton = document.getElementById('tag-dropdown-button');
                 
+                // Remove all pills
                 container.querySelectorAll('.tag-pill').forEach(pill => pill.remove());
-
+                
+                // Re-add all current tags as pills
                 currentPostTags.forEach(tag => {
                     const pill = document.createElement('span');
                     pill.className = 'tag-pill';
@@ -1441,13 +1455,24 @@
                     removeBtn.className = 'tag-pill-remove';
                     removeBtn.innerHTML = '&times;';
                     removeBtn.onclick = (e) => {
-                        e.stopPropagation();
+                        e.stopPropagation(); // Prevent dropdown from opening
                         removeTag(tag);
                     };
                     pill.appendChild(text);
                     pill.appendChild(removeBtn);
-                    container.insertBefore(pill, inputField);
+                    
+                    // Insert the pill *before* the button
+                    container.insertBefore(pill, dropdownButton);
                 });
+                
+                // Update button text
+                if (currentPostTags.length > 0) {
+                    dropdownButton.classList.remove("text-gray-400");
+                    dropdownButton.textContent = "Add another tag...";
+                } else {
+                    dropdownButton.classList.add("text-gray-400");
+                    dropdownButton.textContent = "Select a tag...";
+                }
                 
                 updateHiddenTagInput();
             }
@@ -1456,48 +1481,57 @@
                 const trimmedTag = tag.trim();
                 if (trimmedTag && !currentPostTags.includes(trimmedTag)) {
                     currentPostTags.push(trimmedTag);
-                    renderTagPills();
+                    renderTagPills(); // This will re-render the pills
                 }
-                document.getElementById('tag-input-field').value = '';
+                // Don't reset any input field, just hide the dropdown
+                hideSuggestions();
+                
+                // Re-populate the dropdown in the background so it's fresh
+                // This is a bit of a hack: show and immediately hide
+                // to refresh the content of the dropdown for the next click.
+                showSuggestions(true);
                 hideSuggestions();
             }
 
             function removeTag(tag) {
                 currentPostTags = currentPostTags.filter(t => t !== tag);
                 renderTagPills();
-                document.getElementById('tag-input-field').focus();
+                // Don't re-focus anything
             }
 
             function updateHiddenTagInput() {
                 document.getElementById('tags').value = currentPostTags.join(', ');
             }
 
-            function showSuggestions(query) {
+            function showSuggestions(showAll = false) {
                 const category = postCategorySelect.value;
+                const suggestionsList = document.getElementById('tag-suggestions-list');
+                suggestionsList.innerHTML = ''; // Clear old items
+
                 if (!category) {
-                    hideSuggestions();
+                    suggestionsList.innerHTML = `<div class="tag-suggestion-item italic text-gray-400">Please select a category first.</div>`;
+                    suggestionsList.classList.remove('hidden');
                     return;
                 }
                 
                 const allTagsForCategory = allCategories[category] || [];
-                const filteredTags = allTagsForCategory.filter(tag => 
-                    tag.toLowerCase().includes(query.toLowerCase()) &&
+                
+                // Filter out only the tags *already added*
+                const availableTags = allTagsForCategory.filter(tag => 
                     !currentPostTags.includes(tag)
                 );
                 
-                const suggestionsList = document.getElementById('tag-suggestions-list');
-                suggestionsList.innerHTML = '';
-                
-                if (filteredTags.length === 0) {
-                    hideSuggestions();
+                if (availableTags.length === 0) {
+                     suggestionsList.innerHTML = `<div class="tag-suggestion-item italic text-gray-400">No available tags for this category.</div>`;
+                    suggestionsList.classList.remove('hidden');
                     return;
                 }
 
-                filteredTags.forEach(tag => {
+                availableTags.sort().forEach(tag => {
                     const item = document.createElement('div');
                     item.className = 'tag-suggestion-item';
                     item.textContent = tag;
-                    item.onmousedown = (e) => {
+                    item.onmousedown = (e) => { // Use onmousedown to fire before blur
                         e.preventDefault();
                         addTag(tag);
                     };
@@ -1505,7 +1539,7 @@
                 });
                 
                 suggestionsList.classList.remove('hidden');
-                suggestionIndex = -1;
+                suggestionIndex = -1; // Reset navigation index
             }
             
             function hideSuggestions() {
@@ -1514,24 +1548,8 @@
             }
 
             function navigateSuggestions(direction) {
-                const suggestionsList = document.getElementById('tag-suggestions-list');
-                const items = suggestionsList.querySelectorAll('.tag-suggestion-item');
-                if (items.length === 0) return;
-
-                if (suggestionIndex > -1) {
-                    items[suggestionIndex].classList.remove('active');
-                }
-                
-                suggestionIndex = suggestionIndex + direction;
-                
-                if (suggestionIndex < 0) {
-                    suggestionIndex = items.length - 1;
-                } else if (suggestionIndex >= items.length) {
-                    suggestionIndex = 0;
-                }
-
-                items[suggestionIndex].classList.add('active');
-                items[suggestionIndex].scrollIntoView({ block: 'nearest' });
+                // This function is no longer used by the new dropdown,
+                // but we'll keep it in case you want to add keyboard nav back.
             }
             // --- *** End of Custom Tag Input Logic *** ---
 

@@ -764,6 +764,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             mobileCategoryMenu.addEventListener('click', (e) => {
                 const link = e.target.closest('.category-link-custom');
+                
+                // Stop this click from bubbling up to the window listener
+                e.stopPropagation(); 
+
                 if (link) {
                     e.preventDefault();
                     activeCategory = link.dataset.category;

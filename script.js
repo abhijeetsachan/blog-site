@@ -134,13 +134,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             const shareWhatsapp = document.getElementById('share-whatsapp');
             const shareTelegram = document.getElementById('share-telegram');
 
-            // --- Shared Category Colors Map ---
-            const categoryColors = {
-                "Aphorism": "bg-purple-500/20 text-purple-300 border-purple-500/30",
-                "Essay": "bg-blue-500/20 text-blue-300 border-blue-500/30",
-                "Story writing": "bg-green-500/20 text-green-300 border-green-500/30",
-                "Poetry": "bg-pink-500/20 text-pink-300 border-pink-500/30"
-            };
+            // --- NEW: Dynamic Category Color Palette ---
+            const CATEGORY_COLOR_PALETTE = [
+                "bg-blue-500/20 text-blue-300 border-blue-500/30",    // For "Essay"
+                "bg-pink-500/20 text-pink-300 border-pink-500/30",    // For "Poetry"
+                "bg-green-500/20 text-green-300 border-green-500/30",  // For "Story writing"
+                "bg-purple-500/20 text-purple-300 border-purple-500/30",// For "Aphorism"
+                "bg-yellow-500/20 text-yellow-300 border-yellow-500/30", // New
+                "bg-teal-500/20 text-teal-300 border-teal-500/30",      // New
+                "bg-rose-500/20 text-rose-300 border-rose-500/30",      // New
+                "bg-indigo-500/20 text-indigo-300 border-indigo-500/30" // New
+            ];
 
             // --- FETCH LOGIC ---
             async function loadBlogData() {

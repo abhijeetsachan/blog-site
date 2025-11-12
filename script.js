@@ -753,6 +753,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 activeCategory = link.dataset.category;
                 activeTag = null; 
                 window.location.hash = ''; // <-- Set hash to navigate
+                        filterAndRender(); // <-- ADD THIS LINE
             };
             categoryList.addEventListener('click', handleCategoryClick);
             

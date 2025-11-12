@@ -404,3 +404,9 @@ html { scroll-behavior: smooth; }
         }
 
 }
+/* === FIX: Mobile Category Dropdown Opacity === */
+#mobile-category-menu {
+    /* This overrides the transparent --glass-bg 
+       with the solid background color from your theme */
+    background: var(--mobile-menu-hover);
+}

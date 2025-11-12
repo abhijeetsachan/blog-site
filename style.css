@@ -8,7 +8,7 @@ html { scroll-behavior: smooth; }
         html[data-theme="dark"] {
             --primary-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
             --secondary-gradient: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
-            --glass-bg: rgba(255, 255, 255, 0.08);
+            --glass-bg: rgba(31, 41, 55, 0.7); /* Was 8% white, now 70% dark gray */
             --glass-border: rgba(255, 255, 255, 0.2);
             --body-bg: #0f0f23;
             --body-color: #e2e8f0;

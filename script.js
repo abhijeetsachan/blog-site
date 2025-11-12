@@ -146,6 +146,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                 "bg-indigo-500/20 text-indigo-300 border-indigo-500/30" // New
             ];
 
+            /**
+             * Creates a consistent number from a string (like a category name).
+             * This ensures "Economics" always gets the same color index.
+             */
+            function getNumberForString(str) {
+                if (!str || str.length === 0) return 0;
+                let hash = 0;
+                for (let i = 0; i < str.length; i++) {
+                    hash += str.charCodeAt(i);
+                }
+                return hash;
+            }
+
             // --- FETCH LOGIC ---
             async function loadBlogData() {
                 try {
@@ -316,7 +329,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                     link.dataset.postId = post.id;
                     link.title = post.title;
 
-                    const colorClass = categoryColors[post.category] || "bg-gray-500/20 text-gray-300 border-gray-500/30";
+                    // --- NEW DYNAMIC COLOR LOGIC ---
+                    // Get a consistent number for the category name
+                    const categoryHash = getNumberForString(post.category);
+                    // Use that number to pick an index from our palette
+                    const colorIndex = categoryHash % CATEGORY_COLOR_PALETTE.length;
+                    // Get the color class. Fallback to gray if something goes wrong.
+                    const colorClass = CATEGORY_COLOR_PALETTE[colorIndex] || "bg-gray-500/20 text-gray-300 border-gray-500/30";
+                    // --- END NEW LOGIC ---
 
                     let tagsHTML = '';
                     if (post.tags && post.tags.length > 0) {
@@ -415,7 +435,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 postsToRender.forEach(post => {
                     const postElement = document.createElement('article');
                     postElement.className = 'post-card rounded-2xl overflow-hidden';
-                    const color = categoryColors[post.category] || "bg-gray-500/20 text-gray-300 border-gray-500/30";
+                    // --- NEW DYNAMIC COLOR LOGIC ---
+                    const categoryHash = getNumberForString(post.category);
+                    const colorIndex = categoryHash % CATEGORY_COLOR_PALETTE.length;
+                    const color = CATEGORY_COLOR_PALETTE[colorIndex] || "bg-gray-500/20 text-gray-300 border-gray-500/30";
+                    // --- END NEW LOGIC ---
                     const postLikes = post.likes || 0;
                     
                     postElement.innerHTML = `

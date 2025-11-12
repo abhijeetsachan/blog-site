@@ -775,6 +775,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     mobileCategoryMenu.classList.add('hidden');
                     mobileCategoryChevron.style.transform = 'rotate(0deg)';
                     window.location.hash = ''; // <-- Set hash to navigate
+                        filterAndRender(); // <-- ADD THIS LINE
                 }
             });
 

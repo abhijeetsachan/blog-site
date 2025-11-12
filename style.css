@@ -403,7 +403,6 @@ html { scroll-behavior: smooth; }
             cursor: not-allowed;
         }
 
-}
 /* === FIX: Mobile Category Dropdown Opacity === */
 #mobile-category-menu {
     /* This overrides the transparent --glass-bg */

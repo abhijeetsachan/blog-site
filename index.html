@@ -48,11 +48,16 @@
         <div class="flex justify-between items-center h-16">
             
             <div class="flex-1 min-w-0">
-                <a href="#" class="text-xl sm:text-2xl md:text-3xl font-bold gradient-text flex items-center truncate" id="home-link">
-                    <div class="w-10 h-10 rounded-full gradient-bg flex items-center justify-center mr-2">
+                <a href="#" class="flex items-center" id="home-link">
+                    <div class="flex-shrink-0 w-10 h-10 rounded-full gradient-bg flex items-center justify-center mr-2">
                         <i data-lucide="feather" class="w-5 h-5 text-white"></i>
                     </div>
-                    Ridhi Choudhary's Blog
+                    <div class="min-w-0">
+                        <span class="font-bold gradient-text whitespace-nowrap" 
+                              style="font-size: clamp(1.1rem, 5.5vw, 1.875rem);">
+                            Ridhi Choudhary's Blog
+                        </span>
+                    </div>
                 </a>
             </div>
             
@@ -367,6 +372,7 @@
 </body>
 
 </html>
+
 
 
 

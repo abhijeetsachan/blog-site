@@ -44,71 +44,73 @@
     </div>
 
     <header class="glass sticky top-0 z-50 transition-all duration-300" style="border-color: var(--glass-border);">
-        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex-shrink-0">
-                    <a href="#" class="text-xl sm:text-2xl md:text-3xl font-bold gradient-text flex items-center" id="home-link">
-                        <div class="w-10 h-10 rounded-full gradient-bg items-center justify-center mr-2 hidden sm:flex">
-                            <i data-lucide="feather" class="w-5 h-5 text-white"></i>
-                        </div>
-                        Ridhi Choudhary's Blog
-                    </a>
-                </div>
-                
-                <div class="hidden lg:flex lg:items-center lg:space-x-8">
-                    <a href="#about-section" class="nav-link flex items-center font-medium transition-all duration-300 group">
-                        <i data-lucide="user-circle" class="w-5 h-5 mr-1.5 transition-transform duration-300 group-hover:rotate-6"></i> 
-                        About
-                    </a>
-                    <a href="mailto:ridhii1999@gmail.com" class="nav-link flex items-center font-medium transition-all duration-300 group">
-                        <i data-lucide="mail" class="w-5 h-5 mr-1.5 transition-transform duration-300 group-hover:text-blue-400"></i>
-                        Contact
-                    </a>
-                    
-                    <button id="theme-toggle-btn" class="p-2 rounded-full transition-all" style="color: var(--nav-link-color); background-color: var(--mobile-menu-hover);">
-                        <i data-theme-icon="dark" data-lucide="moon" class="w-5 h-5 hidden"></i>
-                        <i data-theme-icon="light" data-lucide="sun" class="w-5 h-5 hidden"></i>
-                        <i data-theme-icon="sepia" data-lucide="book-open" class="w-5 h-5 hidden"></i>
-                        <i data-theme-icon="slate" data-lucide="layers" class="w-5 h-5 hidden"></i>
-                        <i data-theme-icon="matcha" data-lucide="leaf" class="w-5 h-5 hidden"></i>
-                        <i data-theme-icon="academic" data-lucide="book-heart" class="w-5 h-5 hidden"></i>
-                    </button>
-                </div>
-
-                <div class="lg:hidden flex items-center">
-                    <button id="mobile-theme-toggle" class="p-2 rounded-full transition-all" style="color: var(--nav-link-color); background-color: var(--mobile-menu-hover);">
-                        <i data-theme-icon-mobile="dark" data-lucide="moon" class="w-5 h-5 hidden"></i>
-                        <i data-theme-icon-mobile="light" data-lucide="sun" class="w-5 h-5 hidden"></i>
-                        <i data-theme-icon-mobile="sepia" data-lucide="book-open" class="w-5 h-5 hidden"></i>
-                        <i data-theme-icon-mobile="slate" data-lucide="layers" class="w-5 h-5 hidden"></i>
-                        <i data-theme-icon-mobile="matcha" data-lucide="leaf" class="w-5 h-5 hidden"></i>
-                        <i data-theme-icon-mobile="academic" data-lucide="book-heart" class="w-5 h-5 hidden"></i>
-                    </button>
-
-                    <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md" style="color: var(--nav-link-color);" aria-expanded="false">
-                        <span class="sr-only">Open main menu</span>
-                        <svg id="menu-icon-closed" class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                        </svg>
-                        <svg id="menu-icon-open" class="hidden h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
+    <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+            
+            <div class="flex-1 min-w-0">
+                <a href="#" class="text-xl sm:text-2xl md:text-3xl font-bold gradient-text flex items-center truncate" id="home-link">
+                    <div class="w-10 h-10 rounded-full gradient-bg flex items-center justify-center mr-2">
+                        <i data-lucide="feather" class="w-5 h-5 text-white"></i>
+                    </div>
+                    Ridhi Choudhary's Blog
+                </a>
             </div>
-        </nav>
-
-        <div class="lg:hidden hidden glass mt-2 rounded-lg mx-4" id="mobile-menu">
-            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                <a href="#about-section-mobile" class="mobile-nav-link flex items-center block px-3 py-2 rounded-md text-base font-medium">
-                    <i data-lucide="user-circle" class="w-5 h-5 mr-2"></i> About
+            
+            <div class="hidden lg:flex lg:items-center lg:space-x-8">
+                <a href="#about-section" class="nav-link flex items-center font-medium transition-all duration-300 group">
+                    <i data-lucide="user-circle" class="w-5 h-5 mr-1.5 transition-transform duration-300 group-hover:rotate-6"></i> 
+                    About
                 </a>
-                <a href="mailto:ridhii1999@gmail.com" class="mobile-nav-link flex items-center block px-3 py-2 rounded-md text-base font-medium">
-                    <i data-lucide="mail" class="w-5 h-5 mr-2"></i> Contact
+                <a href="mailto:ridhii1999@gmail.com" class="nav-link flex items-center font-medium transition-all duration-300 group">
+                    <i data-lucide="mail" class="w-5 h-5 mr-1.5 transition-transform duration-300 group-hover:text-blue-400"></i>
+                    Contact
                 </a>
                 
-                </div>
+                <button id="theme-toggle-btn" class="p-2 rounded-full transition-all" style="color: var(--nav-link-color); background-color: var(--mobile-menu-hover);">
+                    <i data-theme-icon="dark" data-lucide="moon" class="w-5 h-5 hidden"></i>
+                    <i data-theme-icon="light" data-lucide="sun" class="w-5 h-5 hidden"></i>
+                    <i data-theme-icon="sepia" data-lucide="book-open" class="w-5 h-5 hidden"></i>
+                    <i data-theme-icon="slate" data-lucide="layers" class="w-5 h-5 hidden"></i>
+                    <i data-theme-icon="matcha" data-lucide="leaf" class="w-5 h-5 hidden"></i>
+                    <i data-theme-icon="academic" data-lucide="book-heart" class="w-5 h-5 hidden"></i>
+                </button>
+            </div>
+
+            <div class="lg:hidden flex items-center flex-shrink-0">
+                <button id="mobile-theme-toggle" class="p-2 rounded-full transition-all" style="color: var(--nav-link-color); background-color: var(--mobile-menu-hover);">
+                    <i data-theme-icon-mobile="dark" data-lucide="moon" class="w-5 h-5 hidden"></i>
+                    <i data-theme-icon-mobile="light" data-lucide="sun" class="w-5 h-5 hidden"></i>
+                    <i data-theme-icon-mobile="sepia" data-lucide="book-open" class="w-5 h-5 hidden"></i>
+                    <i data-theme-icon-mobile="slate" data-lucide="layers" class="w-5 h-5 hidden"></i>
+                    <i data-theme-icon-mobile="matcha" data-lucide="leaf" class="w-5 h-5 hidden"></i>
+                    <i data-theme-icon-mobile="academic" data-lucide="book-heart" class="w-5 h-5 hidden"></i>
+                </button>
+
+                <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md" style="color: var(--nav-link-color);" aria-expanded="false">
+                    <span class="sr-only">Open main menu</span>
+                    <svg id="menu-icon-closed" class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                    <svg id="menu-icon-open" class="hidden h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
         </div>
-    </header>
+    </nav>
+
+    <div class="lg:hidden hidden glass mt-2 rounded-lg mx-4" id="mobile-menu">
+        <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+            <a href="#about-section-mobile" class="mobile-nav-link flex items-center block px-3 py-2 rounded-md text-base font-medium">
+                <i data-lucide="user-circle" class="w-5 h-5 mr-2"></i> About
+            </a>
+            <a href="mailto:ridhii1999@gmail.com" class="mobile-nav-link flex items-center block px-3 py-2 rounded-md text-base font-medium">
+                <i data-lucide="mail" class="w-5 h-5 mr-2"></i> Contact
+            </a>
+            
+            </div>
+    </div>
+</header>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 relative z-10">
 
@@ -365,6 +367,7 @@
 </body>
 
 </html>
+
 
 
 

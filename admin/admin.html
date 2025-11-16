@@ -16,12 +16,21 @@
         // 4. Initialize the editor
         tinymce.init({
             selector: '#blog-editor',
-            plugins: 'lists link image media preview code wordcount',
-            toolbar: 'undo redo | blocks | bold italic | link image media | bullist numlist | code preview',
-            height: 400,
+            
+            // --- UPDATED PLUGINS ---
+            // We've added: textcolor, table, hr, codesample, charmap, emoticons, searchreplace, fullscreen
+            plugins: 'lists link image media preview code wordcount textcolor table hr codesample charmap emoticons searchreplace fullscreen',
+            
+            // --- REPLACED TOOLBAR ---
+            // The single 'toolbar' is replaced with 3 organized toolbars
+            toolbar1: 'undo redo | blocks | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify',
+            toolbar2: 'fontselect fontsizeselect | forecolor backcolor | superscript subscript | blockquote | removeformat',
+            toolbar3: 'link image media codesample | bullist numlist outdent indent | table hr charmap emoticons | searchreplace preview fullscreen',
+            
+            height: 500, // <-- Increased height for the new toolbars
             skin: 'oxide-dark',
             content_css: 'dark',
-            menubar: false,
+            menubar: false, // <-- Kept this from your original config
         });
     </script>
     

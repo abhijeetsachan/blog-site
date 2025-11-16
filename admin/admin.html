@@ -13,24 +13,28 @@
     <script src="https://cdn.tiny.cloud/1/gpo3vu0adjy1d9r8pl1381pse2qxzxzx7ab9se2fxtz6tpmw/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
     
     <script>
+        <script>
         // 4. Initialize the editor
         tinymce.init({
             selector: '#blog-editor',
             
             // --- UPDATED PLUGINS (FIXED) ---
-            // We've NOW added 'advlist' which is required for fontselect/fontsizeselect
             plugins: 'advlist lists link image media preview code wordcount textcolor table hr codesample charmap emoticons searchreplace fullscreen',
             
-            // --- This toolbar setup is correct and will now work ---
+            // --- Toolbar with correct v6 names ---
             toolbar1: 'undo redo | blocks | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify',
-            toolbar2: 'fontselect fontsizeselect | forecolor backcolor | superscript subscript | blockquote | removeformat',
+            toolbar2: 'fontfamily fontsize | forecolor backcolor | superscript subscript | blockquote | removeformat', // <-- Corrected names
             toolbar3: 'link image media codesample | bullist numlist outdent indent | table hr charmap emoticons | searchreplace preview fullscreen',
             
+            // --- NEW: Custom Font Size List ---
+            fontsize_formats: '8pt 10pt 12pt 14pt 16pt 18pt 24pt 36pt', // <-- Added 16pt
+
             height: 500, 
             skin: 'oxide-dark',
             content_css: 'dark',
             menubar: false,
         });
+    </script>
     </script>
     
     <style>

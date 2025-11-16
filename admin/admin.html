@@ -17,20 +17,19 @@
         tinymce.init({
             selector: '#blog-editor',
             
-            // --- UPDATED PLUGINS ---
-            // We've added: textcolor, table, hr, codesample, charmap, emoticons, searchreplace, fullscreen
-            plugins: 'lists link image media preview code wordcount textcolor table hr codesample charmap emoticons searchreplace fullscreen',
+            // --- UPDATED PLUGINS (FIXED) ---
+            // We've NOW added 'advlist' which is required for fontselect/fontsizeselect
+            plugins: 'advlist lists link image media preview code wordcount textcolor table hr codesample charmap emoticons searchreplace fullscreen',
             
-            // --- REPLACED TOOLBAR ---
-            // The single 'toolbar' is replaced with 3 organized toolbars
+            // --- This toolbar setup is correct and will now work ---
             toolbar1: 'undo redo | blocks | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify',
             toolbar2: 'fontselect fontsizeselect | forecolor backcolor | superscript subscript | blockquote | removeformat',
             toolbar3: 'link image media codesample | bullist numlist outdent indent | table hr charmap emoticons | searchreplace preview fullscreen',
             
-            height: 500, // <-- Increased height for the new toolbars
+            height: 500, 
             skin: 'oxide-dark',
             content_css: 'dark',
-            menubar: false, // <-- Kept this from your original config
+            menubar: false,
         });
     </script>
     

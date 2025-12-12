@@ -1,11 +1,11 @@
 {
   "version": 2,
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/admin/server.js" },
-    { "source": "/admin/(.*)", "destination": "/admin/server.js" }
+    { "source": "/api/(.*)", "destination": "/api/index.js" },
+    { "source": "/admin/(.*)", "destination": "/api/index.js" }
   ],
   "functions": {
-    "admin/server.js": {
+    "api/index.js": {
       "includeFiles": "admin/*.html"
     }
   }

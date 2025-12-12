@@ -839,3 +839,16 @@ app.listen(PORT, () => {
     console.log(`Admin Login: http://localhost:${PORT}/admin/login.html`);
     console.log(`-------------------------------------------------`);
 });
+
+
+// --- MODIFIED FOR VERCEL ---
+// Export the app so Vercel can run it as a Serverless Function
+module.exports = app;
+
+// Only listen on a port if running locally (not on Vercel)
+if (require.main === module) {
+    app.listen(PORT, () => {
+        console.log(`--- Blog Server & Admin Panel ---`);
+        console.log(`Server running on http://localhost:${PORT}`);
+    });
+}

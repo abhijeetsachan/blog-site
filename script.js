@@ -965,3 +965,39 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
 
         });
+
+//-- Added for Copy Protection --
+document.addEventListener('contextmenu', event => event.preventDefault()); // Disable Right Click
+
+document.addEventListener('keydown', function(event) {
+    // Disable F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
+    if(event.keyCode == 123) {
+        event.preventDefault();
+        return false;
+    }
+    if(event.ctrlKey && event.shiftKey && (event.keyCode == 'I'.charCodeAt(0) || event.keyCode == 'J'.charCodeAt(0))) {
+        event.preventDefault();
+        return false;
+    }
+    if(event.ctrlKey && event.keyCode == 'U'.charCodeAt(0)) { // Disable View Source
+        event.preventDefault();
+        return false;
+    }
+    // Disable Ctrl+C / Ctrl+X (Copy/Cut)
+    if (event.ctrlKey && (event.key === 'c' || event.key === 'x')) {
+        event.preventDefault();
+        showSnackbar("Content copying is disabled."); // Reuse your existing snackbar
+    }
+});
+
+// -- Added Reading Progress Bar --
+
+window.onscroll = function() {
+    if(!document.getElementById('post-view').classList.contains('hidden')) {
+        let winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+        let height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        let scrolled = (winScroll / height) * 100;
+        // You need to add a <div id="progress-bar"></div> in your HTML header
+        document.getElementById("myBar").style.width = scrolled + "%";
+    }
+};

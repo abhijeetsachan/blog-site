@@ -342,11 +342,38 @@ html { scroll-behavior: smooth; }
 
         .floating-element { animation: float 6s ease-in-out infinite; }
         @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
-        .scrollbar-thin { scrollbar-width: thin; scrollbar-color: rgba(99, 102, 241, 0.5) rgba(30, 30, 46, 0.5); }
-        .scrollbar-thin::-webkit-scrollbar { width: 6px; }
-        .scrollbar-thin::-webkit-scrollbar-track { background: rgba(30, 30, 46, 0.5); border-radius: 10px; }
-        .scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.5); border-radius: 10px; }
-        .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, 0.8); }
+       /* === ENHANCED SCROLLBAR (Matches Themes) === */
+
+/* Firefox support using variables */
+.scrollbar-thin {
+    scrollbar-width: thin;
+    /* Uses the body text color for the thumb, and glass border for the track */
+    scrollbar-color: var(--nav-link-color) var(--glass-border); 
+}
+
+/* Chrome, Edge, Safari */
+.scrollbar-thin::-webkit-scrollbar {
+    width: 6px; /* keep it slim */
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent; /* Makes it look like it's floating */
+    margin: 4px 0; /* Tiny spacing at top and bottom */
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+    /* Uses your theme's secondary gradient but semi-transparent */
+    background: var(--nav-link-color); 
+    opacity: 0.3;
+    border-radius: 10px;
+    border: 2px solid transparent; /* Creates padding effect */
+    background-clip: content-box; /* Ensures the border works as padding */
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    /* On hover, becomes the solid primary theme color */
+    background-color: var(--nav-link-hover);
+}
         .text-shadow { text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); }
         .snackbar { visibility: hidden; min-width: 250px; transform: translateX(-50%); background: var(--glass-bg); color: var(--body-color); text-align: center; border-radius: 12px; padding: 16px; position: fixed; z-index: 100; left: 50%; bottom: 30px; font-size: 17px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3); display: flex; align-items: center; border: 1px solid var(--glass-border); backdrop-filter: blur(10px); }
         .snackbar.show { visibility: visible; animation: snackFadeIn 0.5s, snackFadeOut 0.5s 3.5s; }
@@ -410,4 +437,18 @@ html { scroll-behavior: smooth; }
 
     /* This NEW line removes the blur, solving the click/transparency issue */
     backdrop-filter: none;
+}
+/* Added on 13th Dec to protect from copying */
+/* Protect specific areas, or body to protect everything */
+.protected-content {
+    -webkit-user-select: none; /* Safari */
+    -ms-user-select: none; /* IE 10 and IE 11 */
+    user-select: none; /* Standard syntax */
+    -webkit-touch-callout: none; /* iOS Safari */
+}
+
+/* Allow selection on code blocks if you have them */
+.protected-content pre, 
+.protected-content code {
+    user-select: text;
 }
